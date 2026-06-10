@@ -1,0 +1,5 @@
+v2 notes:
+- only unsuccessful scope is incorrectly labelled - see v1 (I agree with the LLM that it could be excluded)
+- only unsuccessful AP label is incorrectly labelled
+v2 -> v3 prompt changes:
+- minor clarification to the boundary distinction between fermentation for plant-based and fermentation for biomass / precision fermentation

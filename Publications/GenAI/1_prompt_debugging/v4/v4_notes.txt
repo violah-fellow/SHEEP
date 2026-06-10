@@ -1,0 +1,7 @@
+v4 notes (see specific comments in the excel doc):
+- only testing those from v3 where scope was incorrect
+- still struggling with excluding publications where any excluded topics are mentioned AND getting the LLM to recognise socioeconomic research as equally important
+v4 -> v5 prompt changes:
+- edited exclusion criteria prompt
+- swapped general definition to put socioeconomic first and then development research second (hopefully this doesn't break anything else)
+- edited general definition from "substitutes for" to "alternatives to" "conventional animal proteins in human food" as I was concerned not all alt proteins are direct substitutes for animal meat (some just are animal meat, and some are novel foods entirely)
