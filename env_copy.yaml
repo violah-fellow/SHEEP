@@ -1,0 +1,25 @@
+# environment.yml
+name: sheep_copy
+channels:
+  - conda-forge
+  - pip
+  - defaults
+dependencies:
+  - python=3.12
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - python-duckdb # DuckDB for SQL
+  - ipykernel
+  - scikit-learn
+  - joblib # For saving models and parallel processing
+  - tqdm # Progress bars
+  - pip:
+    - dimcli # Dimensions API client
+    - torch
+    - transformers # Hugging Face Transformers for NLP
+    - sentence-transformers # Sentence Transformers for embeddings
+
+
+
