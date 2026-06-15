@@ -1,0 +1,28 @@
+Issues with v9:
+- Inclusion of a yoghurt with plant extract - a few possible reasons
+v9 -> v10:
+- REMOVAL of insect-based protein out of scope - I don't think the LLM will assume it is in scope and it keeps excluding things for mentioning insects
+- Minor edits to plant-based and fermentation definitions, including change from 'fungal' to 'fungal mycelium' in the biomass fermentation definition, and 'mushroom' to 'whole mushroom' in plant-based. Hoping this reduces the renewed overlap in applying fermentation to PB.
+- Addition of an out of scope topic (below) to exclude the addition of plant-derived ingredients to animal products
+Conventional animal-based products enriched with plant-derived or fermentation-derived ingredients or extracts, where the base product is not itself an alternative protein (e.g. plant extract added to dairy)
+
+ALSO I changed the CC labelling logic so if only one AP pillar is decided true, it gets precedent over the LLM CC label
+Previous:
+comparison["pillar_LLM"] = comparison[pillar_flags + ["cross_cutting_LLM"]].apply(
+    lambda r: "CC" if r["cross_cutting_LLM"] or r[pillar_flags].sum() > 1
+              else "PB" if r["plant_based_LLM"]
+              else "F"  if r["fermentation_LLM"]
+              else "CM" if r["cultivated_LLM"]
+              else "NA",
+    axis=1
+)
+
+New: 
+comparison["pillar_LLM"] = comparison[pillar_flags + ["cross_cutting_LLM"]].apply(
+    lambda r: "CC" if r[pillar_flags].sum() > 1 or (r["cross_cutting_LLM"] and r[pillar_flags].sum() == 0)
+              else "PB" if r["plant_based_LLM"]
+              else "F"  if r["fermentation_LLM"]
+              else "CM" if r["cultivated_LLM"]
+              else "NA",
+    axis=1
+)

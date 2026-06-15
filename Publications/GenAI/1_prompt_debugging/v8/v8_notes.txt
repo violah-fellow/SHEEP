@@ -1,0 +1,10 @@
+rand123 (the original training data v1-8)
+Genuinely looking very good.
+I realised I had a duplication of fermentation definitions carried over from an incorrect edit (still exists in v7) AND I ALSO added microalgae within the biomass fermentation definition (it got lost). I made these changes after doing the analysis but did not call it v9. It is still v8. No changes.
+
+rand44 (the new testing data)
+v8 -> v9:
+- add 'mushroom' into plant-based definition
+- edit to cross-cutting to hopefully be a little more clear about it only being for very broad alt protein papers
+
+Testing some added borderline data - I complete agree with the LLM!!! It navigated some quite complex papers covering multiple inclusion and exclusion criteria. I think I'm really close to a very solid prompt that covers just about everything.

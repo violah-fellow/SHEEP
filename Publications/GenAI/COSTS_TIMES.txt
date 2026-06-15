@@ -1,0 +1,7 @@
+COSTS (v7 run):
+$1.02 at start of borderline (30 publications) -> $1.12 at end. $0.033/publication
+$1.12 at start of test 100 (110 publications) -> $1.45 at end. $0.030/publication
+* Includes reasoning that will be removed later, but good to know the approx. figures.
+
+TIMES (Eval run):
+For 110 publications: 8m39s = 519s -> 4.72s/publication

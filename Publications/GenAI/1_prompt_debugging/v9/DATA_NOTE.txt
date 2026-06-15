@@ -1,0 +1,2 @@
+All other folders (v1-8, Dave borderline) used the rand123 initial and test100 data.
+The eval is now using a new test100 dataset with rand44
