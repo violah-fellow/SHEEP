@@ -52,7 +52,7 @@ original_columns = list(data.columns)
 print(f"{len(data)} rows loaded from '{RUN_TABLE}'")
 
 # Build text column from title + abstract
-data['text'] = data[TEXT_COLUMNS[0]] + ' [SEP] ' + data[TEXT_COLUMNS[1]]
+data['text'] = data[TEXT_COLUMNS[0]].fillna('') + ' [SEP] ' + data[TEXT_COLUMNS[1]].fillna('')
 
 # --- 2. Load SPECTER2 model and check token sizes ---
 print("\nLoading SPECTER2 model.")

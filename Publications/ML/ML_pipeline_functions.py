@@ -42,8 +42,8 @@ def check_token_size(data, text_column, tokenizer=None, add_column=True):
     if tokenizer is None:
             raise ValueError("tokenizer must be provided")
 
-    # Count tokens for each text (title + abstract combined)
-    token_count = data[text_column].apply(
+    # Count tokens for each text (title + abstract combined); treat NaN as empty string
+    token_count = data[text_column].fillna('').apply(
         lambda x: len(tokenizer.encode(x, add_special_tokens=True))
     )
 

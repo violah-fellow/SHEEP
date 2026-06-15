@@ -11,7 +11,7 @@ import importlib.util, sys, os
 # path to DuckDB database
 DB_PATH = 'publications_training.db'
 # table containing new training data                 
-TRAINING_TABLE = 'publications_training_new'         
+TRAINING_TABLE = 'publications_new_training'         
 
 # --- Columns ---
 # columns concatenated for embedding (title, abstract)
@@ -19,11 +19,11 @@ TEXT_COLUMNS   = ('title', 'abstract')
 # column with scope labels ('in' / 'out')
 SCOPE_COLUMN   = 'scope'             
 # column with pillar labels       
-PILLAR_COLUMN  = 'pillar'                   
+PILLAR_COLUMN  = 'pillar'  
 
 # --- Embeddings ---
 # checkpoint + final save path for embeddings
-EMBEDDINGS_PATH = 'embeddings_training_new.npy'   
+EMBEDDINGS_PATH = 'embeddings_new_training.npy'   
 
 # --- Model save paths ---
 SCOPE_MODEL_PATH   = 'Models/LR_scope.joblib'
@@ -67,7 +67,7 @@ if 'publications_embeddings' in existing_tables:
 print(f"{len(data)} rows remaining for embedding and training.")
 
 # Build text column from title + abstract
-data['text'] = data[TEXT_COLUMNS[0]] + ' [SEP] ' + data[TEXT_COLUMNS[1]]
+data['text'] = data[TEXT_COLUMNS[0]].fillna('') + ' [SEP] ' + data[TEXT_COLUMNS[1]].fillna('')
 
 # Convert scope labels to binary integers
 data['scope_binary'] = (data[SCOPE_COLUMN] == 'in').astype(int)
@@ -93,45 +93,54 @@ embeddings = mlf.get_embeddings(
     checkpoint=True
 )
 
-# --- 4. Train scope classifier (LR) ---
+# --- 4. Append new rows (all columns + embeddings) to publications_embeddings ---
+print("\nAppending to 'publications_embeddings' table.")
+
+EMBEDDINGS_COLUMNS = ['id', 'title', 'abstract', 'year', 'scope', 'pillar', 'research_category', 'truncated', 'embedding']
+
+data['embedding'] = list(embeddings)
+db.register('df_new', data[EMBEDDINGS_COLUMNS])
+
+if 'publications_embeddings' in existing_tables:
+    db.sql("INSERT INTO publications_embeddings SELECT * FROM df_new")
+else:
+    db.sql("CREATE TABLE publications_embeddings AS SELECT * FROM df_new")
+
+print(f"{len(data)} rows appended to 'publications_embeddings'.")
+
+# --- 5. Load all data from publications_embeddings for training ---
+print("\nLoading all training data from 'publications_embeddings'.")
+all_data = db.sql("SELECT * FROM publications_embeddings").df()
+print(f"{len(all_data)} rows loaded for training.")
+
+all_embeddings = np.array(all_data['embedding'].tolist())
+all_data['scope_binary'] = (all_data[SCOPE_COLUMN] == 'in').astype(int)
+print(f"Scope label distribution:\n{all_data['scope_binary'].value_counts().to_string()}")
+print(f"Pillar label distribution:\n{all_data[PILLAR_COLUMN].value_counts().to_string()}")
+
+# --- 6. Train scope classifier (LR) ---
 print("\nTraining scope classifier.")
-scope_labels = data['scope_binary'].values
 classifier_scope, threshold = mlf.train_scope(
-    embeddings,
-    scope_labels,
+    all_embeddings,
+    all_data['scope_binary'].values,
     model_path=SCOPE_MODEL_PATH,
     **SCOPE_MODEL_KWARGS
 )
 
-# Save threshold to file
 with open(THRESHOLD_PATH, 'w') as f:
     f.write(str(threshold))
 print(f"Scope model saved to: {SCOPE_MODEL_PATH}")
 print(f"Threshold saved to: {THRESHOLD_PATH}  (value: {threshold:.3f})")
 
-# --- 5. Train pillar classifier (LR) ---
+# --- 7. Train pillar classifier (LR) ---
 print("\nTraining pillar classifier.")
-pillar_labels = data[PILLAR_COLUMN].values
-classifier_pillar = mlf.train_pillar(
-    embeddings,
-    pillar_labels,
+mlf.train_pillar(
+    all_embeddings,
+    all_data[PILLAR_COLUMN].values,
     model_path=PILLAR_MODEL_PATH,
     **PILLAR_MODEL_KWARGS
 )
 print(f"Pillar model saved to: {PILLAR_MODEL_PATH}")
-
-# --- 6. Append new rows (all columns + embeddings) to publications_embeddings ---
-print("\nAppending to 'publications_embeddings' table.")
-
-data['embeddings'] = list(embeddings)
-db.register('data', data)
-
-if 'publications_embeddings' in existing_tables:
-    db.sql("INSERT INTO publications_embeddings SELECT * FROM data")
-else:
-    db.sql("CREATE TABLE publications_embeddings AS SELECT * FROM data")
-
-print(f"{len(data)} rows appended to 'publications_embeddings'.")
 
 db.close()
 print("\nDone.")
