@@ -2,8 +2,6 @@
 
 data/raw/
 
-Publications/ML/Plots/*
-
 __pycache__/
 *.pyc
 
