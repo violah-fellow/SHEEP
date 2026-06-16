@@ -20,6 +20,7 @@ dependencies:
     - torch
     - transformers # Hugging Face Transformers for NLP
     - sentence-transformers # Sentence Transformers for embeddings
+    - adapters
 
 
 
