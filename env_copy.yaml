@@ -15,6 +15,7 @@ dependencies:
   - scikit-learn
   - joblib # For saving models and parallel processing
   - tqdm # Progress bars
+  - python-dotenv
   - pip:
     - dimcli # Dimensions API client
     - torch

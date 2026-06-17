@@ -97,11 +97,12 @@ def get_embeddings(data, text_column, file_path, model=None, tokenizer=None, bat
         if os.path.exists(file_path):
             embeddings = list(np.load(file_path, allow_pickle=True))
             start_idx = len(embeddings)
+            start_batch = start_idx // batch_size
             print(f"Resuming from {start_idx}")
         else:
             embeddings = []
             start_idx = 0
-            start_batch=0
+            start_batch = 0
 
         texts_idx = texts.tolist()[start_idx:]
 
