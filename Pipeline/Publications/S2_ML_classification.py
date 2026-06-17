@@ -9,8 +9,12 @@ import importlib.util, os
 # Database
 # path to DuckDB database
 DB_PATH = 'publications.db'
-# table containing the new input data to classify
+# table containing the new input data to classify with run date as name
 RUN_TABLE = 'data_run_test'
+# table for embeddings
+EMBEDDINGS_TABLE = 'publications_embedding'
+# table for final classifications
+CLASSIFICATION_TABLE = 'publications_classified'
 
 # Columns
 # columns concatenated for embedding (title, abstract)
@@ -54,8 +58,17 @@ def main(
 
     # store original columns for saving the table later
     original_columns = list(data.columns)
-
     print(f"{len(data)} rows loaded from '{RUN_TABLE}'")
+
+    # remove entries with existing embedding
+    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+    if EMBEDDINGS_TABLE in existing_tables:
+        existing_ids = db.sql(f"SELECT id FROM {EMBEDDINGS_TABLE}").df()['id']
+        n_before = len(data)
+        data = data[~data['id'].isin(existing_ids)].reset_index(drop=True)
+        print(f"{n_before - len(data)} rows already in {EMBEDDINGS_TABLE}, skipped.")
+    
+    print(f"{len(data)} rows remaining for embedding.")
 
     # Build text column from title + abstract
     data['text'] = data[TEXT_COLUMNS[0]].fillna('') + ' [SEP] ' + data[TEXT_COLUMNS[1]].fillna('')
@@ -80,6 +93,18 @@ def main(
     print(f"Embeddings shape: {embeddings.shape}")
 
     data['embeddings'] = list(embeddings)
+
+    # Save embeddings to database
+    print(f"\nAppending to {EMBEDDINGS_TABLE} table.")
+
+    data_embeddings = data[['id', 'embeddings']]
+    db.register('data_embeddings', data_embeddings)
+
+    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+    if EMBEDDINGS_TABLE in existing_tables:
+        db.sql(f"INSERT INTO {EMBEDDINGS_TABLE} SELECT * FROM data_embeddings")
+    else:
+        db.sql(f"CREATE TABLE {EMBEDDINGS_TABLE} AS SELECT * FROM data_embeddings")
 
     # 4. Run scope classifier
     print("\nRunning scope classifier.")
@@ -140,7 +165,7 @@ def main(
     """)
 
     # 8. Append to publications_classified
-    print("\nAppending to 'publications_classified' table.")
+    print(f"\nAppending to {CLASSIFICATION_TABLE} table.")
 
     output_columns = original_columns + ['pred_combined', 'pred_pillar']
     data_classified = data[output_columns].copy()
@@ -148,12 +173,12 @@ def main(
     db.register('data_classified', data_classified)
 
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
-    if 'publications_classified' in existing_tables:
-        db.sql("INSERT INTO publications_classified SELECT * FROM data_classified")
+    if CLASSIFICATION_TABLE in existing_tables:
+        db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} SELECT * FROM data_classified")
     else:
-        db.sql("CREATE TABLE publications_classified AS SELECT * FROM data_classified")
+        db.sql(f"CREATE TABLE {CLASSIFICATION_TABLE} AS SELECT * FROM data_classified")
 
-    print(f"{len(data_classified)} rows appended to 'publications_classified'.")
+    print(f"{len(data_classified)} rows appended to {CLASSIFICATION_TABLE}.")
 
     db.close()
     print("\nDone!")

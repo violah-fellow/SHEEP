@@ -12,6 +12,7 @@ from transformers import AutoTokenizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_val_predict, train_test_split
 import joblib
+from tqdm import tqdm
 
 ## load_specter
 ## loads the embedding model SPETER2 with the classification adapter
@@ -76,6 +77,7 @@ def get_embeddings(data, text_column, file_path, model=None, tokenizer=None, bat
     model = model.to(device)
 
     texts = data[text_column]
+    total_batches = (len(texts) + batch_size - 1) // batch_size
 
     def get_embeddings_helper(texts, model, batch_size):
         all_embeddings = []
@@ -99,10 +101,13 @@ def get_embeddings(data, text_column, file_path, model=None, tokenizer=None, bat
         else:
             embeddings = []
             start_idx = 0
+            start_batch=0
 
         texts_idx = texts.tolist()[start_idx:]
 
-        for i in range(0, len(texts_idx), batch_size):
+        for i in tqdm(range(0, len(texts_idx), batch_size),
+                      desc='Embedding', total=total_batches,
+                      initial=start_batch, unit='batch'):
             batch = texts_idx[i:i+batch_size]
             embeddings.extend(get_embeddings_helper(batch, model=model, batch_size=batch_size))
             np.save(file_path, embeddings)

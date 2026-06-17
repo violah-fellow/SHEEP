@@ -11,6 +11,8 @@ import importlib.util, sys, os
 DB_PATH = 'publications_training.db'
 # table containing new training data
 TRAINING_TABLE = 'publications_new_training'
+# table for embeddings
+EMBEDDINGS_TABLE = 'publications_embedding'
 
 # Columns
 # columns concatenated for embedding (title, abstract)
@@ -68,11 +70,11 @@ def main(
     print(f"{len(data)} rows loaded from '{TRAINING_TABLE}'")
 
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
-    if 'publications_embeddings' in existing_tables:
+    if EMBEDDINGS_TABLE in existing_tables:
         existing_ids = db.sql("SELECT id FROM publications_embeddings").df()['id']
         n_before = len(data)
         data = data[~data['id'].isin(existing_ids)].reset_index(drop=True)
-        print(f"{n_before - len(data)} rows already in 'publications_embeddings', skipped.")
+        print(f"{n_before - len(data)} rows already in {EMBEDDINGS_TABLE}, skipped.")
     print(f"{len(data)} rows remaining for embedding.")
 
     # Build text column from title + abstract
@@ -96,25 +98,25 @@ def main(
         checkpoint=True
     )
 
-    # 4. Append new rows to publications_embeddings
-    print("\nAppending to 'publications_embeddings' table.")
+    # 4. Append new rows to {EMBEDDINGS_TABLE}
+    print(f"\nAppending to {EMBEDDINGS_TABLE} table.")
 
     EMBEDDINGS_COLUMNS = ['id', 'title', 'abstract', 'year', 'scope', 'pillar', 'research_category', 'truncated', 'embedding']
 
     data['embedding'] = list(embeddings)
     db.register('df_new', data[EMBEDDINGS_COLUMNS])
 
-    if 'publications_embeddings' in existing_tables:
-        db.sql("INSERT INTO publications_embeddings SELECT * FROM df_new")
+    if EMBEDDINGS_TABLE in existing_tables:
+        db.sql(f"INSERT INTO {EMBEDDINGS_TABLE} SELECT * FROM df_new")
     else:
-        db.sql("CREATE TABLE publications_embeddings AS SELECT * FROM df_new")
+        db.sql(f"CREATE TABLE {EMBEDDINGS_TABLE} AS SELECT * FROM df_new")
 
-    print(f"{len(data)} rows appended to 'publications_embeddings'.")
+    print(f"{len(data)} rows appended to {EMBEDDINGS_TABLE}.")
 
-    # 5. Load all data from publications_embeddings for training
-    print("\nLoading all training data from 'publications_embeddings'.")
+    # 5. Load all data from {EMBEDDINGS_TABLE} for training
+    print(f"\nLoading all training data from {EMBEDDINGS_TABLE}.")
 
-    all_data = db.sql("SELECT * FROM publications_embeddings").df()
+    all_data = db.sql(f"SELECT * FROM {EMBEDDINGS_TABLE}").df()
     print(f"{len(all_data)} rows loaded for training.")
 
     all_embeddings = np.array(all_data['embedding'].tolist())
@@ -147,7 +149,7 @@ def main(
     )
 
     db.close()
-    
+
     print("\nDone!")
 
 
