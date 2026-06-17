@@ -167,12 +167,18 @@ def main(
     # 8. Append to publications_classified
     print(f"\nAppending to {CLASSIFICATION_TABLE} table.")
 
-    output_columns = original_columns + ['pred_combined', 'pred_pillar']
+    # get output columns for CLASSIFICATION_TABLE
+    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+    if CLASSIFICATION_TABLE in existing_tables:
+        output_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+    else:
+        output_columns = original_columns + ['pred_combined', 'pred_pillar']
+
+    # convert prediction in / out and add to CLASSIFICATION_TABLE
     data_classified = data[output_columns].copy()
     data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
     db.register('data_classified', data_classified)
 
-    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if CLASSIFICATION_TABLE in existing_tables:
         db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} SELECT * FROM data_classified")
     else:

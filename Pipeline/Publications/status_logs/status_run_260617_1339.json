@@ -1,0 +1,24 @@
+{
+  "config": {
+    "DB_PATH": "publications.db",
+    "KEY_PATH": "../.env",
+    "RUN_TABLE": "run_260617_1339",
+    "REVERSE_TABLE": "run_260617_1339_reverse",
+    "STRINGS_FILE": "dimensions_search_publications.txt",
+    "YEAR": 2025,
+    "SCOPE_MODEL_PATH": "models/LR_scope.joblib",
+    "PILLAR_MODEL_PATH": "models/LR_pillar.joblib",
+    "THRESHOLD_PATH": "models/LR_scope_threshold.txt",
+    "TRAINING_TABLE": "publications_new_training",
+    "EMBEDDINGS_PATH_TRAIN": "embeddings/embeddings_new_training.npy",
+    "EMBEDDINGS_PATH_RUN": "embeddings/embeddings_run_260617_1339.npy",
+    "EMBEDDINGS_PATH_REVERSE": "embeddings/embeddings_run_260617_1339_reverse.npy"
+  },
+  "steps": {
+    "train": "done",
+    "query": "done",
+    "classify": "done",
+    "reverse_query": "done",
+    "reverse_classify": "done"
+  }
+}

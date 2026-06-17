@@ -6,6 +6,10 @@ import os
 # CONFIG 
 # edit parameters for this run here
 
+# Dimensions API
+# path to API key
+KEY_PATH = '../.env'
+
 # Database
 # path to DuckDB database
 DB_PATH = 'publications.db'
@@ -23,6 +27,7 @@ YEAR = 2025
 # START OF SCRIPT
 
 def main(
+    KEY_PATH,
     DB_PATH=DB_PATH,
     RUN_TABLE=RUN_TABLE,
     REVERSE_TABLE=REVERSE_TABLE,
@@ -30,6 +35,7 @@ def main(
     YEAR=YEAR,
 ):
     # import packages
+    from dotenv import load_dotenv
     import dimcli
     from dimcli.utils import dsl_escape
     import pandas as pd
@@ -40,7 +46,8 @@ def main(
     # Login to dimensions API requires a dsl.ini file stored on the computer
     print("\nConnecting to the Dimensions API")
     
-    dimcli.login()
+    load_dotenv(KEY_PATH) 
+    dimcli.login(key=os.getenv("DIMENSIONS_API_KEY"))
     dsl = dimcli.Dsl()
 
     # 2. Extract top researcher ID's
@@ -64,7 +71,7 @@ def main(
 
     all_researchers = []
 
-    for batch in chunks(pub_ids, 100):
+    for batch in chunks(pub_ids, 200):
         ids_str = json.dumps(batch)  
         result = dsl.query(f"""
             search publications
@@ -96,13 +103,15 @@ def main(
     query = dsl.query(f"""search publications
                         where researchers in {researcher_ids}
                         and year={YEAR} 
-                        return publications[id+title+abstract+year+type]
-                        limit 300""")
+                        return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
+                            funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]
+                        limit 200""")
     
     # query = dsl.query_iterative(f"""search publications 
     #                   where researchers.id in {researcher_ids} 
     #                   and year={YEAR} 
-    #                   return publications[id+title+abstract+year+type]""")
+    #                   return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
+    #                   funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]""")
 
     # Convert to pandas dataframe and deduplicate by id    
     query_df = query.as_dataframe() 
@@ -122,6 +131,11 @@ def main(
         n_before = len(query_df)
         query_df = query_df[~query_df['id'].isin(existing_ids)].reset_index(drop=True)
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
+
+    # Reorder columns to match publications_classified
+    expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+                     if c not in ('pred_combined', 'pred_pillar')]
+    query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database
     # Create reverse run table and add queries
