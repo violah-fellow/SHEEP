@@ -1,0 +1,23 @@
+Note to self: I would rather have exclusion with a label 2 than incorrect inclusion with a label 4. We can then only do manual review for 2&3. Having incorrect inclusions at 4 means manual review would be much larger.
+
+Assessing the v11 batch:
+1. Inclusion of insects as APs - I knew this was a risk when I removed it as an out of scope topic - I did do a spot check where it did continue to exclude insects given I do not define APs as including insects, but I think some papers more explicitly refer to insects as APs and it threw the LLM. Bring back the exclusion.
+2. Inclusion of dietary study comparing red meat to non-soy legumes that are a 'sustainable alternative protein source'. Expand out of scope to legumes.
+3. Quinoa engineering for less bitter taste included, but inclusion criteria only includes crop / agronomic / strain / bioprocess optimisation that aim to improve protein quality or yield or improve ease of processing
+4. Inclusion of 'plant protein sources' compared to red meat.
+5. Inclusion of protein sweetener - not an animal product substitute.
+6. Inclusion of general macroalgae characterisation for food. Not AP.
+7. Whole legumes as plant-based protein vs meat in dinner.
+8. Exclusion of socioeconomic papers that minorly cover APs.
+
+Changes to prompt:
+1. Re-inclusion of insects as out of scope
+2. Edit to dietary out of scope to include legumes, vegetables, alongside general plant-based diets.
+3. Expanded agronomic research in scope boundary to specify that protein / yield/ processing must be the goal, not palatability / drought resistance etc.
+4. Edit to dietary out of scope to include 'plant protein sources'
+5. Edit to non-animal substitutes out of scope to include fermentation-derived proteins and sweeteners as an example
+6. Edit to technological in scope to move alternative protein to end of sentence again (not just ap ingredients etc in human food). Also edited the general definition to change 'alternatives' to 'substitutes' of animal products.
+7. Edit to Comparisons of alt proteins to include a not that whole food legumes do not count.
+8. Removed 'and meaningfully discussed' from non-technological in scope boundary.
+9. Update to technological boundary to include fortification etc of alternative protein products.
+

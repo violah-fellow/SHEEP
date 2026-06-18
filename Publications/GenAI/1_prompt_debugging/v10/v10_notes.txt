@@ -1,0 +1,7 @@
+
+
+v10 -> v11:
+- More clarity in out of scope topic that only substitutes for animal *products* are in scope
+- Addition of 'safety' in the socioeconomic in scope boundary and general definition
+- Addition of scaffolding biomaterial examples in the CM definition
+- Added labelling guidance to focus on the product being developed, not the ingredient source.
