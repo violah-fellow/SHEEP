@@ -8,13 +8,13 @@ import importlib.util, os
 
 # Database
 # path to DuckDB database
-DB_PATH = 'publications.db'
+DB_PATH = 'patents.db'
 # table containing the new input data to classify with run date as name
 RUN_TABLE = 'data_run_test'
 # table for embeddings
-EMBEDDINGS_TABLE = 'publications_embedding'
+EMBEDDINGS_TABLE = 'patents_embedding'
 # table for final classifications
-CLASSIFICATION_TABLE = 'publications_classified'
+CLASSIFICATION_TABLE = 'patents_classified'
 
 # Columns
 # columns concatenated for embedding (title, abstract)
@@ -43,8 +43,8 @@ def main(
     # 1. Load ML_pipeline_functions from the same directory as this script
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _spec = importlib.util.spec_from_file_location(
-        'ML_pipeline_publications_functions',
-        os.path.join(_script_dir, 'ML_pipeline_publications_functions.py')
+        'ML_pipeline_patents_functions',
+        os.path.join(_script_dir, 'ML_pipeline_patents_functions.py')
     )
     mlf = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(mlf)
@@ -73,11 +73,11 @@ def main(
     # Build text column from title + abstract
     data['text'] = data[TEXT_COLUMNS[0]].fillna('') + ' [SEP] ' + data[TEXT_COLUMNS[1]].fillna('')
 
-    # Load SPECTER2 model and check token sizes
-    print("\nLoading SPECTER2 model.")
+    # Load PatentSBERTa model and check token sizes
+    print("\nLoading PatentSBERTa model.")
 
-    model, tokenizer = mlf.load_specter()
-    mlf.check_token_size(data, text_column='text', tokenizer=tokenizer, add_column=True)
+    model = mlf.load_specter()
+    mlf.check_token_size(data, text_column='text', add_column=True)
 
     # 3. Compute embeddings
     print("\nComputing embeddings.")
@@ -87,7 +87,6 @@ def main(
         text_column='text',
         file_path=EMBEDDINGS_PATH,
         model=model,
-        tokenizer=tokenizer,
         checkpoint=True
     )
     print(f"Embeddings shape: {embeddings.shape}")
@@ -164,7 +163,7 @@ def main(
         WHERE {RUN_TABLE}.id = data.id
     """)
 
-    # 8. Append to publications_classified
+    # 8. Append to patents_classified
     print(f"\nAppending to {CLASSIFICATION_TABLE} table.")
 
     # get output columns for CLASSIFICATION_TABLE

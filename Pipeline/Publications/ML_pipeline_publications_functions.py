@@ -125,7 +125,7 @@ def get_embeddings(data, text_column, file_path, model=None, tokenizer=None, bat
 ## trains the cope classifier
 ## two outputs --> call like this: classifier, threshold = train_scope(...)
 def train_scope(embeddings, labels, model_path, model=LogisticRegression,
-                test=False, test_size=0.2, stratify_by=None, **model_kwargs):
+                test=False, test_size=0.2, stratify_by=None, max_fn=0.01, **model_kwargs):
     # embeddings = output from sentence transfomer, emebedded text
     # labels = labels that will be predicted, e.g. data['scope']. Make sure the indeces of embeddings and labels are the same and labels are binary (0 and 1).
     # model = which classifier to use, default = LogisticRegression, other options include: MLPClassifier, SVC
@@ -133,6 +133,7 @@ def train_scope(embeddings, labels, model_path, model=LogisticRegression,
     # test = whether to split the provided data into training and test data. If True, test probabilities will be used to determine the threshold, if False, cross-validation will be used
     # test_size = if data is split in training and test data, what size should the test set be
     # stratify_by = which variable should be used to stratify the data in a balanced way, if None, data will be split randomly
+    # max_fm = maximum % of false negative cases, will be used to set the threshold
     # model_path = path to save the model
 
     if model == LogisticRegression:
@@ -176,7 +177,7 @@ def train_scope(embeddings, labels, model_path, model=LogisticRegression,
         for T in thresholds:
             preds = (proba >= T).astype(int)
             fn_rate = ((np.array(y_test) == 1) & (preds == 0)).sum() / n
-            if fn_rate < 0.01:
+            if fn_rate < max_fn:
                 threshold = T
                 print(f"Determined threshold: {T:.3f}, FN rate: {fn_rate:.3%}")
                 break
@@ -198,7 +199,7 @@ def train_scope(embeddings, labels, model_path, model=LogisticRegression,
         for T in thresholds:
             preds = (proba >= T).astype(int)
             fn_rate = ((np.array(labels) == 1) & (preds == 0)).sum() / n
-            if fn_rate < 0.01:
+            if fn_rate < max_fn:
                 threshold = T
                 print(f"Determined threshold: {T:.3f}, FN rate: {fn_rate:.3%}")
                 break

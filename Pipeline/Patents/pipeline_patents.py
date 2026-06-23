@@ -1,4 +1,4 @@
-## Pipeline
+## Pipeline for Patent Data collection and classification
 ## Calls S0-S3 in sequence with checkpoint/resume support.
 ## To restart a completed or unwanted run, delete its status file from status_logs/.
 
@@ -18,7 +18,7 @@ from S3_query_reverse import main as query_reverse
 RESUME = True
 
 # Shared paths
-DB_PATH           = 'publications.db'
+DB_PATH           = 'patents.db'
 SCOPE_MODEL_PATH  = 'models/LR_scope.joblib'
 PILLAR_MODEL_PATH = 'models/LR_pillar.joblib'
 THRESHOLD_PATH    = 'models/LR_scope_threshold.txt'
@@ -31,6 +31,7 @@ YEAR         = 2025
 # Training
 TRAINING_TABLE        = 'publications_new_training'
 EMBEDDINGS_PATH_TRAIN = 'embeddings/embeddings_new_training.npy'
+MAX_FN                = 0.01
 
 STATUS_DIR = 'status_logs'
 os.makedirs(STATUS_DIR, exist_ok=True)
@@ -63,6 +64,7 @@ else:
         'SCOPE_MODEL_PATH':       SCOPE_MODEL_PATH,
         'PILLAR_MODEL_PATH':      PILLAR_MODEL_PATH,
         'THRESHOLD_PATH':         THRESHOLD_PATH,
+        'MAX_FN':                 MAX_FN,
         'TRAINING_TABLE':         TRAINING_TABLE,
         'EMBEDDINGS_PATH_TRAIN':  EMBEDDINGS_PATH_TRAIN,
         'EMBEDDINGS_PATH_RUN':    EMBEDDINGS_PATH_RUN,
@@ -92,6 +94,7 @@ if status['steps']['train'] != 'done':
     #     SCOPE_MODEL_PATH=cfg['SCOPE_MODEL_PATH'],
     #     PILLAR_MODEL_PATH=cfg['PILLAR_MODEL_PATH'],
     #     THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+    #     MAX_FN=cfg['MAX_FN'],
     # )
     mark_done(status, 'train', STATUS_DIR)
 else:
@@ -140,19 +143,3 @@ if status['steps']['reverse_query'] != 'done':
 else:
     print("\nStep 3 (reverse_query) already done, skipping.")
 
-# Step 4: Classify reverse search publications
-if status['steps']['reverse_classify'] != 'done':
-    print("\nStarting Step 4: Classify reverse search publications.")
-    classify_run(
-        DB_PATH=cfg['DB_PATH'],
-        RUN_TABLE=cfg['REVERSE_TABLE'],
-        EMBEDDINGS_PATH=cfg['EMBEDDINGS_PATH_REVERSE'],
-        SCOPE_MODEL_PATH=cfg['SCOPE_MODEL_PATH'],
-        PILLAR_MODEL_PATH=cfg['PILLAR_MODEL_PATH'],
-        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
-    )
-    mark_done(status, 'reverse_classify', STATUS_DIR)
-else:
-    print("\nStep 4 (reverse_classify) already done, skipping.")
-
-print(f"\nPipeline complete for run '{cfg['RUN_TABLE']}'.")

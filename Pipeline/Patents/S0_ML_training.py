@@ -8,11 +8,11 @@ import importlib.util, sys, os
 
 # Database
 # path to DuckDB database
-DB_PATH = 'publications_training.db'
+DB_PATH = 'patents_training.db'
 # table containing new training data
-TRAINING_TABLE = 'publications_new_training'
+TRAINING_TABLE = 'patents_new_training'
 # table for embeddings
-EMBEDDINGS_TABLE = 'publications_embedding'
+EMBEDDINGS_TABLE = 'patents_embedding'
 
 # Columns
 # columns concatenated for embedding (title, abstract)
@@ -32,9 +32,8 @@ PILLAR_MODEL_PATH = 'Models/LR_pillar.joblib'
 THRESHOLD_PATH    = 'Models/LR_scope_threshold.txt'
 
 # Classifier hyperparameters (passed as kwargs to train_scope / train_pillar)
-SCOPE_MODEL_KWARGS  = {'C': 0.1, 'class_weight': 'balanced'}
-PILLAR_MODEL_KWARGS = {'C': 0.1, 'class_weight': 'balanced'}
-MAX_FN              = 0.01
+SCOPE_MODEL_KWARGS  = {'C': 100, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
+PILLAR_MODEL_KWARGS = {'C': 1000, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
 
 # START OF SCRIPT
 
@@ -55,8 +54,8 @@ def main(
     # Load ML_pipeline_functions from the same directory as this script
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _spec = importlib.util.spec_from_file_location(
-        'ML_pipeline_publications_functions',
-        os.path.join(_script_dir, 'ML_pipeline_publications_functions.py')
+        'ML_pipeline_patents_functions',
+        os.path.join(_script_dir, 'ML_pipeline_patents_functions.py')
     )
     mlf = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(mlf)
@@ -82,10 +81,10 @@ def main(
     # Build text column from title + abstract
     data['text'] = data[TEXT_COLUMNS[0]].fillna('') + ' [SEP] ' + data[TEXT_COLUMNS[1]].fillna('')
 
-    # 2. Load SPECTER2 model
-    print("\nLoading SPECTER2 model.")
+    # 2. Load PatentSBERTa model
+    print("\nLoading PatentSBERTa model.")
     
-    model, tokenizer = mlf.load_specter()
+    model = mlf.load_patentsberta()
     mlf.check_token_size(data, text_column='text', tokenizer=tokenizer, add_column=True)
 
     # 3. Compute embeddings
@@ -96,7 +95,6 @@ def main(
         text_column='text',
         file_path=EMBEDDINGS_PATH,
         model=model,
-        tokenizer=tokenizer,
         checkpoint=True
     )
 
