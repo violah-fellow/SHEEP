@@ -19,17 +19,21 @@ RESUME = True
 
 # Shared paths
 DB_PATH           = 'patents.db'
+DB_PATH_TRAINING  = 'patents_training.db'
 SCOPE_MODEL_PATH  = 'models/LR_scope.joblib'
 PILLAR_MODEL_PATH = 'models/LR_pillar.joblib'
 THRESHOLD_PATH    = 'models/LR_scope_threshold.txt'
 KEY_PATH          = '../.env'
 
 # Query
-STRINGS_FILE = 'dimensions_search_publications.txt'
-YEAR         = 2025
+STRINGS_FILE    = 'dimensions_search_patents.txt'
+CPC_SEARCH_FILE = 'CPC_for_query.txt'
+CPC_FILTER_FILE = 'CPC_for_filter.txt'
+YEAR            = 2025
 
 # Training
-TRAINING_TABLE        = 'publications_new_training'
+TRAINING_TABLE        = 'patents_raw'
+EMBEDDINGS_TABLE      = 'patents_embeddings'
 EMBEDDINGS_PATH_TRAIN = 'embeddings/embeddings_new_training.npy'
 MAX_FN                = 0.01
 
@@ -52,23 +56,25 @@ else:
     RUN_TABLE             = f'run_{date}'
     REVERSE_TABLE         = RUN_TABLE + '_reverse'
     EMBEDDINGS_PATH_RUN     = f'embeddings/embeddings_{RUN_TABLE}.npy'
-    EMBEDDINGS_PATH_REVERSE = f'embeddings/embeddings_{REVERSE_TABLE}.npy'
 
     cfg = {
         'DB_PATH':                DB_PATH,
+        'DB_PATH_TRAINING':       DB_PATH_TRAINING,
         'KEY_PATH':               KEY_PATH,
         'RUN_TABLE':              RUN_TABLE,
         'REVERSE_TABLE':          REVERSE_TABLE,
         'STRINGS_FILE':           STRINGS_FILE,
+        'CPC_SEARCH_FILE':        CPC_SEARCH_FILE,
+        'CPC_FILTER_FILE':        CPC_FILTER_FILE,
         'YEAR':                   YEAR,
         'SCOPE_MODEL_PATH':       SCOPE_MODEL_PATH,
         'PILLAR_MODEL_PATH':      PILLAR_MODEL_PATH,
         'THRESHOLD_PATH':         THRESHOLD_PATH,
         'MAX_FN':                 MAX_FN,
         'TRAINING_TABLE':         TRAINING_TABLE,
+        'EMBEDDINGS_TABLE':       EMBEDDINGS_TABLE,
         'EMBEDDINGS_PATH_TRAIN':  EMBEDDINGS_PATH_TRAIN,
         'EMBEDDINGS_PATH_RUN':    EMBEDDINGS_PATH_RUN,
-        'EMBEDDINGS_PATH_REVERSE': EMBEDDINGS_PATH_REVERSE,
     }
     status = {
         'config': cfg,
@@ -77,7 +83,6 @@ else:
             'query':            'pending',
             'classify':         'pending',
             'reverse_query':    'pending',
-            'reverse_classify': 'pending',
         }
     }
     save_status(status, STATUS_DIR)
@@ -87,15 +92,16 @@ else:
 # Step 0: Train classifiers
 if status['steps']['train'] != 'done':
     print("\nStarting Step 0: Train classifiers.")
-    # train_classifiers(
-    #     DB_PATH=cfg['DB_PATH'],
-    #     TRAINING_TABLE=cfg['TRAINING_TABLE'],
-    #     EMBEDDINGS_PATH=cfg['EMBEDDINGS_PATH_TRAIN'],
-    #     SCOPE_MODEL_PATH=cfg['SCOPE_MODEL_PATH'],
-    #     PILLAR_MODEL_PATH=cfg['PILLAR_MODEL_PATH'],
-    #     THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
-    #     MAX_FN=cfg['MAX_FN'],
-    # )
+    train_classifiers(
+        DB_PATH=cfg['DB_PATH_TRAINING'],
+        TRAINING_TABLE=cfg['TRAINING_TABLE'],
+        EMBEDDINGS_TABLE=cfg['EMBEDDINGS_TABLE'],
+        EMBEDDINGS_PATH=cfg['EMBEDDINGS_PATH_TRAIN'],
+        SCOPE_MODEL_PATH=cfg['SCOPE_MODEL_PATH'],
+        PILLAR_MODEL_PATH=cfg['PILLAR_MODEL_PATH'],
+        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+        MAX_FN=cfg['MAX_FN'],
+    )
     mark_done(status, 'train', STATUS_DIR)
 else:
     print("\nStep 0 (train) already done, skipping.")
@@ -108,6 +114,8 @@ if status['steps']['query'] != 'done':
         DB_PATH=cfg['DB_PATH'],
         RUN_TABLE=cfg['RUN_TABLE'],
         STRINGS_FILE=cfg['STRINGS_FILE'],
+        CPC_SEARCH_FILE=cfg['CPC_SEARCH_FILE'],
+        CPC_FILTER_FILE=cfg['CPC_FILTER_FILE'],
         YEAR=cfg['YEAR'],
     )
     mark_done(status, 'query', STATUS_DIR)
@@ -120,6 +128,7 @@ if status['steps']['classify'] != 'done':
     classify_run(
         DB_PATH=cfg['DB_PATH'],
         RUN_TABLE=cfg['RUN_TABLE'],
+        EMBEDDINGS_TABLE=cfg['EMBEDDINGS_TABLE'],
         EMBEDDINGS_PATH=cfg['EMBEDDINGS_PATH_RUN'],
         SCOPE_MODEL_PATH=cfg['SCOPE_MODEL_PATH'],
         PILLAR_MODEL_PATH=cfg['PILLAR_MODEL_PATH'],

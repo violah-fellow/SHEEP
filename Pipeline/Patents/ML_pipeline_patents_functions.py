@@ -9,6 +9,7 @@ import warnings
 import torch
 from sentence_transformers import SentenceTransformer
 from sklearn.svm import SVC
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.model_selection import StratifiedKFold, cross_val_predict, train_test_split
 import joblib
 from tqdm import tqdm
@@ -25,7 +26,7 @@ def load_patentsberta():
 
 ## check_token_size 
 ## counts number of tokens per entry and saves a 'truncated' = True/False column to the provided dataframe if add_column = True
-def check_token_size(data, text_column, model=model, add_column=True):
+def check_token_size(data, text_column, model=None, add_column=True):
     # data = dataframe as pandas.DataFrame
     # text_column = column in data containing the concatenated string for embedding
     # model = model to use (must be loaded before)
@@ -49,15 +50,13 @@ def check_token_size(data, text_column, model=model, add_column=True):
 ## get_embeddings
 ## converts the provided text to embeddings using the specified model
 ## runs on GPU if available, otherwise on CPU
-def get_embeddings(data, text_column, file_path, model=model, batch_size=32, checkpoint=True):
+def get_embeddings(data, text_column, file_path, model=None, batch_size=32, checkpoint=True):
     # data = dataframe as pandas.DataFrame
     # text_column = column in data containing the concatenated string for embedding
     # model = model to use (must be loaded before)
     # batch_size = size of batches going into model
     # checkpoint = whether to save checkpoint during embedding to enable continuous embedding in case of crash
     # file_path = path to save the embedding file
-
-    tokenizer = model.tokenizer
 
     if model is None:
         raise ValueError("model must be provided")
@@ -85,13 +84,13 @@ def get_embeddings(data, text_column, file_path, model=model, batch_size=32, che
                       desc='Embedding', total=total_batches,
                       initial=start_batch, unit='batch'):
             batch = texts_idx[i:i+batch_size]
-            embeddings.extend(model.encode(batch, model=model, batch_size=batch_size))
+            embeddings.extend(model.encode(batch, batch_size=batch_size))
             np.save(file_path, embeddings)
 
         embeddings = np.array(embeddings)
 
     else:
-        embeddings = model.encode(texts.tolist(), model=model, batch_size=batch_size)
+        embeddings = model.encode(texts.tolist(), batch_size=batch_size)
         np.save(file_path, embeddings)
 
     return embeddings
@@ -116,8 +115,9 @@ def train_scope(embeddings, labels, model_path, model=SVC,
         defaults.update(model_kwargs)
         model_kwargs = defaults
 
-    # define classifier
-    classifier = model(**model_kwargs, random_state=42)
+    # define classifier and wrap with calibration
+    base_classifier = model(**model_kwargs, random_state=42)
+    classifier = CalibratedClassifierCV(base_classifier, cv=5, method='isotonic')
 
     # split data into train and test if test = True
     # train classifier with training data and validate with test data
@@ -193,13 +193,14 @@ def train_pillar(embeddings, labels, model_path, model=SVC, **model_kwargs):
     # model_kwargs = arguments for the specific model. For SVC: C, class_weight, kernel, gamma
     # model_path = path to save the model
 
-    if model == LogisticRegression:
+    if model == SVC:
         defaults = {'C': 1000, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
         defaults.update(model_kwargs)
         model_kwargs = defaults
 
-    # define classifier
-    classifier = model(**model_kwargs, random_state=42)
+    # define classifier and wrap with calibration
+    base_classifier = model(**model_kwargs, random_state=42)
+    classifier = CalibratedClassifierCV(base_classifier, cv=5, method='isotonic')
 
     # train model
     classifier.fit(embeddings, labels)

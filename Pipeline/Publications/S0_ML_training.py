@@ -73,7 +73,7 @@ def main(
 
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if EMBEDDINGS_TABLE in existing_tables:
-        existing_ids = db.sql("SELECT id FROM publications_embeddings").df()['id']
+        existing_ids = db.sql(f"SELECT id FROM {EMBEDDINGS_TABLE}").df()['id']
         n_before = len(data)
         data = data[~data['id'].isin(existing_ids)].reset_index(drop=True)
         print(f"{n_before - len(data)} rows already in {EMBEDDINGS_TABLE}, skipped.")

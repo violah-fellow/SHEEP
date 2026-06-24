@@ -22,7 +22,7 @@ CLASSIFICATION_TABLE = 'patents_classified'
 # path to txt file with search strings and CPC codes
 STRINGS_FILE = 'dimensions_search_patents.txt'
 CPC_SEARCH_FILE = 'CPC_for_query.txt'
-CPC_FILTER_FILE = 'CPC_for filter.txt'
+CPC_FILTER_FILE = 'CPC_for_filter.txt'
 
 # Other parameters for search
 YEAR = 2025
@@ -45,6 +45,7 @@ def main(
     from dimcli.utils import dsl_escape
     import pandas as pd
     import duckdb
+    import json
 
     # 1. Load Dimensions API and search strings
     # Login to dimensions API requires a dsl.ini file stored on the computer
@@ -74,7 +75,7 @@ def main(
         # string search
         query.append(dsl.query(f"""search patents for "{dsl_escape(query_string)}"
                                where publication_year={YEAR} 
-                               return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+                               return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
                                 publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                                 assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                                 publications+researchers+times_cited+family_count] 
@@ -84,7 +85,7 @@ def main(
         query.append(dsl.query(f"""search patents 
                                where cpc in {json.dumps(cpc_search)}
                                and publication_year={YEAR} 
-                               return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+                               return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
                                 publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                                 assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                                 publications+researchers+times_cited+family_count]
@@ -95,7 +96,7 @@ def main(
         # # string search
         # query.append(dsl.query_iterative(f"""search patents for "{dsl_escape(query_string)}"
         #                        where publication_year={YEAR} 
-        #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+        #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
         #                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
         #                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
         #                         publications+researchers+times_cited+family_count] 
@@ -105,7 +106,7 @@ def main(
         # query.append(dsl.query_iterative(f"""search patents 
         #                        where cpc in {json.dumps(cpc_search)}
         #                        and publication_year={YEAR} 
-        #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+        #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
         #                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
         #                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
         #                         publications+researchers+times_cited+family_count]
@@ -115,16 +116,17 @@ def main(
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
     query_df = query_df.drop_duplicates(subset="id").reset_index(drop=True)
 
+    # Remove version duplicates of the same patent
+    query_df = query_df.sort_values(['publication_year', 'kind'], ascending=[False, False]).groupby(["family_id", "jurisdiction", "application_number"]).head(1)
+
     # 3. Filter by CPC codes
     # Get CPC codes for filtering
     # Load CPC codes for filtering by reading the txt file
     with open(CPC_FILTER_FILE, 'r') as f:
         cpc_filter = f.read().splitlines()
 
-    cpc_mask = (
-        query_df['cpc'].isna() |
-        query_df['cpc'].apply(lambda codes: not codes) |  # empty list
-        query_df['cpc'].apply(lambda codes: any(c in cpc_filter for c in codes))
+    cpc_mask = query_df['cpc'].apply(
+        lambda codes: not isinstance(codes, list) or not codes or any(c in cpc_filter for c in codes)
     )
     
     query_df = query_df[cpc_mask]
@@ -140,10 +142,33 @@ def main(
         query_df = query_df[~query_df['id'].isin(existing_ids)].reset_index(drop=True)
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
 
+        # Check for newer versions of already-classified patents
+        # (same family/jurisdiction/application combo but higher publication_year)
+        existing_versions = db.sql(f"""
+            SELECT family_id, jurisdiction, application_number, publication_year AS publication_year_existing, id AS id_existing
+            FROM {CLASSIFICATION_TABLE}
+        """).df()
+
+        version_matches = query_df.merge(
+            existing_versions, on=['family_id', 'jurisdiction', 'application_number'], how='inner'
+        )
+
+        newer = version_matches[version_matches['publication_year'] > version_matches['publication_year_existing']]
+        older_or_same = version_matches[version_matches['publication_year'] <= version_matches['publication_year_existing']]
+
+        if not newer.empty:
+            db.register('superseded', pd.DataFrame({'id': newer['id_existing'].tolist()}))
+            db.sql(f"DELETE FROM {CLASSIFICATION_TABLE} WHERE id IN (SELECT id FROM superseded)")
+            print(f"{len(newer)} superseded rows deleted from {CLASSIFICATION_TABLE}.")
+
+        if not older_or_same.empty:
+            query_df = query_df[~query_df['id'].isin(older_or_same['id'])].reset_index(drop=True)
+            print(f"{len(older_or_same)} older/same-version rows dropped.")
+
     # Reorder columns to match patents_classified if it exists
     if CLASSIFICATION_TABLE in existing_tables:
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                         if c not in ('pred_combined', 'pred_pillar')]
+                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database

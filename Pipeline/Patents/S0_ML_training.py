@@ -12,7 +12,7 @@ DB_PATH = 'patents_training.db'
 # table containing new training data
 TRAINING_TABLE = 'patents_new_training'
 # table for embeddings
-EMBEDDINGS_TABLE = 'patents_embedding'
+EMBEDDINGS_TABLE = 'patents_embeddings'
 
 # Columns
 # columns concatenated for embedding (title, abstract)
@@ -24,7 +24,7 @@ PILLAR_COLUMN = 'pillar'
 
 # Embeddings
 # checkpoint + final save path for embeddings
-EMBEDDINGS_PATH = 'embeddings_new_training.npy'
+EMBEDDINGS_PATH = 'embeddings_training.npy'
 
 # Model save paths
 SCOPE_MODEL_PATH  = 'Models/LR_scope.joblib'
@@ -34,12 +34,14 @@ THRESHOLD_PATH    = 'Models/LR_scope_threshold.txt'
 # Classifier hyperparameters (passed as kwargs to train_scope / train_pillar)
 SCOPE_MODEL_KWARGS  = {'C': 100, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
 PILLAR_MODEL_KWARGS = {'C': 1000, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
+MAX_FN              = 0.01
 
 # START OF SCRIPT
 
 def main(
     DB_PATH=DB_PATH,
     TRAINING_TABLE=TRAINING_TABLE,
+    EMBEDDINGS_TABLE=EMBEDDINGS_TABLE,
     TEXT_COLUMNS=TEXT_COLUMNS,
     SCOPE_COLUMN=SCOPE_COLUMN,
     PILLAR_COLUMN=PILLAR_COLUMN,
@@ -72,7 +74,7 @@ def main(
 
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if EMBEDDINGS_TABLE in existing_tables:
-        existing_ids = db.sql("SELECT id FROM publications_embeddings").df()['id']
+        existing_ids = db.sql(f"SELECT id FROM {EMBEDDINGS_TABLE}").df()['id']
         n_before = len(data)
         data = data[~data['id'].isin(existing_ids)].reset_index(drop=True)
         print(f"{n_before - len(data)} rows already in {EMBEDDINGS_TABLE}, skipped.")
@@ -85,7 +87,7 @@ def main(
     print("\nLoading PatentSBERTa model.")
     
     model = mlf.load_patentsberta()
-    mlf.check_token_size(data, text_column='text', tokenizer=tokenizer, add_column=True)
+    mlf.check_token_size(data, text_column='text', model=model, add_column=True)
 
     # 3. Compute embeddings
     print("\nComputing embeddings.")
@@ -101,9 +103,9 @@ def main(
     # 4. Append new rows to {EMBEDDINGS_TABLE}
     print(f"\nAppending to {EMBEDDINGS_TABLE} table.")
 
-    EMBEDDINGS_COLUMNS = ['id', 'title', 'abstract', 'year', 'scope', 'pillar', 'research_category', 'truncated', 'embedding']
+    EMBEDDINGS_COLUMNS = ['id', 'embeddings', 'scope', 'pillar']
 
-    data['embedding'] = list(embeddings)
+    data['embeddings'] = list(embeddings)
     db.register('df_new', data[EMBEDDINGS_COLUMNS])
 
     if EMBEDDINGS_TABLE in existing_tables:
@@ -119,7 +121,7 @@ def main(
     all_data = db.sql(f"SELECT * FROM {EMBEDDINGS_TABLE}").df()
     print(f"{len(all_data)} rows loaded for training.")
 
-    all_embeddings = np.array(all_data['embedding'].tolist())
+    all_embeddings = np.array(all_data['embeddings'].tolist())
     all_data['scope_binary'] = (all_data[SCOPE_COLUMN] == 'in').astype(int)
     
     print(f"Scope label distribution:\n{all_data['scope_binary'].value_counts().to_string()}")
@@ -144,7 +146,7 @@ def main(
 
     mlf.train_pillar(
         all_embeddings,
-        all_data[PILLAR_COLUMN].values,
+        all_data[PILLAR_COLUMN].fillna('NA').values,
         model_path=PILLAR_MODEL_PATH,
         **PILLAR_MODEL_KWARGS
     )

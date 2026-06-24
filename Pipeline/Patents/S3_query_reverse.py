@@ -72,10 +72,9 @@ def main(
     # only pull 100 publications per search term for testing
     query = []
     for batch in chunks(family_ids, 500):
-        ids_batch = json.dumps(batch)  
         q = dsl.query(f"""search patents
-          where family_id in {json.dumps(ids_batch)}
-          return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+          where family_id in {json.dumps(batch)}
+          return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                         publications+researchers+times_cited+family_count]
@@ -85,10 +84,9 @@ def main(
     # full query
     # query = []
     # for batch in chunks(family_ids, 500):
-    #     ids_batch = json.dumps(batch)  
     #     q = dsl.query_iterative(f"""search patents
-    #       where family_id in {json.dumps(ids_batch)}
-    #       return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+year+priority_year+
+    #       where family_id in {json.dumps(batch)}
+    #       return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
     #                      publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
     #                      assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
     #                      publications+researchers+times_cited+family_count]
@@ -99,10 +97,10 @@ def main(
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
     query_df = query_df.drop_duplicates(subset="id").reset_index(drop=True)
 
-    # Filter publications that already are in the final database
-    # Connect to SQL database
-    db = duckdb.connect(database=DB_PATH)
+    # Remove version duplicates of the same patent
+    query_df = query_df.sort_values(['publication_year', 'kind'], ascending=[False, False]).groupby(["family_id", "jurisdiction", "application_number"]).head(1)
 
+    # Filter publications that already are in the final database
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if CLASSIFICATION_TABLE in existing_tables:
         existing_ids = db.sql(f"SELECT id FROM {CLASSIFICATION_TABLE}").df()['id']
@@ -110,10 +108,33 @@ def main(
         query_df = query_df[~query_df['id'].isin(existing_ids)].reset_index(drop=True)
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
 
-    # Reorder columns to match patents_classified
-    expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                     if c not in ('pred_combined', 'pred_pillar')]
-    query_df = query_df.reindex(columns=expected_cols)
+        # Check for newer versions of already-classified patents
+        # (same family/jurisdiction/application combo but higher publication_year)
+        existing_versions = db.sql(f"""
+            SELECT family_id, jurisdiction, application_number, publication_year AS publication_year_existing, id AS id_existing
+            FROM {CLASSIFICATION_TABLE}
+        """).df()
+
+        version_matches = query_df.merge(
+            existing_versions, on=['family_id', 'jurisdiction', 'application_number'], how='inner'
+        )
+
+        newer = version_matches[version_matches['publication_year'] > version_matches['publication_year_existing']]
+        older_or_same = version_matches[version_matches['publication_year'] <= version_matches['publication_year_existing']]
+
+        if not newer.empty:
+            db.register('superseded', pd.DataFrame({'id': newer['id_existing'].tolist()}))
+            db.sql(f"DELETE FROM {CLASSIFICATION_TABLE} WHERE id IN (SELECT id FROM superseded)")
+            print(f"{len(newer)} superseded rows deleted from {CLASSIFICATION_TABLE}.")
+
+        if not older_or_same.empty:
+            query_df = query_df[~query_df['id'].isin(older_or_same['id'])].reset_index(drop=True)
+            print(f"{len(older_or_same)} older/same-version rows dropped.")
+
+        # Reorder columns to match patents_classified
+        expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope')]
+        query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database
     # Create reverse run table and add queries
@@ -141,16 +162,12 @@ def main(
     # make sure there is only one patent per family ID
     run_data = run_data.drop_duplicates(subset="family_id").reset_index(drop=True)
 
-    db.register('data', run_data[['family_id'] + list(new_columns.keys())])
+    available_cols = ['family_id'] + [c for c in new_columns.keys() if c in run_data.columns]
+    db.register('data', run_data[available_cols])
+    set_clause = ", ".join(f"{c} = data.{c}" for c in new_columns if c in run_data.columns)
     db.sql(f"""
         UPDATE {REVERSE_TABLE}
-        SET proba_scope     = data.proba_scope,
-            pred_scope      = data.pred_scope,
-            threshold_scope = data.threshold_scope,
-            proba_pillar    = data.proba_pillar,
-            pred_pillar     = data.pred_pillar,
-            pred_combined   = data.pred_combined,
-            embeddings      = data.embeddings
+        SET {set_clause}
         FROM data
         WHERE {REVERSE_TABLE}.family_id = data.family_id
     """)
