@@ -1,0 +1,10 @@
+Note: I did some minor fiddling A-D before I then moved onto a full analysis and the proper v5-v6 changes.
+
+Issues:
+- Reviews on a single organism appear to slip through the 'one category' review rule
+- Optimisation of precision fermentation products is triggering TMS instead of ingredient optimisation, even when there is no actual investigation into the fermentation aspect
+- Still struggling with winery byproducts being seen as the novel contribution in an otherwise characterisation (and thus ingredient optimisation) paper
+v5 -> v6:
+- Add example in intro that a review on one organism that covers multiple aspects still = Other
+- Removed characterisation and validation from TMS definition as this would be part of a paper that develops the recombinant expression anyway. Any separate characterisation of an individual ingredient would quite naturally then be ingredient optimisation. Also specifically added recombinantly expressed ingredients within ingredient optimisation.
+- Changed agricultural byproducts to agricultural and industrial byproducts in the feedstocks definition and added a new instruction to assign over ingredient optimisation where the intention is the validate a novel feedstock

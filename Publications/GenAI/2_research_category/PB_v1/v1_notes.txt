@@ -1,0 +1,5 @@
+Notes:
+- Impact assessments is too broad and Other is not specifically including broad reviews that cover multiple topics.
+v1 -> v2 changes:
+- Narrower impact assessment
+- Specify Other includes broad reviews

@@ -1,0 +1,12 @@
+Just note that I removed some of the overlap guidance from fermentation between the technical categories because I don't think CM will suffer the same way and some of it was irrelevant anyway.
+
+Issues:
+- Need to add bioprinting / 3D printing into scaffold definition
+
+v1 -> v2:
+- Scaffold - Add 3D bioprinting to scaffold definition
+- Bioprocess design - add cell detachment and physical stimulation
+- Cell line development - focus on cell line engineering and selection, not characterisation. Add caveat that just looking at transcriptomics isn't cell line engineering.
+- Food safety - add novel food regulation
+- Impact assessments - slightly tighten to exclude broad value chain assessments. 
+- Added food safety novel food regulation example in the intro

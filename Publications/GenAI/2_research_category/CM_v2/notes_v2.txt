@@ -1,0 +1,3 @@
+v2->v3:
+- Reframing of impact assessments to be a tighter and exclude generic systematic reviews of conceptual frameworks e.g. value chain analysis
+- Much more blunt rule forcing scoping reviews to be categorised as Other

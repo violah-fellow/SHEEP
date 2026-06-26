@@ -1,0 +1,12 @@
+Issues:
+- Broad review articles being assigned specific categories and not Other.
+- Strain development being interpreted too broadly.
+- Target molecule selection is losing out to strain development when genetic engineering is mentioned.
+- Digestibility dilemma is back again. This time, Dave has consistently assigned health & nutrition when digestibility is the only focus of the paper, while ingredient optimisation is assigned when digestibility is measured as only one metric of many in characterising an ingredient.
+- Papers using novel feedstocks in a specific reactor type were being labelled bioprocess, even when the novel contribution was the feedstock.
+v1 -> v2:
+- Added further guidance in the prompt into that review articles are Other unless they only focus on one topic.
+- Redefined strain development to focus exclusively on microbe selection and engineering, and have removed focus on improving yields and functional improvements - these are implied and are drawing the LLM towards this topic for just normal ingredient / process optimisations.
+- Redefined target molecule selection to also explicitly include genetic engineering, and added a clause to prefer target molecule selection where the object of the study is a precision fermentation ingredient.
+- Digestibility reframed within ingredient optimisation and health & nutrition such that digestibility as one metric among many is ingredient optimisation, and then a publication focussed solely or primarily on digestibility and bioavailability is health & nutrition.
+- Redefined feedstocks to prefer over bioprocess when a novel feedstock is being assessed and there is no specific reactor or process design.

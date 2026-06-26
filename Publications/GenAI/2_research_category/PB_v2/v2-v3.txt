@@ -1,0 +1,13 @@
+Notes:
+- Don't want cooking of AP products to count as end-product formulation.
+- I poorly defined health & nutrition creating false overlap with ingredient and end product
+v1 -> v2 changes:
+- Update EPF to prevent cooking being included.
+- Extension of the intro to specify focus on the primary research contribution, as well as expanding the Other definition to capture more of the weird stuff like case studies and equipment cleaning.
+- Redefined health & nutrition boundary such that: (1) digestibility was removed from ingredient and end product and moved to health & nutrition; (2) 
+- Redefined texturization methods to focus on improvement of final product texture, and included 'extrusion' within ingredient optimisation processing, to address the extrusion overlap (extrusion can be used to improve ingredient functionality and nutrition and not specifically be related to texture)
+- Impact assessment should include non-quantitative (including stakeholder) assessments of AP ecosystem function, including supply chain resilience and food systems research
+- Redefined Other to be more comprehensive including commentary pieces
+
+
+v4 - is v3 but with an updated intro that includes some examples around the Other boundary.
