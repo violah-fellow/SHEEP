@@ -34,6 +34,7 @@ def main(
     KEY_PATH=KEY_PATH,    
     DB_PATH=DB_PATH,
     RUN_TABLE=RUN_TABLE,
+    CLASSIFICATION_TABLE=CLASSIFICATION_TABLE,
     STRINGS_FILE=STRINGS_FILE,
     CPC_SEARCH_FILE=CPC_SEARCH_FILE,
     CPC_FILTER_FILE=CPC_FILTER_FILE,
@@ -118,6 +119,9 @@ def main(
 
     # Remove version duplicates of the same patent
     query_df = query_df.sort_values(['publication_year', 'kind'], ascending=[False, False]).groupby(["family_id", "jurisdiction", "application_number"]).head(1)
+
+    # clean abstract
+    query_df['abstract'] = query_df['abstract'].str.replace(r'<[^>]*>', '', regex=True)
 
     # 3. Filter by CPC codes
     # Get CPC codes for filtering

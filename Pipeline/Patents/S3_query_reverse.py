@@ -100,6 +100,9 @@ def main(
     # Remove version duplicates of the same patent
     query_df = query_df.sort_values(['publication_year', 'kind'], ascending=[False, False]).groupby(["family_id", "jurisdiction", "application_number"]).head(1)
 
+    # clean abstract
+    query_df['abstract'] = query_df['abstract'].str.replace(r'<[^>]*>', '', regex=True)
+
     # Filter publications that already are in the final database
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if CLASSIFICATION_TABLE in existing_tables:
