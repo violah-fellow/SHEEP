@@ -65,7 +65,7 @@ def main(
                             where year={YEAR} 
                             return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
                             funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]
-                            limit 250"""))
+                            limit 10"""))
         
         # query.append(dsl.query_iterative(f"""search publications for "{dsl_escape(query_string)}"
         #                     where year={YEAR} 

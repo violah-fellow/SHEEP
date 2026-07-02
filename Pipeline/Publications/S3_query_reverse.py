@@ -105,7 +105,7 @@ def main(
                         and year={YEAR} 
                         return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
                             funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]
-                        limit 200""")
+                        limit 10""")
     
     # query = dsl.query_iterative(f"""search publications 
     #                   where researchers.id in {researcher_ids} 

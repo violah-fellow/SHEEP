@@ -114,7 +114,7 @@ if status['steps']['query'] != 'done':
 else:
     print("\nStep 1 (query) already done, skipping.")
 
-# Step 2: Classify queried publications
+# Step 2: Classify queried publications with ML
 if status['steps']['classify'] != 'done':
     print("\nStarting Step 2: Classify queried publications.")
     classify_run(
@@ -128,6 +128,8 @@ if status['steps']['classify'] != 'done':
     mark_done(status, 'classify', STATUS_DIR)
 else:
     print("\nStep 2 (classify) already done, skipping.")
+
+
 
 # Step 3: Reverse search
 if status['steps']['reverse_query'] != 'done':
@@ -143,7 +145,7 @@ if status['steps']['reverse_query'] != 'done':
 else:
     print("\nStep 3 (reverse_query) already done, skipping.")
 
-# Step 4: Classify reverse search publications
+# Step 4: Classify reverse search publications with ML
 if status['steps']['reverse_classify'] != 'done':
     print("\nStarting Step 4: Classify reverse search publications.")
     classify_run(
