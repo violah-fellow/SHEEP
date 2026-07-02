@@ -6,10 +6,7 @@ __pycache__/
 *.pyc
 
 Publications/ML/Plots/*
-<<<<<<< HEAD
 
 Funding/1_deduplication/raw_data/
-Funding/1_deduplication/data_changes/Funding/1_deduplication/data_changes/
-=======
+Funding/1_deduplication/data_changes/
 Patents/ML/Plots/*
->>>>>>> main
