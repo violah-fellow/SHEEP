@@ -43,8 +43,8 @@ def main(
     # 1. Load ML_pipeline_functions from the same directory as this script
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _spec = importlib.util.spec_from_file_location(
-        'ML_pipeline_functions',
-        os.path.join(_script_dir, 'ML_pipeline_functions.py')
+        'ML_pipeline_publications_functions',
+        os.path.join(_script_dir, 'ML_pipeline_publications_functions.py')
     )
     mlf = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(mlf)

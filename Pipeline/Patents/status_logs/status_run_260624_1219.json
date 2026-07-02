@@ -1,0 +1,27 @@
+{
+  "config": {
+    "DB_PATH": "patents.db",
+    "DB_PATH_TRAINING": "patents_training.db",
+    "KEY_PATH": "../.env",
+    "RUN_TABLE": "run_260624_1219",
+    "REVERSE_TABLE": "run_260624_1219_reverse",
+    "STRINGS_FILE": "dimensions_search_patents.txt",
+    "CPC_SEARCH_FILE": "CPC_for_query.txt",
+    "CPC_FILTER_FILE": "CPC_for_filter.txt",
+    "YEAR": 2025,
+    "SCOPE_MODEL_PATH": "models/LR_scope.joblib",
+    "PILLAR_MODEL_PATH": "models/LR_pillar.joblib",
+    "THRESHOLD_PATH": "models/LR_scope_threshold.txt",
+    "MAX_FN": 0.01,
+    "TRAINING_TABLE": "patents_raw",
+    "EMBEDDINGS_TABLE": "patents_embeddings",
+    "EMBEDDINGS_PATH_TRAIN": "embeddings/embeddings_new_training.npy",
+    "EMBEDDINGS_PATH_RUN": "embeddings/embeddings_run_260624_1219.npy"
+  },
+  "steps": {
+    "train": "done",
+    "query": "done",
+    "classify": "done",
+    "reverse_query": "done"
+  }
+}

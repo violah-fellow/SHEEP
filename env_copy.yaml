@@ -16,6 +16,7 @@ dependencies:
   - joblib # For saving models and parallel processing
   - tqdm # Progress bars
   - python-dotenv
+  - rapidfuzz
   - pip:
     - dimcli # Dimensions API client
     - torch
