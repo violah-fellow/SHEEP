@@ -1,0 +1,11 @@
+{
+  "batch_id": "msgbatch_013AJEZa5WmciLuweU9m3qKB",
+  "run_table": "test_llm_scope",
+  "model": "claude-haiku-4-5",
+  "n_records": 2,
+  "dataset_ids": [
+    "pub.1184338618",
+    "pub.1195079093"
+  ],
+  "created_at": "2026-07-02T17:04:01.912293"
+}
