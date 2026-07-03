@@ -1,0 +1,70 @@
+Research category prompts — v3 test run optimisation notes
+Applied to: prompt_rescat_patents_F.md only
+(PB, CM, CC unchanged — PB and CC confirmed good; CM at 98%)
+
+v3 accuracy (primary / either):
+  F: 82% / 92%  (unchanged from v2 on primary; either slightly dipped from 94%)
+
+Net effect of v3 changes: Bioprocess vs Target molecule fixes for casein worked,
+but the "do not let a named target molecule override" language introduced two
+regressions in Target molecule selection (collagen peptide production; lipase
+characterisation). EPF vs Texturization still unresolved (rows 19, 46).
+
+Remaining errors split:
+  - Borderline/accepted (no prompt changes): rows 7, 8, 10, 28, 29
+  - Fixable regressions from v3: rows 5, 39 (TMS → Bioprocess/IO)
+  - Still unresolved EPF vs Texturization: rows 19, 46
+
+---
+
+1. TARGET MOLECULE SELECTION REGRESSIONS FROM V3 — F
+
+v3 introduced "do not let the presence of a named target molecule override
+[Bioprocess]" which was too broad. It correctly fixed the casein production method
+cases (rows 4/9 in v2) but also caught two legitimate TMS cases:
+
+- Row 5: "RECOMBINANT PRODUCTION OF A COLLAGEN PEPTIDE PREPARATION" — recombinant
+  collagen is a target molecule; the production method is not the primary novelty.
+  v3 prompt pulled this to Bioprocess incorrectly.
+- Row 39: "Lipases, compositions, methods and uses thereof" — a wild-type microbial
+  lipolytic enzyme with specific fatty acid chain-length selectivity. The enzyme's
+  specific molecular properties are the primary claimed contribution → TMS.
+  v3 prompt pulled this to Ingredient optimisation.
+
+Training labels confirmed correct: Target molecule selection for both.
+
+Fix (F only):
+- Rewrote the Bioprocess preamble bullet to specify it applies when the PRIMARY
+  NOVELTY IS THE PROCESS STEPS OR PROTOCOL, not merely the fact that a protein is
+  produced recombinantly.
+- Rewrote the TMS preamble bullet to explicitly include "characterising a novel enzyme
+  or functional protein for its specific molecular properties → TMS."
+- Expanded TMS definition to explicitly cover: (a) naturally-occurring/wild-type
+  enzymes where molecular properties are the primary contribution (e.g. lipases,
+  proteases), (b) recombinant expression of food proteins (e.g. collagen, caseins),
+  and (c) the key rule: assign TMS when the target molecule or enzyme itself is the
+  primary invention, regardless of whether a production method is also described.
+
+---
+
+2. END PRODUCT FORMULATION VS TEXTURIZATION — F (still unresolved, moved to preamble)
+
+Rows 19 and 46 ("FOOD OR FEED PRODUCT" with alginate structuring; "COMPOSITION
+COMPRISING TEXTURED FUNGAL PROTEIN PIECES") — both are product COMPOSITION patents
+where texture is a property of the formula, not a separate process/apparatus invention.
+The composition rule added to the EPF definition in v3 had no effect.
+
+Fix (F only):
+- Moved the composition rule to the preamble as an explicit bullet example, which
+  carries more weight than definition text based on observed model behaviour:
+  "A patent claiming a finished product COMPOSITION (where texture or structure is a
+  property of the formula) → End product formulation (not Texturization methods)."
+
+---
+
+BORDERLINE CASES ACCEPTED (carried over from v2, no changes):
+- Row 7: Fungal biomass from Trichocomaceae (Strain dev vs Bioprocess) — both fine
+- Row 8: Mycelial food substitute + production method (EPF vs Bioprocess) — borderline
+- Row 10: Casein heat treatment (IO vs Bioprocess) — both defensible
+- Row 28: Artificial protein/casein coagulation (TMS vs EPF/Texturization) — hard case
+- Row 29: BSG fungal medium (Bioprocess vs Feedstocks) — feedstock reading defensible
