@@ -65,7 +65,7 @@ def main(
                             where year={YEAR} 
                             return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
                             funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]
-                            limit 10"""))
+                            limit 20"""))
         
         # query.append(dsl.query_iterative(f"""search publications for "{dsl_escape(query_string)}"
         #                     where year={YEAR} 
@@ -92,9 +92,12 @@ def main(
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
 
     # Reorder columns to match publications_classified if it exists
+    # excludes ML/LLM prediction columns, which are computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py)
     if CLASSIFICATION_TABLE in existing_tables:
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                         if c not in ('pred_combined', 'pred_pillar')]
+                         if c not in ('pred_combined', 'pred_pillar', 'scope_LLM', 'confidence_LLM', 'pillar_LLM',
+                                      'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
+                                      'status_LLM', 'stop_reason_LLM')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database

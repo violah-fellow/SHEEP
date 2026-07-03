@@ -1,0 +1,10 @@
+{
+  "batch_id": "msgbatch_014qY2LntkHBycZdC9oyiyV4",
+  "run_table": "run_260702_2339_reverse",
+  "model": "claude-sonnet-4-6",
+  "n_records": 1,
+  "dataset_ids": [
+    "pub.1202715673"
+  ],
+  "created_at": "2026-07-03T00:48:05.857898"
+}

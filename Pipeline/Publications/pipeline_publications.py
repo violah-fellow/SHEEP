@@ -23,7 +23,7 @@ DB_PATH           = 'publications.db'
 SCOPE_MODEL_PATH  = 'models/LR_scope.joblib'
 PILLAR_MODEL_PATH = 'models/LR_pillar.joblib'
 THRESHOLD_PATH    = 'models/LR_scope_threshold.txt'
-KEY_PATH          = '../../.env'
+KEY_PATH          = '../.env' # or '../../.env' if running from the pipeline folder
 
 # Query
 STRINGS_FILE = 'dimensions_search_publications.txt'
@@ -81,9 +81,10 @@ else:
             'train':            'pending',
             'query':            'pending',
             'classify':         'pending',
-            'llm_scope':        'pending',
-            'reverse_query':    'pending',
-            'reverse_classify': 'pending',
+            'llm_scope':         'pending',
+            'reverse_query':     'pending',
+            'reverse_classify':  'pending',
+            'reverse_llm_scope': 'pending',
         }
     }
     save_status(status, STATUS_DIR)
@@ -177,5 +178,19 @@ if status['steps']['reverse_classify'] != 'done':
     mark_done(status, 'reverse_classify', STATUS_DIR)
 else:
     print("\nStep 5 (reverse_classify) already done, skipping.")
+
+# Step 6: LLM scope classification for reverse search publications
+if status['steps']['reverse_llm_scope'] != 'done':
+    print("\nStarting Step 6: LLM scope classification for reverse search publications.")
+    scope_llm(
+        KEY_PATH=cfg['KEY_PATH'],
+        DB_PATH=cfg['DB_PATH'],
+        RUN_TABLE=cfg['REVERSE_TABLE'],
+        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+        LLM_MODEL_SCOPE=cfg['LLM_MODEL_SCOPE'],
+    )
+    mark_done(status, 'reverse_llm_scope', STATUS_DIR)
+else:
+    print("\nStep 6 (reverse_llm_scope) already done, skipping.")
 
 print(f"\nPipeline complete for run '{cfg['RUN_TABLE']}'.")
