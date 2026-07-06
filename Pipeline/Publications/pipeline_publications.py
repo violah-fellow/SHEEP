@@ -10,7 +10,7 @@ from S0_ML_training import main as train_classifiers
 from S1_query_dimensions import main as query_dimensions
 from S2_ML_classification import main as classify_run
 from S3_LLM_scope import main as scope_llm
-from S3_query_reverse import main as query_reverse
+from S4_query_reverse import main as query_reverse
 
 # CONFIG 
 # edit parameters for this run here
@@ -31,6 +31,8 @@ YEAR         = 2025
 
 # GenAI
 LLM_MODEL_SCOPE = 'claude-sonnet-4-6'   # or 'claude-haiku-4-5' for cheap test runs
+# path to the system prompt used for scoping
+PROMPT_PATH = 'llm_prompts/scope_prompt_publications.md'
 
 # Training
 TRAINING_TABLE        = 'publications_new_training'
@@ -69,6 +71,7 @@ else:
         'PILLAR_MODEL_PATH':      PILLAR_MODEL_PATH,
         'THRESHOLD_PATH':         THRESHOLD_PATH,
         'LLM_MODEL_SCOPE':        LLM_MODEL_SCOPE,
+        'PROMPT_PATH':            PROMPT_PATH,
         'MAX_FN':                 MAX_FN,
         'TRAINING_TABLE':         TRAINING_TABLE,
         'EMBEDDINGS_PATH_TRAIN':  EMBEDDINGS_PATH_TRAIN,
@@ -145,6 +148,7 @@ if status['steps']['llm_scope'] != 'done':
         RUN_TABLE=cfg['RUN_TABLE'],
         THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
         LLM_MODEL_SCOPE=cfg['LLM_MODEL_SCOPE'],
+        PROMPT_PATH=cfg['PROMPT_PATH'],
     )
     mark_done(status, 'llm_scope', STATUS_DIR)
 else:

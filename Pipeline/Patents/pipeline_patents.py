@@ -9,8 +9,9 @@ from Helper_pipeline_functions import save_status, mark_done, find_incomplete_ru
 from S0_ML_training import main as train_classifiers
 from S1_query_dimensions import main as query_dimensions
 from S2_ML_classification import main as classify_run
-from S3_query_reverse import main as query_reverse
-from S4_Assignee_cleanup import main as assignee_cleanup
+from S3_LLM_scope import main as llm_scope
+from S4_query_reverse import main as query_reverse
+from S5_Assignee_cleanup import main as assignee_cleanup
 
 # CONFIG 
 # edit parameters for this run here
@@ -40,6 +41,12 @@ MAX_FN                = 0.01
 
 # Classification
 CLASSIFICATION_TABLE = 'patents_classified'
+
+# LLM scoping
+LLM_MODEL_SCOPE       = 'claude-haiku-4-5'
+PROMPT_PATH           = 'llm_prompts/scope_prompt_patents.md'
+BATCH_DIR             = 'batch_jobs'
+POLL_INTERVAL_SECONDS = 1800
 
 # Assignee name clean-up
 ASSIGNEE_COLUMN = 'assignee_names'
@@ -86,6 +93,10 @@ else:
         'EMBEDDINGS_TABLE':       EMBEDDINGS_TABLE,
         'EMBEDDINGS_PATH_TRAIN':  EMBEDDINGS_PATH_TRAIN,
         'EMBEDDINGS_PATH_RUN':    EMBEDDINGS_PATH_RUN,
+        'LLM_MODEL_SCOPE':        LLM_MODEL_SCOPE,
+        'PROMPT_PATH':            PROMPT_PATH,
+        'BATCH_DIR':              BATCH_DIR,
+        'POLL_INTERVAL_SECONDS':  POLL_INTERVAL_SECONDS,
         'ASSIGNEE_COLUMN':        ASSIGNEE_COLUMN,
         'CLEAN_COLUMN':           CLEAN_COLUMN,
         'COMPANY_LIST':           COMPANY_LIST,
@@ -97,6 +108,7 @@ else:
             'train':            'pending',
             'query':            'pending',
             'classify':         'pending',
+            'llm_scope':        'pending',
             'reverse_query':    'pending',
             'assignee_cleanup': 'pending',
         }
@@ -156,9 +168,27 @@ if status['steps']['classify'] != 'done':
 else:
     print("\nStep 2 (classify) already done, skipping.")
 
-# Step 3: Reverse search
+# Step 3: LLM scoping
+if status['steps']['llm_scope'] != 'done':
+    print("\nStarting Step 3: LLM scoping.")
+    llm_scope(
+        KEY_PATH=cfg['KEY_PATH'],
+        DB_PATH=cfg['DB_PATH'],
+        RUN_TABLE=cfg['RUN_TABLE'],
+        CLASSIFICATION_TABLE=cfg['CLASSIFICATION_TABLE'],
+        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+        PROMPT_PATH=cfg['PROMPT_PATH'],
+        LLM_MODEL_SCOPE=cfg['LLM_MODEL_SCOPE'],
+        BATCH_DIR=cfg['BATCH_DIR'],
+        POLL_INTERVAL_SECONDS=cfg['POLL_INTERVAL_SECONDS'],
+    )
+    mark_done(status, 'llm_scope', STATUS_DIR)
+else:
+    print("\nStep 3 (llm_scope) already done, skipping.")
+
+# Step 4: Reverse search
 if status['steps']['reverse_query'] != 'done':
-    print("\nStarting Step 3: Reverse search for researcher IDs.")
+    print("\nStarting Step 4: Reverse search for family members.")
     query_reverse(
         KEY_PATH=cfg['KEY_PATH'],
         DB_PATH=cfg['DB_PATH'],
@@ -169,11 +199,11 @@ if status['steps']['reverse_query'] != 'done':
     )
     mark_done(status, 'reverse_query', STATUS_DIR)
 else:
-    print("\nStep 3 (reverse_query) already done, skipping.")
+    print("\nStep 4 (reverse_query) already done, skipping.")
 
-# Step 4: Assignee clean-up
+# Step 5: Assignee clean-up
 if status['steps']['assignee_cleanup'] != 'done':
-    print("\nStarting Step 4: Clean-up of assignee names.")
+    print("\nStarting Step 5: Clean-up of assignee names.")
     assignee_cleanup(
         DB_PATH=cfg['DB_PATH'],
         CLASSIFICATION_TABLE=cfg['CLASSIFICATION_TABLE'],
@@ -184,5 +214,5 @@ if status['steps']['assignee_cleanup'] != 'done':
     )
     mark_done(status, 'assignee_cleanup', STATUS_DIR)
 else:
-    print("\nStep 4 (assignee_cleanup) already done, skipping.")
+    print("\nStep 5 (assignee_cleanup) already done, skipping.")
 

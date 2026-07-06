@@ -78,7 +78,7 @@ def main(
                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                         publications+researchers+times_cited+family_count]
-          limit 100 """)
+          limit 150 """)
         query.append(q)
 
     # full query
@@ -136,7 +136,10 @@ def main(
 
         # Reorder columns to match patents_classified
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope')]
+                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope',
+                                      'scope_LLM', 'confidence_LLM', 'pillar_LLM',
+                                      'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM',
+                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database
@@ -150,14 +153,23 @@ def main(
     print(f"\nUpdating '{REVERSE_TABLE}' in database with prediction columns.")
 
     new_columns = {
-        'embeddings':      'DOUBLE[]',
-        'truncated':       'BOOLEAN',
-        'proba_scope':     'DOUBLE',
-        'pred_scope':      'INTEGER',
-        'threshold_scope': 'DOUBLE',
-        'proba_pillar':    'DOUBLE',
-        'pred_pillar':     'VARCHAR',
-        'pred_combined':   'INTEGER',
+        'embeddings':        'DOUBLE[]',
+        'truncated':         'BOOLEAN',
+        'proba_scope':       'DOUBLE',
+        'pred_scope':        'INTEGER',
+        'threshold_scope':   'DOUBLE',
+        'proba_pillar':      'DOUBLE',
+        'pred_pillar':       'VARCHAR',
+        'pred_combined':     'INTEGER',
+        'scope_LLM':         'VARCHAR',
+        'confidence_LLM':    'DOUBLE',
+        'pillar_LLM':        'VARCHAR',
+        'plant_based_LLM':   'BOOLEAN',
+        'fermentation_LLM':  'BOOLEAN',
+        'cultivated_LLM':    'BOOLEAN',
+        'cross_cutting_LLM': 'BOOLEAN',
+        'status_LLM':        'VARCHAR',
+        'stop_reason_LLM':   'VARCHAR',
     }
     for col, dtype in new_columns.items():
         db.sql(f"ALTER TABLE {REVERSE_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
@@ -189,7 +201,8 @@ def main(
     data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
     db.register('data_classified', data_classified)
 
-    db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} SELECT * FROM data_classified")
+    cols_str = ", ".join(f'"{c}"' for c in output_columns)
+    db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} ({cols_str}) SELECT * FROM data_classified")
     
     print(f"{len(data_classified)} rows appended to {CLASSIFICATION_TABLE}.")
 

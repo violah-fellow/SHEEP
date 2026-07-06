@@ -42,6 +42,8 @@ def main(
     PILLAR_MODEL_PATH=PILLAR_MODEL_PATH,
     THRESHOLD_PATH=THRESHOLD_PATH,
 ):
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
     # 1. Load ML_pipeline_functions from the same directory as this script
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _spec = importlib.util.spec_from_file_location(
@@ -110,7 +112,8 @@ def main(
             FROM {CLASSIFICATION_TABLE}
         """).df()
 
-        known_data = known_data.merge(family_preds, on='family_id', how='left')
+        _drop = [c for c in ['proba_scope', 'pred_combined', 'pred_pillar'] if c in known_data.columns]
+        known_data = known_data.drop(columns=_drop).merge(family_preds, on='family_id', how='left')
 
         db.register('known_update', known_data[['id', 'proba_scope', 'pred_combined', 'pred_pillar']])
         db.sql(f"""
@@ -125,11 +128,30 @@ def main(
 
         # Append new patents from known families to CLASSIFICATION_TABLE
         # (the family is known but these specific patents weren't seen before)
-        output_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+        _llm_cols = {'scope_LLM', 'confidence_LLM', 'pillar_LLM', 'plant_based_LLM',
+                     'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
+                     'status_LLM', 'stop_reason_LLM'}
+        output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+                          if c not in _llm_cols]
         known_classified = known_data[output_columns].copy()
         known_classified['pred_combined'] = known_classified['pred_combined'].map({1: 'in', 0: 'out'})
+        _nested = ['cpc', 'inventor_names', 'assignee_names', 'assignee_cities',
+                   'assignee_countries', 'funder_countries']
+        import json as _json
+        def _to_json(x):
+            if isinstance(x, str):
+                return x
+            if hasattr(x, '__len__'):
+                return _json.dumps(x.tolist() if hasattr(x, 'tolist') else list(x))
+            if x is None or pd.isna(x):
+                return x
+            return _json.dumps(x)
+        for _c in _nested:
+            if _c in known_classified.columns:
+                known_classified[_c] = known_classified[_c].apply(_to_json)
         db.register('known_classified', known_classified)
-        db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} SELECT * FROM known_classified")
+        _cols_str = ", ".join(f'"{c}"' for c in output_columns)
+        db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} ({_cols_str}) SELECT * FROM known_classified")
         print(f"{len(known_classified)} rows from known families appended to {CLASSIFICATION_TABLE}.")
 
     # 5. New families: select representative per family, embed, classify, propagate
@@ -209,7 +231,8 @@ def main(
 
         # Propagate predictions from representative to all members of the same family
         pred_cols = [c for c in new_columns if c in reps.columns]
-        new_data = new_data.merge(reps[['family_id'] + pred_cols], on='family_id', how='left')
+        _drop = [c for c in pred_cols if c in new_data.columns]
+        new_data = new_data.drop(columns=_drop).merge(reps[['family_id'] + pred_cols], on='family_id', how='left')
 
         # Update RUN_TABLE for new families
         print(f"\nUpdating '{RUN_TABLE}' with predictions for new families.")
@@ -226,17 +249,27 @@ def main(
         # Append new families to CLASSIFICATION_TABLE
         print(f"\nAppending to {CLASSIFICATION_TABLE} table.")
         existing_tables_now = db.sql("SHOW TABLES").df()['name'].tolist()
+        _llm_cols = {'scope_LLM', 'confidence_LLM', 'pillar_LLM', 'plant_based_LLM',
+                     'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
+                     'status_LLM', 'stop_reason_LLM'}
         if CLASSIFICATION_TABLE in existing_tables_now:
-            output_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+            output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+                              if c not in _llm_cols]
         else:
             output_columns = original_columns + ['proba_scope', 'pred_combined', 'pred_pillar']
 
         data_classified = new_data[output_columns].copy()
         data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
+        _nested = ['cpc', 'inventor_names', 'assignee_names', 'assignee_cities',
+                   'assignee_countries', 'funder_countries']
+        for _c in _nested:
+            if _c in data_classified.columns:
+                data_classified[_c] = data_classified[_c].apply(_to_json)
         db.register('data_classified', data_classified)
 
         if CLASSIFICATION_TABLE in existing_tables_now:
-            db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} SELECT * FROM data_classified")
+            _cols_str = ", ".join(f'"{c}"' for c in output_columns)
+            db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} ({_cols_str}) SELECT * FROM data_classified")
         else:
             db.sql(f"CREATE TABLE {CLASSIFICATION_TABLE} AS SELECT * FROM data_classified")
 

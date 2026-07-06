@@ -1,4 +1,4 @@
-## LLM scoping script: send ML-positive publications to Claude via the Batch API and store scope/pillar results.
+## LLM scoping script: send ML-positive patents to Claude via the Batch API and store scope/pillar results.
 ## Submits a batch, waits (polling) for it to complete, then parses and writes results back to the database.
 ## Can be run standalone (uses CONFIG defaults) or imported and called as main().
 
@@ -9,15 +9,15 @@ import os
 
 # Anthropic API
 # path to API key
-KEY_PATH = '../../.env'
+KEY_PATH = '../.env'
 
 # Database
 # path to DuckDB database
-DB_PATH = 'publications.db'
+DB_PATH = 'patents.db'
 # table containing the new input data to classify with run date as name
-RUN_TABLE = 'test_llm_scope'
+RUN_TABLE = 'data_run_test'
 # table for final classifications
-CLASSIFICATION_TABLE = 'publications_classified'
+CLASSIFICATION_TABLE = 'patents_classified'
 
 # ML threshold
 # path to the scope threshold used by S2_ML_classification
@@ -25,7 +25,7 @@ THRESHOLD_PATH = 'Models/LR_scope_threshold.txt'
 
 # LLM
 # path to the system prompt used for scoping
-PROMPT_PATH = 'llm_prompts/scope_prompt_publications.md'
+PROMPT_PATH = 'llm_prompts/scope_prompt_patents.md'
 # model to use for scoping; set from the main pipeline script
 LLM_MODEL_SCOPE = 'claude-haiku-4-5'  # or 'claude-sonnet-4-6' for more accurate results
 MAX_TOKENS = 512
@@ -43,7 +43,7 @@ _TOOL_PROPERTIES = {
     "scope": {
         "type": "string",
         "enum": ["in", "out"],
-        "description": "Whether the publication is in scope for alternative proteins."
+        "description": "Whether the patent is in scope for alternative proteins."
     },
     "confidence": {
         "type": "integer",
@@ -59,8 +59,8 @@ _TOOL_PROPERTIES = {
 _TOOL_REQUIRED = ["scope", "confidence", "plant_based", "fermentation", "cultivated", "cross_cutting"]
 
 CLASSIFICATION_TOOL = {
-    "name": "classify_publication",
-    "description": "Record the scope and pillar classification for a research publication.",
+    "name": "classify_patent",
+    "description": "Record the scope and pillar classification for a patent.",
     "input_schema": {
         "type": "object",
         "properties": _TOOL_PROPERTIES,
@@ -142,7 +142,7 @@ def main(
                     ],
                     "messages": [{"role": "user", "content": user_message}],
                     "tools": [CLASSIFICATION_TOOL],
-                    "tool_choice": {"type": "tool", "name": "classify_publication"},
+                    "tool_choice": {"type": "tool", "name": "classify_patent"},
                 }
             }
 
@@ -180,20 +180,20 @@ def main(
 
     raw_results = []
     for result in client.messages.batches.results(batch_id):
-        pub_id = result.custom_id.replace("_", ".")
+        patent_id = result.custom_id.replace("_", ".")
         if result.result.type == "succeeded":
             content = result.result.message.content
             stop_reason = result.result.message.stop_reason
             tool_block = next((b for b in content if b.type == "tool_use"), None)
             if tool_block:
                 record = dict(tool_block.input)
-                record["id"] = pub_id
+                record["id"] = patent_id
                 record["status_LLM"] = "ok"
                 record["stop_reason_LLM"] = stop_reason
             else:
-                record = {"id": pub_id, "status_LLM": "parse_error", "stop_reason_LLM": stop_reason}
+                record = {"id": patent_id, "status_LLM": "parse_error", "stop_reason_LLM": stop_reason}
         else:
-            record = {"id": pub_id, "status_LLM": result.result.type, "stop_reason_LLM": None}
+            record = {"id": patent_id, "status_LLM": result.result.type, "stop_reason_LLM": None}
         raw_results.append(record)
 
     results_df = pd.DataFrame(raw_results)
@@ -206,7 +206,7 @@ def main(
     if "scope_LLM" in results_df.columns:
         print(f"LLM predicted in scope: {(results_df['scope_LLM'] == 'in').sum()}")
 
-    # Derive pillar_LLM from the boolean flags (same logic as genai_scope_batchoutput.ipynb):
+    # Derive pillar_LLM from the boolean flags:
     # CC if multiple pillar flags are True, or if only cross_cutting_LLM is True
     pillar_flags = ["plant_based_LLM", "fermentation_LLM", "cultivated_LLM"]
 
@@ -226,7 +226,7 @@ def main(
 
     results_df["pillar_LLM"] = results_df.apply(derive_pillar, axis=1)
 
-    # 6. Write results back to RUN_TABLE
+    # 6. Write results back to RUN_TABLE and CLASSIFICATION_TABLE
     print(f"\nUpdating '{RUN_TABLE}' with LLM columns.")
 
     llm_columns = {

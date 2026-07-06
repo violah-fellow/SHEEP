@@ -80,17 +80,17 @@ def main(
                                 publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                                 assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                                 publications+researchers+times_cited+family_count] 
-                               limit 100"""))
+                               limit 150"""))
         
-        # CPC code search
-        query.append(dsl.query(f"""search patents 
-                               where cpc in {json.dumps(cpc_search)}
-                               and publication_year={YEAR} 
-                               return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
-                                publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
-                                assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
-                                publications+researchers+times_cited+family_count]
-                               limit 100"""))
+    # CPC code search
+    query.append(dsl.query(f"""search patents 
+                            where cpc in {json.dumps(cpc_search)}
+                            and publication_year={YEAR} 
+                            return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
+                            publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
+                            assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
+                            publications+researchers+times_cited+family_count]
+                            limit 100"""))
         
         # full search
 
@@ -103,15 +103,15 @@ def main(
         #                         publications+researchers+times_cited+family_count] 
         #             """))
         
-        # # CPC code search
-        # query.append(dsl.query_iterative(f"""search patents 
-        #                        where cpc in {json.dumps(cpc_search)}
-        #                        and publication_year={YEAR} 
-        #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
-        #                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
-        #                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
-        #                         publications+researchers+times_cited+family_count]
-        #             """))
+    # # CPC code search
+    # query.append(dsl.query_iterative(f"""search patents 
+    #                        where cpc in {json.dumps(cpc_search)}
+    #                        and publication_year={YEAR} 
+    #                        return patents[id+family_id+application_number+title+abstract+cpc+jurisdiction+kind+year+priority_year+
+    #                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
+    #                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
+    #                         publications+researchers+times_cited+family_count]
+    #             """))
 
     # Convert to pandas dataframe and deduplicate by id    
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
@@ -172,7 +172,10 @@ def main(
     # Reorder columns to match patents_classified if it exists
     if CLASSIFICATION_TABLE in existing_tables:
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope')]
+                         if c not in ('pred_combined', 'pred_pillar', 'proba_scope',
+                                      'scope_LLM', 'confidence_LLM', 'pillar_LLM',
+                                      'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM',
+                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database
