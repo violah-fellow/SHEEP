@@ -1,0 +1,10 @@
+Issues:
+- Bioprocess still being selected where there is some bioprocess optimisation but on a novel feedstock and the novel feedstock is really the primary contribution of the paper
+- Still overlap between strain and target molecule.
+- Strain engineering to reduce mycotoxin is being marked as food safety primary.
+- Strain dev being assigned when only testing two existing strains and not improving the microbes themselves.
+v2 -> v3:
+- Redefined the Prefer Feedstocks sentence to focus on the novelty of the input material, and added industrial waste gas as an example novel feedstock 
+- Redefined both strain development and target molecule selection to mirror the same structure but have clear output goal differences (strain = cell growth / general biomass properties; target = express / produce molecule)
+- Added toxin reduction as a genetic engineering target within strain development, and add ingredient & product focus to food safety.
+- Added clarification in strain development that just testing existing strains in different growth conditions is not strain development (likely feedstocks or bioprocess). Must be manipulating the cells themselves.

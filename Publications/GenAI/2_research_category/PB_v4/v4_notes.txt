@@ -1,0 +1,10 @@
+Only remaining issues are:
+- Texturisation still winning when it is used as a method to alter ingredient properties (should be ingredient optimisation).
+- Food safety being linked to cleaning & maintenance of equipment.
+- Health & nutrition being tied to bioavailability.
+v4 -> v5 changes:
+- Specific exclusion clause added to end of texturization.
+- Focused food safety definition on food only and excluded general cleaning and manufacturing hygiene.
+- Removed bioavailability from health & nutrition definition. It's a borderline value that could be in either category.
+- Minor wording edits to other definitions.
+- Edited Ingredient Optimisation to more explicitly include extrusion for modifying ingredient properties, and added an example in the list in the intro.

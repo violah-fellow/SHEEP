@@ -48,8 +48,8 @@ all <- all %>%
 
 # Filter for year = 2025 & available title and abstract & articles
 all <- all %>%
-    dplyr::filter(PubYear == 2025) %>% # 3876
-    dplyr::filter(!is.na(Title) & !is.na(Abstract)) # 3869
+    dplyr::filter(PubYear == 2025) %>% # 3876 - research articles only, now includes review articles too
+    dplyr::filter(!is.na(Title) & !is.na(Abstract)) # 3869 - research articles only, now includes review articles too
 
 # Rename some columns and select
 all <- all %>%

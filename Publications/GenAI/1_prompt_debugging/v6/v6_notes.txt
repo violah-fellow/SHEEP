@@ -1,0 +1,22 @@
+v6 notes (see specific comments in the excel doc):
+- still issues with exclusion of anything mention in the exclusion criteria
+- also issues with protein-focus when alt proteins aren't all necessarily branded that way (e.g. plant-based dairy)
+- some issue with overlap between generic 'plant-based' diet and specific plant-based products
+
+Still to fix:
+- Overlap between plant-based traditional fermentation and the fermentation label - getting a lot of cross-cutting I think? May need to curate my own dataset.
+- Consider edit / boundary to state that a plant-based diet is not enough, it must include plant-based products that replace animal-derived foods
+
+
+I should really hone in on confidence scores in this dataset. I am hoping 2&3 capture all of the true in scope incorrectly labelled as out of scope, and that 1 remains a majority of the out of scope data to reduce manual review. 4&5 have consistently been good at identifying in scope.
+
+v6 -> v7 prompt changes:
+- Updated hybrid products boundary to state that they are in scope if the research is relevant to alt protein development and not solely to improve animal protein products.
+- MAJOR - update to general definition to include alt proteins more generally and be slightly less protein-focussed. Also updated boundary condition 1 to remove the primary focus on proteins and move again towards a focus on replacing animal-derived food. This also removed an explicit out of scope caveat for plants and microorganisms as general foods.
+- Remove microalgae boundary condition as it is within fermentation label already
+- MAJOR - changed Exclusions to Out of Scope Topics to reduce the potential for the LLM to readily exclude anything that contains one of those topics
+- Simplified socioeconomic research boundary to just say any time an alt protein is explicitly mentioned. Also moved to second place.
+- Simplified general health product boundary as the medical exclusion is covered in out of scope.
+- MAJOR - duplicated the traditional fermentation caveat to also feature in the fermentation definition. Updated the definitions of fermentation and plant-based a little. 
+- MAJOR - edited the comparisons scope boundary to ensure alternative protein products are explicitly mentioned. Moved the exclusion of broad dietary studies (e.g. plant-based, vegan, vegetarian diets) to the out of scope section. Trying to tackle inclusion of 'plant-based diet' which often is just fruit & veg.
+- Separated the out of scope agronomy sentence into the out of scope section, away from its boundary bullet point.

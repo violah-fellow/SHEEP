@@ -1,0 +1,8 @@
+Notes on v7:
+- Managed to exclude 'plant-based diet' study in test100, but then excluded an in scope borderline one that does explicitly mention plant-based ingredients. Also have a persistent issue with insect proteins being excluded. I have decided to take more weight out of the 'out of scope topics' section.
+
+v7 -> v8:
+- MAJOR - changed 'out of scope topics' to 'topics that do not count as alternative proteins'. I also moved the instruction to include publications that also contain in scope material to after the list.
+- tweaked PB definition to use 'crop or agronomic' instead of 'crop'
+- MAJOR - enabling technologies changed to 'stated as an application' rather than a 'primary or significant focus'. I think this is important for abstracts given they are already so short and could miss alt protein significance otherwise.
+- Edits to the dietary out of scope and the comparisons in scope to strike a better balance between plant-based diet vs explicit inclusion when it says plant-based meat / other specific products

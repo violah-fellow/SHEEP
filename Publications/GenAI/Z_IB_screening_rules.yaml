@@ -1,0 +1,113 @@
+benchmark_version: "v1.0"
+
+valid_values:
+  in_scope:
+    - "yes"
+    - "no"
+  review_flag:
+    - "none"
+    - "unsure"
+    - "borderline"
+  pillars:
+    - "Plant-based"
+    - "Fermentation"
+    - "Cultivated"
+
+prompt_constraints:
+  one_pillar_only: true
+  blank_pillar_if_out_of_scope: true
+  blank_category_if_out_of_scope: true
+
+inclusion_criteria:
+  - "Publications on the classification or characterisation of a plant, algal or microbial species or cultivated animal cells as a source of protein or other ingredients (including, but not limited to, lipids, enzymes, or fibres) which can contribute to improving the sensory and techno-functional properties of an alternative protein ingredient or product with a potential use case in human food."
+  - "Publications on how the processing of plant, algal, microbial, or cultivated animal tissue affects protein functionality or quality for use as a food."
+  - "Publications on crop or strain optimisation or agronomic or bioprocessing practices that examine or aim to improve protein quality or yield or improve ease of processing."
+  - "Publications on the characterisation and/or optimisation of alternative feedstocks or cell culture media or bioprocessing methods, which examine strategies for their utilisation, including life cycle assessments, with the aim of improving the sustainability, efficiency, and/or economic viability of the process."
+  - "Publications on the characterisation of blended products where the results are relevant for the development of improved hybrid alternative protein products and/or the improvement of the functionality of individual plant, microbial, or cultivated proteins."
+  - "Publications that compare the functional properties of plant, microbial, or cultivated protein ingredients or products with conventional animal proteins where the findings are relevant for optimising the techno-functional attributes of the alternative protein ingredient or product."
+  - "Publications on the biochemical properties (flavour, aroma, nutritional properties, allergenicity) of plant, algal, microbial or cultivated proteins."
+  - "Publications on the societal, policy, and regulatory aspects or studies relating to consumer acceptance or techno-economic analysis of alternative proteins."
+  - "English language publications."
+
+exclusion_criteria:
+  - "Publications on broad-spectrum comparisons of animal- and plant- or microbial-based protein diets, or consumer attitudes towards these diets, where the outcomes were not relevant for the development of alternative protein products."
+  - "Publications on the classification of a plant, algal, microbial species, or cultivated animal proteins, with a stated use case for pet food or animal feed only."
+  - "Publications on the general characteristics of underutilised plant, algal, or microbial species as foods where protein is not a focus or is only a minority focus."
+  - "Publications on the characterisation of blended products where the aim is the improvement of the functionality of animal protein products or ingredients."
+  - "Publications on the characterisation of a plant, algal, or microbial protein ingredient functionality where the stated aim is the development of nutraceuticals, bioactive peptides, or some other health-promoting ingredient."
+  - "Publications on the characterisation of plant, algal, or microbial proteins, or associated processing techniques, where the stated aim was the development of a food that does not substitute animal proteins (eg, bread, pasta, snacks)."
+  - "Publications on the biochemical properties (flavour, aroma, nutritional properties, allergenicity) of plant, algal, or microbial proteins where the stated use case is not substituting animal products (meat, egg, dairy analogues) or no specific use case is given."
+  - "Publications on the development of plant-, algal-, or microbial-based foods as medical nutrition solutions or publications on the development of alternative protein products where the stated end user is a vulnerable person (eg, children, end users with a diagnosed medical condition)."
+  - "Corrections to previously published studies already included in the dataset."
+  - "Publications on any other topics not listed in the inclusion criteria."
+  - "Non-English language publications."
+
+pillar_definitions:
+  Plant-based: "Produced directly from plants but look, taste, and cook like conventional animal products. Traditional fermentation techniques which use yeast or other microorganisms to modify the flavour, texture, or other characteristics of plant proteins are considered within the plant-based pillar."
+  Fermentation: "Biomass fermentation leverages the fast growth and high-protein content of microorganisms to produce large quantities of protein. Precision fermentation uses microbial hosts to produce specific functional ingredients which are important for the manufacture of alternative protein end products."
+  Cultivated: "Foods like chicken, pork, beef, and fish that are produced by cultivating animal cells directly, thus replicating the sensory and nutritional profiles of conventional meat and seafood."
+
+research_categories:
+  - name: "Strain development"
+    description: "Screening and optimisation of novel strains to identify the most efficient pathways for producing targets or modifying substrates."
+    relevant_pillars: ["Fermentation", "Plant-based"]
+
+  - name: "Cell line development"
+    description: "Sourcing, optimising, and banking new and existing cell lines to achieve faster cell growth, greater stability and stress tolerance, improved cell line performance (such as adherence and differentiation), and higher cell density in terrestrial and aquatic cell lines."
+    relevant_pillars: ["Cultivated"]
+
+  - name: "Target molecule selection"
+    description: "Target identification and validation to broaden the scope of food ingredients produced by precision fermentation."
+    relevant_pillars: ["Fermentation"]
+
+  - name: "Cell culture media"
+    description: "Reducing cell culture media costs and increasing their availability by characterising and validating novel sources of growth factors, amino acids, and other media components."
+    relevant_pillars: ["Cultivated"]
+
+  - name: "Feedstocks"
+    description: "Innovations in media, including new components and feedstock utilisation strategies (including the use of alternative feedstocks) to achieve higher efficiency, greater scale, and reduced costs."
+    relevant_pillars: ["Fermentation"]
+
+  - name: "Bioprocess design"
+    description: "Innovations in bioreactor design including improved efficiency, monitoring and control, and both upstream and downstream process innovations."
+    relevant_pillars: ["Fermentation", "Cultivated", "Plant-based"]
+
+  - name: "Crop development"
+    description: "Breeding of crops and increased use of underutilised protein crops for higher protein yields and functionality."
+    relevant_pillars: ["Plant-based"]
+
+  - name: "Ingredient optimisation"
+    description: "Improved protein fractionation and functionalisation to achieve higher-quality ingredients with less processing. Also covers the development of novel ingredients to augment nutritional profiles and enhance the sensory experience of alternative protein products."
+    relevant_pillars: ["Plant-based", "Fermentation"]
+
+  - name: "Scaffolding"
+    description: "Improved scaffolding biomaterials that support cell adherence and differentiation to allow the replication of complex animal meat structures."
+    relevant_pillars: ["Cultivated"]
+
+  - name: "Texturisation methods"
+    description: "Process innovations, including (but not limited to) novel texturisation methods such as extrusion, electrospinning, 3D printing, and enzymatic processing to match the texture of animal protein."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "End product formulation"
+    description: "Formulation and product design and testing including fat integration, shelf life and stability testing, evaluations of sensory quality, and nutritional assessment and fortification."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "Health & nutrition"
+    description: "Dietary impacts of alternative proteins including population-wide studies, systematic reviews, and in vitro studies on health impacts, for example, bioavailability."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "Food safety & quality"
+    description: "Toxicological and safety assessments, regulatory improvements, such as assay development or validation."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "Consumer & market research"
+    description: "Consumer behaviour research including nomenclature studies, purchasing intent (including retail and food environments), and market scoping and brand development."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "Impact assessments"
+    description: "Impact assessments including life cycle or techno-economic analyses, economic and other broader environmental impact assessments, and social/geopolitical impacts including policy interventions."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]
+
+  - name: "No category assigned"
+    description: "Publications on topics not covered by the other research categories described here. This can include discussions on the political, ethical, or philosophical implications of alternative protein or the protein transition. Broad-scope review articles covering numerous aspects of alternative proteins are also assigned to this category."
+    relevant_pillars: ["Plant-based", "Fermentation", "Cultivated"]

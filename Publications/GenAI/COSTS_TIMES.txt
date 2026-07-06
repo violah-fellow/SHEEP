@@ -1,0 +1,14 @@
+COSTS (v7 run, inc. reasoning):
+$1.02 at start of borderline (30 publications) -> $1.12 at end. $0.0033/publication
+$1.12 at start of test 100 (110 publications) -> $1.45 at end. $0.0030/publication
+* Includes reasoning that will be removed later, but good to know the approx. figures.
+COSTS (v11 run, exc. reasoning):
+$3.62 at start of test 100 (110 publications) -> $3.93 at end. $0.0028/publication
+COSTS:
+v11_Eval sonnet: $3.93 at start (2928 publications) -> $11.99 at end ($8.06). $0.002565/publication
+eval_sonnet_conf15 + eval_sonnet_conf17: $11.99 at start, $28.40 at end.
+eval_opus_conf17: $28.40 at start, $42.21 at end.
+
+TIMES (Eval run):
+For 110 publications: 8m39s = 519s -> 4.72s/publication
+For v11 110 pubs run without reasoning: 6m48s = 3.71s/publication

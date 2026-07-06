@@ -1,0 +1,28 @@
+{
+  "config": {
+    "DB_PATH": "publications.db",
+    "KEY_PATH": "../../.env",
+    "RUN_TABLE": "run_260702_2339",
+    "REVERSE_TABLE": "run_260702_2339_reverse",
+    "STRINGS_FILE": "dimensions_search_publications.txt",
+    "YEAR": 2025,
+    "SCOPE_MODEL_PATH": "models/LR_scope.joblib",
+    "PILLAR_MODEL_PATH": "models/LR_pillar.joblib",
+    "THRESHOLD_PATH": "models/LR_scope_threshold.txt",
+    "LLM_MODEL_SCOPE": "claude-sonnet-4-6",
+    "MAX_FN": 0.01,
+    "TRAINING_TABLE": "publications_new_training",
+    "EMBEDDINGS_PATH_TRAIN": "embeddings/embeddings_new_training.npy",
+    "EMBEDDINGS_PATH_RUN": "embeddings/embeddings_run_260702_2339.npy",
+    "EMBEDDINGS_PATH_REVERSE": "embeddings/embeddings_run_260702_2339_reverse.npy"
+  },
+  "steps": {
+    "train": "done",
+    "query": "done",
+    "classify": "done",
+    "llm_scope": "done",
+    "reverse_query": "done",
+    "reverse_classify": "done",
+    "reverse_llm_scope": "done"
+  }
+}

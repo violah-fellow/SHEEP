@@ -133,8 +133,11 @@ def main(
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
 
     # Reorder columns to match publications_classified
+    # excludes ML/LLM prediction columns, which are computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py)
     expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                     if c not in ('pred_combined', 'pred_pillar')]
+                     if c not in ('pred_combined', 'pred_pillar', 'scope_LLM', 'confidence_LLM', 'pillar_LLM',
+                                  'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
+                                  'status_LLM', 'stop_reason_LLM')]
     query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database

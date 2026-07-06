@@ -1,0 +1,5 @@
+I have a feeling lots of CM papers will reach across multiple categories, such as bioprocess development and end product formulation, both looking at the production process and the sensory or nutritional outcomes.
+
+Bioprocess Design — co-culture system design, including cell type ratios, sequential or simultaneous culture strategies, and conditions that drive differentiation of multiple cell types together during production.
+End Product Formulation — physical integration of separately cultivated fat and muscle components into a structured product, alongside multi-ingredient decisions, texture, shelf-life, sensory evaluation, and nutritional profiling.
+The boundary case worth defining is structured product development where scaffolding, co-culture, and formulation all interact — for example a paper developing a muscle-fat co-culture on a scaffold with sensory evaluation of the result. In that case your existing rule "prefer End Product Formulation when a finished product is the primary object of study" should still hold, with Scaffolding or Bioprocess Design as the second label depending on which technical contribution is more prominent.

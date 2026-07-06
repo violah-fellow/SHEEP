@@ -1,0 +1,20 @@
+I did PB first, then adapted the best-performing prompt for F, then CM, then CC
+
+
+Additions to F that could be relevant for PB:
+- Further guidance on review articles being Other unless very specifically a single category.
+- Disambiguation around digestibility being used as a characterisation metric among many (-> ingredient optimisation or end product formulation)
+- Adjusted safety definition to really focus on food and then to also exclude process, occupational, and environmental safety of manufacturing facilities.
+- Rewording the intro to include novel contribution as a key factor in determining topic
+
+MATCHED OUTPUT SCHEME ORDER TO PROMPT DEFINITION ORDER - big improvements to F (previously, schema was alphabetical while prompt was more thematic)
+
+Additions to CM that could be relevant to all:
+- Turns out food regulation e.g. novel foods frameworks, is supposed to be in food safety. So that I guess!
+- Update to intro wording around Other labelling of broad scoping reviews
+- Updates to impact assessment and food safety to catch novel foods regulation and policy in the right places (would need to validate this)
+
+
+
+Note about CC:
+- Had to adjust the broad reviews to Other boundary to allow it to select the main theme of the review because I was losing relatively targeted reviews on one category that just also included a small amount of environmental or other considerations to Other, when they should have been that first category

@@ -1,0 +1,10 @@
+Issues:
+- Food safety back to including occupation health. I have reworded to bluntly be only about food.
+v4 -> v5:
+- Food safety & quality now extremely bluntly about food safety only. Specified the bad safety's.
+- Removed feedstock preference note in ingredient optimisation - not necessary, was an LLM addition that I don't think helped all that much. 
+- Updated review example in the intro saying a review covering both microbial engineering and bioprocess design would be Other
+- Moved feedstocks to after TMS and strain - sits more closely with bioprocess
+- Adjusted ingredient optimisation to be only improvement focussed (not just general characterisation)
+- Minor rewording of the intro to focus on novel contribution
+- Expansion of policy framework within impact assessments

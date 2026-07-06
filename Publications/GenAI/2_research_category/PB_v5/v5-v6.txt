@@ -1,0 +1,3 @@
+v5 -> v6:
+- Opinion pieces in Other should only be broad, cross-cutting ones - opinion pieces about other specific topics (e.g. health & nutrition) should go into those respective categories (updated Other definition)
+- Specified consumer & market research is consumer focussed and does not include compositional comparisons of commercial available (on the market) products.

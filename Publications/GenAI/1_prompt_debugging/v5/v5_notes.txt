@@ -1,0 +1,19 @@
+v5 notes (see specific comments in the excel doc):
+
+Inclusion / exclusion criteria has now been harmonised by Dave and Stella. In the prompt, I now need to explicitly include:
+- infant formula
+- publications relating to children / adolescents (e.g. eating preferences)
+- publications on alternative protein products in animal trials (e.g. studying digestibility and digestive tract health impacts of alt proteins in rats) [I don't know if this was ever excluded? But I can consider specifying that research studying health impacts / digestibility etc of alt proteins is included]
+- include any dietary publication that mentions alternative proteins
+
+These criteria changes cover all the scope issues I identified in v5 and borderline, so not additional changes to prompt from a scope perspective here.
+
+AP pillar notes (v5 sonnet, borderline sonnet, v3 haiku):
+- Adjust prompt to be more explicit about labelling plant-based with any traditional fermentation of plant ingredients, and fermentation only when the product is biomass or precision-derived products
+- Issues with cross cutting. Two failure routes - either all pillars NA so no CC label applied (very general alt protein socioeconomic type pubs), or one pillar assigned to one of those very general pubs. Add a cross-cutting label but exclusively for these very general pubs. I will then still extract CC in instances where multiple pillars are assigned.
+
+v5 -> v6 prompt changes:
+- removed medical exclusion and made a new boundary to replace it, which includes infant formula as general nutritional product, but still specifies medical-only products are out of scope
+- edited boundary 2 to now include dietary and health studies where alt proteins are featured
+- removed boundary about labelling and clarified distinction between fermentation and plant-based within the category definitions; also changed 'Boundaries' to 'Scope Boundaries' and 'Category Definitions' to 'Category Definitions and Labels' for improved signposting
+- added a cross-cutting label but ONLY for publications that broadly cover alt proteins and not one pillar specifically (e.g. consumer acceptance, food systems transformation, diet, policy, ...). I will still also extract a CC label where multiple alt proteins are specifically addressed.

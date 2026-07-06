@@ -1,0 +1,7 @@
+For CC labels - check which is more accurate - one AP pillar or CC label being the override.
+Alternatively, just send this specific case (only one AP pillar AND CC label for manual review)
+
+
+Known issues:
+- Some tension between PB and F where there is fermentation of plant-based (pretty good but not 100%)
+- Microalgae currently just F. Excludes real microalgae in PB, and also draws CM into CC where microalgae scaffolding is used, though you could argue that this really is CC research.

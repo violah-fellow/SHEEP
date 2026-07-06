@@ -1,0 +1,12 @@
+v3 notes (see specific comments in the excel doc):
+- I should request limit of reasoning to one concise sentence - do not ask for reasoning based on boundaries specifically (responses are longer than needed to understand where the LLM went wrong and costs $$)
+- Alginate paper previously marked in-scope but I agree with LLM to label out of scope - mention of cultivated meat is incidental / prospective, and not thoroughly discussed in the review. Regardless, I have specified a new boundary condition to more clearly note that enabling technologies are included *only were alternative protein production is a primary or significant stated application*
+- Comparing my prompt to Ismael's, I broadened the first boundary from just protein as a primary focus, to also include non-protein ingredients where the stated application is alternative protein
+v3 -> v4 prompt changes:
+- reduced reasoning to 1 concise sentence
+- edited first boundary (protein focus) to include non-protein ingredients targeted at alternative protein products
+- added boundary for enabling technologies
+- added boundary for agronomic research
+- edited exclusion criteria guidance to keep publications that mention excluded topics where in scope topics are dominant (the LLM was removing any publication that even mentioned one of the exclusion criteria)
+- edited exclusion criteria to put nutraceuticals and bioactive peptides with medical nutrition exclusion (remove health-promoting wording entirely as some publications point to the health-promoting benefits of protein)
+- edited the general definition to explicitly so both R&D and socioeconomic topics are in scope (previously read the second sentence as subordinate and would exclude e.g. policy publications as 'not the main focus')

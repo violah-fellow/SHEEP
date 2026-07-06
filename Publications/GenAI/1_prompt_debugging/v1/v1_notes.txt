@@ -1,0 +1,5 @@
+v1 notes:
+- only unsuccessful scope is not clearly labelled (I agree with the LLM that it could be excluded)
+v1 -> v2 prompt changes:
+- microalgae is fermentation, not plant-based
+- where fermentation is used to modify proteins (e.g. nutritional enhancement, reduced allergenicity, improved digestibility), this is plant-based

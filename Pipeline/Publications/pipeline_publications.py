@@ -9,6 +9,7 @@ from Helper_pipeline_functions import save_status, mark_done, find_incomplete_ru
 from S0_ML_training import main as train_classifiers
 from S1_query_dimensions import main as query_dimensions
 from S2_ML_classification import main as classify_run
+from S3_LLM_scope import main as scope_llm
 from S3_query_reverse import main as query_reverse
 
 # CONFIG 
@@ -22,11 +23,14 @@ DB_PATH           = 'publications.db'
 SCOPE_MODEL_PATH  = 'models/LR_scope.joblib'
 PILLAR_MODEL_PATH = 'models/LR_pillar.joblib'
 THRESHOLD_PATH    = 'models/LR_scope_threshold.txt'
-KEY_PATH          = '../.env'
+KEY_PATH          = '../.env' # or '../../.env' if running from the pipeline folder
 
 # Query
 STRINGS_FILE = 'dimensions_search_publications.txt'
 YEAR         = 2025
+
+# GenAI
+LLM_MODEL_SCOPE = 'claude-sonnet-4-6'   # or 'claude-haiku-4-5' for cheap test runs
 
 # Training
 TRAINING_TABLE        = 'publications_new_training'
@@ -64,6 +68,7 @@ else:
         'SCOPE_MODEL_PATH':       SCOPE_MODEL_PATH,
         'PILLAR_MODEL_PATH':      PILLAR_MODEL_PATH,
         'THRESHOLD_PATH':         THRESHOLD_PATH,
+        'LLM_MODEL_SCOPE':        LLM_MODEL_SCOPE,
         'MAX_FN':                 MAX_FN,
         'TRAINING_TABLE':         TRAINING_TABLE,
         'EMBEDDINGS_PATH_TRAIN':  EMBEDDINGS_PATH_TRAIN,
@@ -76,8 +81,10 @@ else:
             'train':            'pending',
             'query':            'pending',
             'classify':         'pending',
-            'reverse_query':    'pending',
-            'reverse_classify': 'pending',
+            'llm_scope':         'pending',
+            'reverse_query':     'pending',
+            'reverse_classify':  'pending',
+            'reverse_llm_scope': 'pending',
         }
     }
     save_status(status, STATUS_DIR)
@@ -129,11 +136,23 @@ if status['steps']['classify'] != 'done':
 else:
     print("\nStep 2 (classify) already done, skipping.")
 
+# Step 3: LLM scope classification
+if status['steps']['llm_scope'] != 'done':
+    print("\nStarting Step 3: LLM scope classification.")
+    scope_llm(
+        KEY_PATH=cfg['KEY_PATH'],
+        DB_PATH=cfg['DB_PATH'],
+        RUN_TABLE=cfg['RUN_TABLE'],
+        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+        LLM_MODEL_SCOPE=cfg['LLM_MODEL_SCOPE'],
+    )
+    mark_done(status, 'llm_scope', STATUS_DIR)
+else:
+    print("\nStep 3 (llm_scope) already done, skipping.")
 
-
-# Step 3: Reverse search
+# Step 4: Reverse search
 if status['steps']['reverse_query'] != 'done':
-    print("\nStarting Step 3: Reverse search for researcher IDs.")
+    print("\nStarting Step 4: Reverse search for researcher IDs.")
     query_reverse(
         KEY_PATH=cfg['KEY_PATH'],
         DB_PATH=cfg['DB_PATH'],
@@ -143,11 +162,11 @@ if status['steps']['reverse_query'] != 'done':
     )
     mark_done(status, 'reverse_query', STATUS_DIR)
 else:
-    print("\nStep 3 (reverse_query) already done, skipping.")
+    print("\nStep 4 (reverse_query) already done, skipping.")
 
-# Step 4: Classify reverse search publications with ML
+# Step 5: Classify reverse search publications with ML
 if status['steps']['reverse_classify'] != 'done':
-    print("\nStarting Step 4: Classify reverse search publications.")
+    print("\nStarting Step 5: Classify reverse search publications.")
     classify_run(
         DB_PATH=cfg['DB_PATH'],
         RUN_TABLE=cfg['REVERSE_TABLE'],
@@ -158,6 +177,20 @@ if status['steps']['reverse_classify'] != 'done':
     )
     mark_done(status, 'reverse_classify', STATUS_DIR)
 else:
-    print("\nStep 4 (reverse_classify) already done, skipping.")
+    print("\nStep 5 (reverse_classify) already done, skipping.")
+
+# Step 6: LLM scope classification for reverse search publications
+if status['steps']['reverse_llm_scope'] != 'done':
+    print("\nStarting Step 6: LLM scope classification for reverse search publications.")
+    scope_llm(
+        KEY_PATH=cfg['KEY_PATH'],
+        DB_PATH=cfg['DB_PATH'],
+        RUN_TABLE=cfg['REVERSE_TABLE'],
+        THRESHOLD_PATH=cfg['THRESHOLD_PATH'],
+        LLM_MODEL_SCOPE=cfg['LLM_MODEL_SCOPE'],
+    )
+    mark_done(status, 'reverse_llm_scope', STATUS_DIR)
+else:
+    print("\nStep 6 (reverse_llm_scope) already done, skipping.")
 
 print(f"\nPipeline complete for run '{cfg['RUN_TABLE']}'.")

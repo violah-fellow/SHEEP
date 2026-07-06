@@ -1,0 +1,17 @@
+Issues:
+- Target molecule selection now too narrow - focused only on microbial engineering on not on slightly more general molecule selection and screening, including from natural sources. Simultaneously, optimisation of recombinant expression conditions is being read as bioprocess design (upstream) - when it should still be target molecule selection.
+- Still had strain development be chosen over target molecule selection
+- Overlap between ingredient optimisation, feedstocks, strain development, all sorts
+- Broad review still getting specific categories
+v3 -> v4:
+- Redefined target molecule selection to focus back on the molecule, while still very explicitly including strain engineering as a factor.
+- Added a new example in the intro to balance the strain development example
+- Rewrote ingredient optimisation to be focussed on ingredient properties, and bioprocess design to be focussed on yield and scalability.
+- Added 'blueprint' into Other and adjusted the intro caveat to be very explicitly for only a single research category.
+
+
+
+Paused addition to bioprocess design:
+Note: optimisation of expression conditions (e.g. induction temperature, inducer concentration) performed as part of establishing a new recombinant expression system belongs in Target Molecule Selection rather than Bioprocess Design. Bioprocess Design applies when the expression system is already established and the process engineering itself is the novel contribution.
+
+Consider moving TMS exclusion to beginning of strain development definition if not improving.

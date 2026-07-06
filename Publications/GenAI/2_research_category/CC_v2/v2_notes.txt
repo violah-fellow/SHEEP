@@ -1,0 +1,5 @@
+v2 -> v3:
+- Made novel foods regulation more prominent in food safety & quality definition and added exclusion to impact assessment
+- Edited health & nutrition to exclude antioxidants / others just for being mentioned and not explicitly measured or systematically reviewed.
+- Added a prefer this over end product to texturization
+- Edits to the examples in the intro to include a texturization one.
