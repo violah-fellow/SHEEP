@@ -1,0 +1,190 @@
+Research category prompts — v1 test run optimisation notes
+Applied to: prompt_rescat_patents_PB.md, prompt_rescat_patents_CM.md, prompt_rescat_patents_F.md, prompt_rescat_patents_CC.md
+
+Test set sizes: PB n=40, CM n=42, F n=51, CC n=38
+Primary correct before: PB 60%, CM 83%, F 67%, CC 68%
+Either correct before: PB 75%, CM 91%, F 78%, CC 84%
+
+---
+
+1. STRAIN DEVELOPMENT MASSIVELY UNDERDETECTED — PB and F
+
+The largest error class across PB and F. The LLM repeatedly classified patents for novel bacterial
+or fungal strains as Ingredient optimisation (seeing the downstream effect: ingredient modification)
+or Texturization methods (seeing the downstream purpose: e.g. exopolysaccharide texturisation)
+instead of recognising the STRAIN ITSELF as the primary invention.
+
+Affected cases: novel Lactobacillus cultures for plant-based dairy, modified Streptococcus strains
+with phage resistance, Lactococcus strains for fermentation of plant-based preparations, lactic
+bacterium with modified galactokinase expression for texturising, novel Carnobacterium strains,
+novel fungal biomass strains (F).
+
+Fix: Added explicit guidance in both PB and F Strain development definitions:
+"The key marker is that the STRAIN OR CULTURE ITSELF is the primary innovation — its genetic
+makeup, functional properties, or selection from a population — regardless of its downstream
+application." Added preamble examples making clear that a novel strain → Strain development
+even if its downstream effect is ingredient modification, texturisation, or contaminant control.
+
+---
+
+2. BIOPROCESS DESIGN UNDERDETECTED — F
+
+Second largest error class in F (67% primary correct). The LLM assigned Ingredient optimisation
+or Target molecule selection to patents that primarily describe a PRODUCTION METHOD or PROCESS.
+
+Affected cases: casein production method via transgenic microorganisms (→ Bioprocess design,
+not Target molecule selection), solid-state fermentation method using brewery spent grain (→
+Bioprocess design, not Feedstocks), BSG medium production + fungal biomass (→ Bioprocess
+design, not Feedstocks), co-culture method for protein production (→ Bioprocess design), heat/
+pipe treatment method to increase casein ratio (→ Bioprocess design), mycelial growth on
+substrate as scaffolding process (→ Bioprocess design, since Scaffolding is not a separate
+F category).
+
+Root cause: The Bioprocess design definition was narrowly framed around bioreactor design and
+did not clearly cover general production process protocols.
+
+Fix: Broadened Bioprocess design in F to explicitly include "novel process protocols — such as
+solid-state fermentation methods, co-culture strategies, sequential fermentation protocols, and
+production pipeline steps — where the primary innovation is the METHOD or PROCESS of production
+rather than the properties of the resulting ingredient." Added decision rule: "Assign Bioprocess
+design when the primary novelty is HOW the fermentation or production is conducted, even when
+the output is a specific molecule or ingredient." Added preamble example distinguishing Target
+molecule selection (molecule is the novelty) vs Bioprocess design (method is the novelty). Added
+note that mycelial structuring processes → Bioprocess design.
+
+---
+
+3. OTHER ASSIGNED WHEN SPECIFIC LABEL APPLIES — CM and general
+
+In CM, two patents about animal feed additives containing cell-growth-relevant compounds were
+classified as Other because the primary stated context was farming, not cell culture. Viola's
+guidance: "if any of the specific labels apply, always prefer them over the 'Other' category."
+
+Fix: Added "Never assign Other when a specific category clearly applies. Other is a last resort"
+to the preamble of all four prompts. Added to CM Cell culture media definition: "Includes
+identification of novel sources of growth factors or media components from any origin where the
+application is cell culture — even when the patent's primary stated context is a different
+application (e.g. animal feed additives)." Added preamble example for CM.
+
+---
+
+4. INGREDIENT OPTIMISATION vs END PRODUCT FORMULATION — PB, CC, F (recurring boundary confusion)
+
+Multiple cases where LLM assigned the wrong category between these two adjacent categories.
+Observed both directions of error (EPF given as IO, IO given as EPF).
+
+Key patterns:
+- A specific novel COMPOUND (emulsifier, colorant, flavour modifier, enzyme, fatty acid amide)
+  for use in AP products → Ingredient optimisation (the compound is the invention, even if
+  described being used in a final product)
+- A FINISHED PRODUCT FORMULA (specific multi-ingredient composition) → End product formulation
+- Agreed corrections: several cases where LLM's EPF or IO was actually correct and Viola updated
+  the training label (karitene emulsifier in dairy analogues, prevention of aggregation in nut
+  milk, pea flavour composition, IMPROVEMENTS IN OR RELATING TO ORGANIC COMPOUNDS colorant)
+
+Fix: Added preamble examples in PB and CC explicitly illustrating the compound-vs-product
+distinction. Added to CC Ingredient optimisation definition: "Also includes specific compounds
+(emulsifiers, colorants, flavour modifiers, enzymes) developed or identified for use in AP
+products, where the specific compound is the primary object of the invention."
+
+---
+
+5. SCAFFOLDING vs BIOPROCESS DESIGN (CM, CC)
+
+A cell culture construct comprising fibres for cell adhesion within a bioreactor module was
+classified as Scaffolding by the LLM; Viola classified it as Bioprocess design because it is
+part of an integrated bioreactor system, not a standalone scaffold material.
+
+Fix: Added to CM and CC Scaffolding definitions: "The primary subject must be the scaffold
+MATERIAL or ARCHITECTURE itself, not a production system or bioreactor module that incorporates
+scaffolding as one component." Added to CM Bioprocess design: "A scaffold or bioprinting element
+that is integrated within a bioreactor or production system design should be classified as
+Bioprocess design rather than Scaffolding." Added preamble example in CC.
+
+---
+
+6. TEXTURIZATION METHODS vs SCAFFOLDING for tissue mincing (CC)
+
+A device for mechanically mincing or fragmenting biological tissue into microtissue fragments was
+classified as Scaffolding by the LLM. Viola: "Important here is the last sentence — generating
+minced tissue → texturisation."
+
+Fix: Added to CC Texturization methods: "Also includes mechanical devices for mincing, cutting,
+or fragmenting meat-analogue tissue to produce desired textures." Added preamble example.
+
+---
+
+7. END PRODUCT FORMULATION for slicing/portioning apparatus (CC)
+
+Two patents for slicing machines and methods were classified as Other by the LLM. Viola:
+"Patent is about handling the end product." These should be End product formulation.
+
+Fix: Added to CC End product formulation definition: "Also includes patents for equipment and
+methods for portioning, slicing, cutting, or forming the final alternative protein product into
+its end-use format." Added preamble example.
+
+---
+
+8. BIOPROCESS DESIGN vs TEXTURIZATION for production apparatus (CM, CC)
+
+An extruder system for forming folded extrudates (CM, given: Texturization) was corrected by
+Viola to Bioprocess design: "the patent concerns the apparatus and method." Similarly, a
+supervisory AI control system for wet extrusion of meat substitutes (CC, given: End product
+formulation) was corrected to Bioprocess design.
+
+Fix: Added monitoring/control systems and processing apparatus to CM Bioprocess design definition.
+Added AI/machine intelligence control system example to CC Bioprocess design definition and
+preamble.
+
+---
+
+9. CROP DEVELOPMENT vs INGREDIENT OPTIMISATION (PB)
+
+A patent for pea varieties with improved taste profile (given: Ingredient optimisation) was
+classified as Crop development by the LLM. Viola: "it mainly concerns INGREDIENTS FROM the crop
+but not the development of the crop line itself."
+
+Fix: Added to PB Crop development definition: "When a patent focuses on the ingredients or
+functional properties derived from a crop rather than the plant genetics, breeding, or variety
+itself, prefer Ingredient optimisation."
+
+---
+
+10. CELL LINE DEVELOPMENT vs END PRODUCT FORMULATION (CM)
+
+Two identical patents (Food Products Comprising Avian Stem Cells) were classified as Cell line
+development by the LLM; Viola: "the focus is the product which consists of specific cell line
+and cell culture media but they are not the focus of the patent → End product formulation."
+
+Fix: Added to CM Cell line development definition: "Does not include food products that
+incorporate cells as an ingredient without primary innovation in the cell line itself, which
+belongs in End product formulation." Added preamble example.
+
+---
+
+11. TEXTURIZATION METHODS for texture-function ingredients (F)
+
+A patent for a microalgae protein extract with specific texturising/coagulation function was
+classified as Ingredient optimisation. Viola: "the ingredient described here has the clear focus
+of improving texture of products, so texturisation methods is the right label."
+
+Fix: Added to F Texturization methods: "Also includes ingredients specifically extracted or
+processed where the primary stated function is texturization (e.g. a protein extract for
+coagulation or gelling) — prefer Texturization methods over Ingredient optimisation when
+texturizing function is the primary purpose of the ingredient." Added preamble example.
+
+---
+
+TRAINING LABEL CORRECTIONS NOTED BY VIOLA (not prompt changes, but noted for record)
+- PB: Karitene in food products → corrected to End product formulation
+- PB: Prevention of aggregation in nut milk → corrected to Ingredient optimisation
+- PB: Process for preparing a flavour composition → corrected to End product formulation
+- PB: Low sugar oat base → corrected to End product formulation
+- PB: Inhibitors of cell envelope proteinases (×2) → corrected to Food safety & quality
+- CC: Fat tissue mimetic → corrected to End product formulation
+- CC: Supervisory machine intelligence controls → corrected to Bioprocess design
+- CM: Systems and methods for rapid liquid bioprinting → corrected to Scaffolding
+- F: Compositions and applications derived from Ogataea polymorpha → corrected to Target molecule selection
+- F: Lipases, compositions, methods and uses → corrected to Target molecule selection
+- F: Method for producing casein (one instance) → corrected to Ingredient optimisation
+- F: Method for producing casein (another instance) → corrected to Bioprocess design

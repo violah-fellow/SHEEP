@@ -1,0 +1,121 @@
+Research category prompts — v2 test run optimisation notes
+Applied to: prompt_rescat_patents_PB.md, prompt_rescat_patents_F.md, prompt_rescat_patents_CC.md
+(prompt_rescat_patents_CM.md unchanged — CM reached 98% primary accuracy in v2)
+
+v2 accuracy (primary / either):
+  PB: 85% / 100%  (was 60% / 75% in v1)
+  CM: 98% / 100%  (was 83% / 91% in v1)
+  F:  82% / 94%   (was 67% / 78% in v1)
+  CC: 95% / 100%  (was 68% / 84% in v1)
+
+All remaining errors appear in the top-2 (either_correct = 100% for PB, CM, CC;
+94% for F). Changes below target only clear cases; genuinely borderline cases
+(PB IO/EPF boundary, F row 28 Target molecule vs Texturization, F row 10
+IO vs Bioprocess) accepted as-is.
+
+Also fixed in this round (notebook, not prompt):
+  "Strain development" was missing from PB_CATS enum in genai_rescat_patents.ipynb —
+  this is why all PB strain development cases failed in v1 and v2 despite correct
+  prompt guidance. Fixed by adding it to PB_CATS. "Consumer & market research" and
+  "Impact assessments" also removed from all four pillar cat lists.
+
+---
+
+1. STRAIN DEVELOPMENT OVER-TRIGGERING FOR INHIBITOR SCREENING — PB
+
+Affected cases: Two instances of the same patent about screening procedures to
+identify inhibitors of cell envelope proteinases from lactic acid bacteria.
+Training label: Food safety & quality. LLM assigned: Strain development.
+
+Root cause: The strong strain development guidance added in v1 caused the LLM to
+trigger on any mention of LAB or microbial strains, even when the patent's primary
+subject is an inhibitor compound rather than the strain itself.
+
+Fix (PB only):
+- Added preamble bullet: "A patent describing a screening method to identify inhibitor
+  compounds targeting microbial enzymes, where the inhibitor compound (not a novel
+  strain) is the primary subject → Food safety & quality (not Strain development)"
+- Added to Strain development definition: "Does not include patents whose primary
+  subject is an inhibitor compound, screening assay, or other molecule that targets
+  or interacts with microbial enzymes but does not claim a novel strain — these belong
+  in Food safety & quality."
+
+---
+
+2. TARGET MOLECULE SELECTION OVER BIOPROCESS DESIGN — F
+
+Affected cases: Two instances of a casein production patent. Training label: Bioprocess
+design. LLM assigned: Target molecule selection, because casein is a named recombinant
+target protein.
+
+Root cause: The existing guidance ("when the method is the primary innovation, prefer
+Bioprocess design") was not strong enough when a well-known target molecule (casein)
+was prominently named.
+
+Fix (F only):
+- Strengthened existing preamble bullet to include a concrete casein example and an
+  explicit warning: "do not let the presence of a named target molecule override this."
+
+---
+
+3. TEXTURIZATION METHODS OVER END PRODUCT FORMULATION — F
+
+Affected cases: Two patents describing compositions of textured fermentation-derived
+products (textured fungal protein pieces; mycoprotein food/feed with alginate cross-
+linking). Training label: End product formulation. LLM assigned: Texturization methods.
+
+Root cause: Both patents describe texture as a key product property, causing the
+Texturization methods trigger to fire even though the primary claimed subject is the
+product formula/composition, not a texturization process or apparatus.
+
+Fix (F only):
+- Added to End product formulation definition: "A patent that claims a product
+  COMPOSITION — where texture is one property of the claimed formula rather than the
+  primary process innovation — belongs here, not in Texturization methods."
+
+---
+
+4. FEEDSTOCKS OVER BIOPROCESS DESIGN — F
+
+Affected case: "PRODUCTION OF A FUNGAL FERMENTATION MEDIUM FROM BREWER'S SPENT GRAIN."
+Training label: Bioprocess design. LLM assigned: Feedstocks.
+
+Root cause: The Feedstocks priority rule added in v1 ("assign Feedstocks over Bioprocess
+Design when the primary novelty is the input material") was too aggressive for patents
+where both a novel feedstock AND a production process are described. The LLM correctly
+identified BSG as a novel feedstock but over-applied the rule.
+
+Fix (F only):
+- Softened the Feedstocks priority rule: "Assign Feedstocks over Bioprocess Design when
+  the primary novelty is the input material ALONE and no significant process design
+  innovation is described alongside it — if both a novel feedstock and a production
+  process are central to the patent, prefer Bioprocess design."
+
+---
+
+5. SCAFFOLDING OVER BIOPROCESS DESIGN — CC
+
+Affected case: "CELL CULTURE CONSTRUCT" — a construct comprising fibres with external
+surfaces for cell adhesion and culturing, integrated within a bioreactor module.
+Training label: Bioprocess design. LLM assigned: Scaffolding.
+
+Root cause: The existing preamble bullet said "scaffold element integrated within a
+bioreactor" but the patent uses language like "cell culture construct" and "fibres for
+cell adhesion" — the LLM pattern-matched to Scaffolding before processing the bioreactor
+module context.
+
+Fix (CC only):
+- Made the preamble bullet more concrete: now explicitly mentions "cell culture
+  construct, fibrous material for cell adhesion, or scaffold element that is designed
+  as part of or integrated within a bioreactor module or production system → Bioprocess
+  design (not Scaffolding)."
+
+---
+
+BORDERLINE CASES ACCEPTED AS-IS (no prompt changes):
+- PB: Exopolysaccharides from novel LAB strains (IO vs Strain development) — both defensible
+- PB: Pea varieties with improved taste profile (IO vs Crop development) — both defensible
+- PB: Karitene / flavour composition (IO vs EPF primary order) — borderline, top-2 correct
+- F: Fungal biomass from Trichocomaceae (Strain development vs Bioprocess design) — both defensible
+- F: Casein heat treatment (IO vs Bioprocess design) — both defensible
+- F: Artificial protein composition / casein coagulation (Target molecule vs Texturization) — genuinely hard

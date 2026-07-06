@@ -1,0 +1,76 @@
+Research category prompts — publications → patents adaptation
+Applied to: prompt_rescat_pubs_PB_v6.md, prompt_rescat_pubs_CM_v4.md, prompt_rescat_pubs_F_v6.md, prompt_rescat_pubs_CC_v4.md
+
+---
+
+1. LANGUAGE THROUGHOUT — ALL PROMPTS
+   Every instance of "publication", "paper", "article", and "study" replaced with "patent".
+   "novel contribution of the paper" / "primary research contribution of the paper" →
+   "primary invention or claimed contribution of the patent".
+   "A category should only be assigned if the paper actively investigates, develops, or measures" →
+   "A category should only be assigned if the patent actively claims, develops, or describes an
+   invention in that domain".
+   Worked examples updated from "A paper doing X → Category" to "A patent claiming X → Category".
+
+2. CATEGORIES REMOVED — ALL PROMPTS
+   Consumer & market research: Patents do not study consumer behaviour, purchasing intent,
+   product acceptance, or labelling perception. Removed entirely.
+   Impact assessments: Patents do not conduct LCA, TEA, carbon footprinting, or systematic
+   policy reviews. Removed entirely.
+   Category counts updated accordingly:
+     PB: 9 specific → 7 specific; 10 total → 8 total
+     CM: 9 specific → 7 specific; 10 total → 8 total
+     F:  11 specific → 9 specific; 12 total → 10 total
+     CC: 8 specific → 7 specific (original count was already inconsistent); 9 total → 8 total
+
+3. HEALTH & NUTRITION REFRAMED — ALL PROMPTS
+   Publication definition: studies measuring physiological outcomes (population studies, in vivo/
+   in vitro studies with a physiological primary endpoint).
+   Patent definition: inventions specifically designed to improve nutritional composition,
+   digestibility, or health-relevant properties — e.g. processes to reduce anti-nutritional
+   factors (phytates, trypsin inhibitors), increase protein bioavailability, enhance micronutrient
+   content, or achieve specific nutritional targets.
+   Boundary with Ingredient Optimisation / End Product Formulation preserved: general nutritional
+   characterisation or profiling as part of ingredient/product development remains in those
+   categories; Health & nutrition requires the nutritional improvement to be the primary aim
+   of the invention.
+
+4. FOOD SAFETY & QUALITY REFRAMED — ALL PROMPTS
+   Publication definition: safety assessments (microbial profiling, contaminant detection,
+   allergenicity studies, assay validation).
+   Patent definition: inventions for improving or ensuring safety and quality — novel preservation
+   methods, antimicrobial treatments, allergen detection or reduction methods, novel analytical
+   methods or assays. Shifted from "conducting assessments" to "claiming inventions that achieve
+   or enable safety/quality outcomes".
+   Boundaries retained: excludes process/occupational/environmental safety of manufacturing
+   facilities and equipment maintenance.
+   CM-specific: removed "analysis of novel food regulatory approval pathways and frameworks"
+   (a publication-type activity) from the definition.
+
+5. CROP DEVELOPMENT REFRAMED — PB ONLY
+   Publication definition: "Breeding of crops and increased use of underutilised protein crops
+   for higher protein yields, protein quality, and functionality."
+   Patent definition: inventions for developing novel crop varieties or plant lines through
+   breeding, genetic modification, or gene editing (e.g. CRISPR) aimed at improving protein
+   yield, quality, or processability. Explicitly includes novel breeding methods and tools.
+   Rationale: patents claim novel varieties and modification methods rather than reporting
+   breeding research outcomes.
+
+6. OTHER REFRAMED — ALL PROMPTS
+   Publication Other included: broad review articles, opinions, perspectives, commentary,
+   workshop reports, case studies, recipe development.
+   Patent Other: none of these publication types exist for patents. Replaced with patent-
+   appropriate catch-all examples: patents spanning multiple categories without a dominant
+   focus; general manufacturing infrastructure patents; patents covering packaging, distribution,
+   or storage; and inventions not covered by the named categories.
+   Also removed: the sentence "Other should be assigned to broad review articles that span
+   multiple of the defined categories" and the F-prompt paragraph on review/perspective
+   handling ("Review articles and perspective pieces receive Other unless...").
+
+7. CATEGORY DEFINITIONS (SHARED) — MINOR WORDING ADJUSTMENTS
+   Ingredient optimisation, End product formulation, Texturization methods, Bioprocess design,
+   Scaffolding, Strain development, Target molecule selection, Cell line development,
+   Cell culture media, Feedstocks: definitions preserved structurally; "study", "paper", and
+   "novel contribution" language updated to "invention", "patent", and "claimed contribution".
+   The substantive boundaries between these categories (e.g. Ingredient Optimisation vs End
+   Product Formulation; Feedstocks vs Bioprocess Design) are unchanged.

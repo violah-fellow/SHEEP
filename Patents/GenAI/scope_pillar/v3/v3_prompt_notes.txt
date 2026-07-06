@@ -1,0 +1,55 @@
+Prompt version 3 — changes and rationale
+Based on test run review (round 2), 7 misclassified cases analysed.
+
+---
+
+1. CONFIDENCE SCALE RECALIBRATED (Cases 1, 3)
+   Previous: level 3 = "probably out of scope but explicitly mentions AP or known AP ingredients"
+   New:      level 3 = "probably out of scope, but the technology/ingredient is directly applicable
+                        to AP product development even without a stated AP application"
+             level 4 = "genuinely uncertain" (absorbs the old level-3 meaning as a sub-case)
+   Rationale: LLM was assigning confidence 1-2 to patents covering general food technologies
+   (e.g. colourants for food/beverage, structured fats for foodstuffs) that are clearly
+   applicable to AP products. Viola wants these to score 3-4, not 1-2, to reflect implied
+   relevance even when no AP application is stated.
+
+2. BIOMASS FERMENTATION APPARATUS IN SCOPE (Case 2)
+   Added new In Scope Boundary: apparatus and methods explicitly designed for biomass
+   fermentation (not general fermentation for beverages, chemicals, pharma) are in scope
+   under the fermentation pillar as enabling technologies, even without naming a specific
+   organism or food application.
+   Rationale: A container specifically described for "fermentation of biomass" implies
+   bioprocess use for growing microbial biomass, a core AP production route. The LLM
+   excluded it for lacking an explicit food/AP organism mention.
+
+3. STARCH CROP PROTEIN MODIFICATION IN SCOPE (Case 5)
+   Added new In Scope Boundary: patents on modification, processing, or functional
+   improvement of protein isolated from starch/staple crops (corn protein, wheat gluten,
+   rice protein) are in scope when protein is the primary subject and functional
+   improvements concern food ingredient properties.
+   Rationale: The starch crop exclusion targets general agronomic research on crops
+   (yield, pest resistance). When a patent is specifically about improving isolated protein
+   functionality, the crop exclusion should not apply. LLM excluded a corn protein
+   deamidation patent because corn is listed as a starch crop.
+
+4. MULTI-SOURCE FORMULATIONS AND GENERIC PROTEIN TERMS → CC (Cases 4, 6)
+   Expanded the cross-cutting definition to cover:
+   (a) Generic protein descriptors ("protein powder", "plant protein", "protein-rich
+       material") in addition to "alternative protein" and "non-animal protein"
+   (b) Formulation patents listing protein sources from multiple pillars as interchangeable
+       or optional ingredients (e.g. "proteins from pulses, grains, or microorganisms")
+   Rationale: Case 4 — a wet extrusion system using "protein powder" was labelled PB
+   because of meat substitute framing, despite unspecified protein source. Case 6 — a
+   vegan egg substitute listing proteins from pulses/grains/microorganisms was labelled PB
+   despite microorganism proteins (fermentation-derived) being listed as an option.
+
+5. BOOLEAN FLAG ASSIGNMENT GUIDANCE FOR CROSS-CUTTING (Case 7)
+   Added a "Flag assignment guidance" section before the Output line.
+   Key rule: when cross_cutting=True because the protein source is unspecified, set
+   plant_based, fermentation, and cultivated all to False.
+   Rationale: The LLM reasoned correctly (CC) for an animal-free dairy/egg substitute
+   with cellulase but set fermentation=True (because cellulase is a fermentation enzyme)
+   alongside cross_cutting=True. The post-processing code assigns F in this case because
+   the CC derivation logic requires either >1 pillar flag OR (cross_cutting AND 0 pillar
+   flags). Setting fermentation=True for the auxiliary enzyme broke the CC assignment.
+   The flags should reflect the AP product's protein source, not auxiliary ingredients.

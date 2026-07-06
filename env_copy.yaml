@@ -17,6 +17,8 @@ dependencies:
   - tqdm # Progress bars
   - python-dotenv
   - rapidfuzz
+  - anthropic
+  - openpyxl
   - pip:
     - dimcli # Dimensions API client
     - torch
