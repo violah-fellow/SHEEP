@@ -1,5 +1,5 @@
 ## Pipeline for Publication Data collection and classification
-## Calls S0-S3 in sequence with checkpoint/resume support.
+## Calls S0-S4 in sequence with checkpoint/resume support.
 ## To restart a completed or unwanted run, delete its status file from status_logs/.
 
 import os
