@@ -1,0 +1,145 @@
+End product prompt — v1 test run optimisation notes
+Applied to: prompt_endproduct_patents_work.md
+
+v1 accuracy (primary / either): 75% / 85%  (n=104, against original GT labels)
+Several GT labels were found to be wrong (LLM was correct); true accuracy is higher.
+
+---
+
+1. REMOVE "FATS" CATEGORY
+
+Removed entirely. Two v1 errors involved Fats:
+- Row 49: BIOREACTOR FOR CULTURED FAT (CM) → LLM assigned Fats; GT was Meat.
+  Cultured fat bioreactors explicitly for cultivated meat → Meat. Added to preamble.
+- Row 76: PLANT-BASED BUTTER → LLM assigned Fats; GT was Spreads.
+  With Fats removed, plant-based butter and other fat-phase spreads → Spreads, sauces,
+  and condiments. Updated Spreads definition and preamble to cover fat-phase products.
+
+---
+
+2. ADD "DAIRY" AS A GENERAL DAIRY CATEGORY
+
+Three rows labelled "Dairy" by Viola (instead of a specific dairy subcategory):
+- Row 30: FERMENTED FOOD PRODUCT (fungal biomass on vegetable feedstock → non-animal
+  dairy substitute). GT: Cheese. LLM: Yoghurt. Viola: Dairy. The fermented dairy product
+  type is not clearly determined from the abstract alone.
+- Row 41: Pectin-containing emulsifier — described for BOTH oil-in-water emulsion AND a
+  fermented product; spans multiple dairy types. GT: Milk. LLM: Yoghurt. Viola: Dairy.
+- Row 66: Exocellular polysaccharides improving texture of "dairy products" — LAB strains
+  applicable across dairy types. GT: Milk. LLM: Yoghurt. Viola: Dairy.
+
+Fix: Added "Dairy" as a 12th category (after Cream and ice cream) with definition and
+a preamble rule. Also changed Milk and milk proteins from being the "default" dairy
+category to being specific to liquid dairy/beverage applications; Dairy is now the
+fallback when dairy type is unclear.
+
+---
+
+3. LLM INFERRING END PRODUCT FROM EXTERNAL KNOWLEDGE — LARGEST ERROR CLASS
+
+Multiple cases where the LLM assigned a specific category by inferring how an ingredient,
+organism, or technology is commonly used — information NOT stated in the abstract.
+
+Affected cases:
+- Row 7: Agglomeration system → LLM said Milk ("commonly applied in dairy powder
+  manufacturing"). Abstract describes processing equipment; no product mentioned. → Agnostic.
+- Row 27: Oat-based seasoning → LLM said Milk (inferred oat milk from "oat suspension").
+  Abstract says "oat-based flavourful seasoning / intermediate in manufacture of other food
+  products." → Spreads (seasoning as a condiment/sauce ingredient).
+- Row 32: Device for generating microtissue fragments → LLM said Meat ("applicable to
+  cultivated meat"). Abstract describes a cutting device for mincing biological tissue;
+  no food product is stated. → Agnostic.
+- Row 79: Novel Carnobacterium maltaromaticum strain → LLM said Fish ("well-known for use
+  in fish products"). Abstract says "preparation of a food product" — completely generic.
+  → Agnostic.
+
+Fix: Added a prominent IMPORTANT notice at the top of the preamble:
+"Base your classification ONLY on what the title and abstract explicitly state about the
+intended end product application. Do NOT infer an end product from external knowledge
+about how an ingredient, organism, or technology is commonly used."
+
+---
+
+4. CROSS-CUTTING VS AGNOSTIC — CLARIFIED BOUNDARY
+
+Several cases where Cross-cutting and Agnostic were confused, with Viola's corrections:
+
+- Viola accepts Agnostic (LLM was right, GT wrong):
+  Row 15: Pea + rapeseed protein isolate → Agnostic (GT was Eggs — wrong label)
+  Row 58: Method for predicting raw material functionality → Agnostic (GT was Milk — wrong)
+  Row 63: Bioreactor system for biomass production → Agnostic (GT was Fish — wrong)
+  Row 67: Moringa oleifera microcapsules → Agnostic (GT was Cross-cutting — wrong)
+  Row 82: Highly soluble pea starch as maltodextrin substitute → Agnostic (GT was Cheese)
+
+- Viola says Cross-cutting (LLM was right, GT wrong):
+  Row 83: Mycelium ingredients explicitly described for meat, fish, dairy, and beverages
+    → Cross-cutting (GT was Agnostic — wrong; abstract names multiple product types)
+  Row 84: Stabilized liquid deamidase compositions → Cross-cutting (food-use enzyme with
+    broad applicability; GT was Yoghurt — wrong)
+  Row 100: Method for stabilising liquid deamidase compositions → Cross-cutting (same)
+
+- Viola says Cross-cutting (LLM was wrong, GT was wrong):
+  Row 51: Textured wheat gluten composition → Cross-cutting. GT was Agnostic; LLM said Meat.
+    The abstract says "its use" without specifying; textured protein = food ingredient without
+    specific product targeting → Cross-cutting.
+
+Fix: Rewrote the Cross-cutting and Agnostic definitions to clarify the boundary:
+  - Cross-cutting: explicitly multi-product patents PLUS food ingredient compositions
+    (textured proteins, food-use enzymes, encapsulated food ingredients) with no specific
+    product targeting.
+  - Agnostic: equipment, bioreactors, strain/biomass characterisation, extraction methods,
+    bioproduction processes with no food product framing. Does NOT include food ingredient
+    compositions — those go to Cross-cutting.
+
+---
+
+5. ALGAE / MICROALGAE — CLARIFICATION
+
+Two identical patents (lacto-fermented algae) caused two separate errors (rows 47 and 72):
+GT was "Eggs and egg proteins" (wrong label), LLM assigned Fish and seafood (wrong), and
+Viola says Agnostic. Algae lacto-fermentation process producing "ready-to-eat algae in
+vegetable form and a fermentation juice" — not an alternative protein seafood product.
+
+Fix: Added explicit preamble rule: "algae or microalgae patents not explicitly described
+as fish/seafood substitutes should NOT be assigned Fish and seafood." Added the same note
+to the Fish and seafood definition.
+
+---
+
+TRAINING LABEL CORRECTIONS NOTED BY VIOLA (not prompt changes, noted for record):
+- Row 3: ANIMAL-FREE SUBSTITUTE DAIRY FOOD PRODUCTS → corrected to Yoghurt and fermented dairy
+  (original: Cheese — the acidified dairy analogue is yoghurt-like, not cheese)
+- Row 15: Pea and rapeseed protein isolate → corrected to Agnostic (original: Eggs)
+- Row 47: Lacto-fermented algae process → corrected to Agnostic (original: Eggs)
+- Row 51: Textured wheat gluten → corrected to Cross-cutting (original: Agnostic)
+- Row 58: Method for predicting raw material functionality → corrected to Agnostic
+  (original: Milk)
+- Row 63: Bioreactor system for biomass production → corrected to Agnostic (original: Fish)
+- Row 67: Coacervate core-shell microcapsules (Moringa) → corrected to Agnostic
+  (original: Cross-cutting)
+- Row 72: Lacto-fermented algae (same patent as row 47) → corrected to Agnostic
+  (original: Eggs)
+- Row 82: Highly soluble pea starch as maltodextrin substitute → corrected to Agnostic
+  (original: Cheese)
+- Row 83: Fungal ingredients and derived products → corrected to Cross-cutting
+  (original: Agnostic)
+- Row 84: Stabilized liquid deamidase compositions → corrected to Cross-cutting
+  (original: Yoghurt)
+- Row 87: Lactobacillus plantarum strain for fermented milk → corrected to Yoghurt
+  (original: Milk)
+- Row 100: Method for stabilising liquid deamidase compositions → corrected to
+  Cross-cutting (original: Yoghurt)
+
+---
+
+ACCEPTED BORDERLINE CASES (no prompt changes):
+- Row 17: Almond flour vegan food product particulate (GT: Cross-cutting, LLM: Milk)
+  — borderline, either_correct=TRUE, both defensible
+- Row 36: Edible beads with fruit filling (GT: Cross-cutting, LLM: Spreads)
+  — borderline, LLM inferred application, but hard case
+- Row 39: Dairy-free sweetened condensed milk (GT: Chocolate, LLM: Milk)
+  — either_correct=TRUE; sweetened condensed milk primarily used in confectionery is the
+  GT rationale
+- Row 68: Vegetable paste from Lactobacillus reuteri fermentation (GT: Cross-cutting,
+  LLM: Spreads) — borderline; "vegetable paste" could be interpreted as a spread but
+  GT Cross-cutting is defensible

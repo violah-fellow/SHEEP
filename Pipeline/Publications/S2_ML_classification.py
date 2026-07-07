@@ -59,6 +59,7 @@ def main(
     import numpy as np
     import pandas as pd
     import json
+    from datetime import datetime
 
     # 2. Load input data
     db = duckdb.connect(database=DB_PATH)
@@ -172,6 +173,7 @@ def main(
 
         # 6. Combine predictions
         data['pred_combined'] = mlf.combine_classifications(pred_scope, pred_pillar)
+        data['date_ML'] = datetime.today().strftime('%y%m%d')
 
         in_scope_n = data['pred_combined'].sum()
 
@@ -189,6 +191,7 @@ def main(
             'proba_pillar':    'DOUBLE',
             'pred_pillar':     'VARCHAR',
             'pred_combined':   'INTEGER',
+            'date_ML':         'VARCHAR',
         }
         for col, dtype in new_columns.items():
             db.sql(f"ALTER TABLE {RUN_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
@@ -202,7 +205,8 @@ def main(
                 proba_pillar    = data_predictions.proba_pillar,
                 pred_pillar     = data_predictions.pred_pillar,
                 pred_combined   = data_predictions.pred_combined,
-                embeddings      = data_predictions.embeddings
+                embeddings      = data_predictions.embeddings,
+                date_ML         = data_predictions.date_ML
             FROM data_predictions
             WHERE {RUN_TABLE}.id = data_predictions.id
         """)
@@ -214,15 +218,16 @@ def main(
     data_to_append = pd.concat([already_predicted, data], ignore_index=True) if len(already_predicted) > 0 else data
 
     # get output columns for CLASSIFICATION_TABLE
-    # excludes LLM columns, which are computed later in the pipeline (S3_LLM_scope.py)
+    # excludes columns computed later in the pipeline (S3_LLM_scope.py, S6_LLM_labelling.py)
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
     if CLASSIFICATION_TABLE in existing_tables:
         output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                            if c not in ('scope_LLM', 'confidence_LLM', 'pillar_LLM', 'plant_based_LLM',
                                         'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
-                                        'status_LLM', 'stop_reason_LLM')]
+                                        'status_LLM', 'stop_reason_LLM',
+                                        'date_LLM', 'date_labelling')]
     else:
-        output_columns = original_columns + ['pred_combined', 'pred_pillar']
+        output_columns = original_columns + ['pred_combined', 'pred_pillar', 'date_ML']
 
     # convert prediction in / out and add to CLASSIFICATION_TABLE
     data_classified = data_to_append[output_columns].copy()

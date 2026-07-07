@@ -1,0 +1,125 @@
+End product prompt — v2 test run optimisation notes
+Applied to: prompt_endproduct_patents_work.md
+
+v2 accuracy (primary / either): 90% / 97%  (n=104, against corrected GT labels)
+Up from 75% / 85% in v1. No new training label corrections identified.
+
+True errors (primary=FALSE, either=FALSE): 3 rows
+  - Row 41: accepted as unavoidable miss (see below)
+  - Row 71: fixable — PAD enzyme method → Agnostic
+  - Row 90: fixable — milk frothing device → Milk and milk proteins
+
+Borderline cases (primary=FALSE, either=TRUE): 7 rows
+  - Rows 36, 39, 54, 57, 68, 84, 100
+
+---
+
+1. PHYSICAL FORMAT INFERENCE — EXTEND ANTI-INFERENCE RULE
+
+Rows 36 and 68 show the LLM inferring product category from the ingredient's form:
+- Row 36: Edible beads with fruit filling → LLM inferred Chocolate/confectionery.
+  GT: Cross-cutting. Viola: "doesn't mention the dessert specifically."
+  Encapsulated ingredients or delivery systems (beads, spheres, microcapsules) with a
+  flavoured filling are not automatically confectionery — no specific end product stated
+  → Cross-cutting.
+- Row 68: Vegetable paste from Lactobacillus fermentation → LLM inferred Spreads
+  ("paste" = condiment). GT: Cross-cutting. Viola: "Cross-cutting since no specific end
+  product mentioned."
+
+Fix: Extended the IMPORTANT notice to explicitly prohibit inferring product category from
+physical form (beads, microcapsules, gels, pastes, purées). Also added clarification to
+the Spreads bullet and definition: "paste" or "purée" alone does not trigger Spreads.
+
+---
+
+2. SWEETENED CONDENSED MILK ANALOGUE → CHOCOLATE
+
+Row 39: Dairy-free sweetened condensed milk analogue → LLM: Dairy, GT: Chocolate,
+either=TRUE.
+Viola: "specifically sweetened condensed milk which is a dessert/sweet."
+Sweetened condensed milk is used as a confectionery ingredient, not as a direct dairy
+replacement (it is sweet, not savoury). Its plant-based analogue belongs in Chocolate,
+desserts, and confectionery.
+
+Fix: Added explicit rule to Chocolate preamble bullet and Chocolate definition: dairy-free
+analogues of sweetened condensed milk → Chocolate, desserts, and confectionery.
+
+---
+
+3. DAIRY + NON-DAIRY PRODUCT TYPES → CROSS-CUTTING
+
+Row 54: Seaweed flour procedure for milk-based aliments (desserts, yogurts, ice cream,
+whipping cream) AND meat/vegan analogues → LLM: Dairy, GT: Cross-cutting, either=TRUE.
+Viola: "Cross-cutting since it also mentions the application in meat or vegan analogues."
+The current prompt has the rule "multiple dairy types → Cross-cutting" but it did not
+catch the case where dairy is mentioned alongside a non-dairy product type.
+
+Fix: Added explicit preamble rule: "Assign Dairy only when the patent is exclusively
+about dairy-analogue products. If the abstract also mentions other AP product types
+(meat, fish, food categories generally) → Cross-cutting."
+
+---
+
+4. ENZYME COMPOSITION vs METHOD — CROSS-CUTTING vs AGNOSTIC BOUNDARY
+
+Two error types pointing in opposite directions:
+
+Row 71: PAD enzyme to obtain improved food — LLM: Cross-cutting, GT: Agnostic,
+either=FALSE.
+Viola: "Agnostic because of method focus and no end product." Abstract: "a method for
+improving properties of a food product containing a protein" — food product is generic.
+This is a METHOD patent (the process is the innovation, not a food ingredient).
+→ Too generic to indicate any specific product type → Agnostic.
+
+Rows 84 and 100: Stabilized liquid deamidase COMPOSITIONS → LLM: Agnostic,
+GT: Cross-cutting, either=TRUE.
+Viola: "borderline but as it can be added to food I would say Cross-cutting."
+These are COMPOSITION patents (the enzyme formulation is the innovation). Even though
+no specific food product is mentioned in the abstract, enzyme compositions formulated
+for food use (deamidases, transglutaminases, proteases) are food ingredients → Cross-cutting.
+
+Fix: Clarified the composition vs method distinction in both the Cross-cutting bullet
+and definition, and in the Agnostic definition:
+  - Enzyme COMPOSITION patents (where the formulation is the claimed innovation)
+    → Cross-cutting even if no food product is mentioned in the abstract.
+  - METHOD patents applying an enzyme or process to modify generic "food products" or
+    "food products containing protein" without naming any specific product type → Agnostic.
+
+---
+
+5. PROCESSING EQUIPMENT WITH NAMED PRODUCT → ASSIGN PRODUCT CATEGORY
+
+Row 90: Milk foaming device for coffee-milk applications → LLM: Dairy, GT: Milk and
+milk proteins, either=FALSE.
+Viola: "specifically mentions milk not other dairy products so Milk and milk proteins."
+The existing prompt sends equipment → Agnostic unless a food product is stated. This
+device explicitly says "milk foam" and "milk modifications" for coffee/beverage use.
+Equipment with an explicitly named product application should be assigned that product
+category — Agnostic is reserved for equipment with NO named food product context.
+
+Fix: Added exception to both the Agnostic preamble bullet and Agnostic definition:
+"Processing equipment that explicitly names a specific product application (e.g. a milk
+frothing device for milk/coffee applications, a cheese press) → assign the corresponding
+product category, not Agnostic."
+
+---
+
+6. ACCEPTED MISSES (no prompt changes)
+
+Row 41: Pectin emulsifier for oil-in-water emulsion + fermented product (dairy use
+only in claims, not in abstract). LLM: Spreads, GT: Dairy, either=FALSE.
+Viola: "Difficult, the use for dairy is only stated in the claims unfortunately.
+I think we will just miss some patents like this." — Accepted as unavoidable.
+
+Row 57: Coagulated tuber protein product method → LLM: Cross-cutting, GT: Agnostic,
+either=TRUE.
+Borderline — a composition of tuber protein that "a food product comprising it"
+was sufficient for LLM to say Cross-cutting; GT is Agnostic (method focus).
+either=TRUE; accepted.
+
+Rows 84 and 100: either=TRUE (borderline); addressed by the composition/method rule
+above though fully correct classification of very short enzyme abstracts remains hard.
+
+---
+
+TRAINING LABEL CORRECTIONS: None identified in v2 test round.

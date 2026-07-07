@@ -42,6 +42,7 @@ def main(
 ):
     # import packages
     from dotenv import load_dotenv
+    from datetime import datetime
     import dimcli
     from dimcli.utils import dsl_escape
     import pandas as pd
@@ -122,6 +123,7 @@ def main(
 
     # clean abstract
     query_df['abstract'] = query_df['abstract'].str.replace(r'<[^>]*>', '', regex=True)
+    query_df['date_dimensions'] = datetime.today().strftime('%y%m%d')
 
     # 3. Filter by CPC codes
     # Get CPC codes for filtering
@@ -170,12 +172,14 @@ def main(
             print(f"{len(older_or_same)} older/same-version rows dropped.")
 
     # Reorder columns to match patents_classified if it exists
+    # excludes columns computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py, S7_LLM_labelling.py)
     if CLASSIFICATION_TABLE in existing_tables:
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                          if c not in ('pred_combined', 'pred_pillar', 'proba_scope',
                                       'scope_LLM', 'confidence_LLM', 'pillar_LLM',
                                       'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM',
-                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM')]
+                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM',
+                                      'date_ML', 'date_LLM', 'date_labelling')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database

@@ -36,6 +36,7 @@ def main(
 ):
     # import packages
     from dotenv import load_dotenv
+    from datetime import datetime
     import dimcli
     from dimcli.utils import dsl_escape
     import pandas as pd
@@ -72,9 +73,10 @@ def main(
         #                     return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
         #                     funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]"""))
 
-    # Convert to pandas dataframe and deduplicate by id    
+    # Convert to pandas dataframe and deduplicate by id
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
     query_df = query_df.drop_duplicates(subset="id").reset_index(drop=True)
+    query_df['date_dimensions'] = datetime.today().strftime('%y%m%d')
 
     # 3. Filter articles
     # Filter for articles
@@ -92,12 +94,14 @@ def main(
         print(f"{n_before - len(query_df)} rows already in {CLASSIFICATION_TABLE}.")
 
     # Reorder columns to match publications_classified if it exists
-    # excludes ML/LLM prediction columns, which are computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py)
+    # excludes columns computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py, S6_LLM_labelling.py)
     if CLASSIFICATION_TABLE in existing_tables:
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-                         if c not in ('pred_combined', 'pred_pillar', 'scope_LLM', 'confidence_LLM', 'pillar_LLM',
+                         if c not in ('pred_combined', 'pred_pillar',
+                                      'scope_LLM', 'confidence_LLM', 'pillar_LLM',
                                       'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
-                                      'status_LLM', 'stop_reason_LLM')]
+                                      'status_LLM', 'stop_reason_LLM',
+                                      'date_ML', 'date_LLM', 'date_labelling')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database

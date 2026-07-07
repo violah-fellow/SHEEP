@@ -56,6 +56,7 @@ def main(
     import duckdb
     import numpy as np
     import pandas as pd
+    from datetime import datetime
 
     # 2. Load input data
     db = duckdb.connect(database=DB_PATH)
@@ -73,6 +74,7 @@ def main(
         'proba_pillar':    'DOUBLE',
         'pred_pillar':     'VARCHAR',
         'pred_combined':   'INTEGER',
+        'date_ML':         'VARCHAR',
     }
     for col, dtype in new_columns.items():
         db.sql(f"ALTER TABLE {RUN_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
@@ -108,11 +110,12 @@ def main(
                 family_id,
                 proba_scope,
                 pred_pillar,
+                date_ML,
                 CASE WHEN pred_combined = 'in' THEN 1 ELSE 0 END AS pred_combined
             FROM {CLASSIFICATION_TABLE}
         """).df()
 
-        _drop = [c for c in ['proba_scope', 'pred_combined', 'pred_pillar'] if c in known_data.columns]
+        _drop = [c for c in ['proba_scope', 'pred_combined', 'pred_pillar', 'date_ML'] if c in known_data.columns]
         known_data = known_data.drop(columns=_drop).merge(family_preds, on='family_id', how='left')
 
         db.register('known_update', known_data[['id', 'proba_scope', 'pred_combined', 'pred_pillar']])
@@ -130,7 +133,8 @@ def main(
         # (the family is known but these specific patents weren't seen before)
         _llm_cols = {'scope_LLM', 'confidence_LLM', 'pillar_LLM', 'plant_based_LLM',
                      'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
-                     'status_LLM', 'stop_reason_LLM'}
+                     'status_LLM', 'stop_reason_LLM',
+                     'date_LLM', 'date_labelling'}
         output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                           if c not in _llm_cols]
         known_classified = known_data[output_columns].copy()
@@ -226,6 +230,7 @@ def main(
 
         # Combine predictions
         reps['pred_combined'] = mlf.combine_classifications(pred_scope, pred_pillar)
+        reps['date_ML'] = datetime.today().strftime('%y%m%d')
         in_scope_n = reps['pred_combined'].sum()
         print(f"Predicted in scope: {in_scope_n} / {len(reps)} ({in_scope_n / len(reps):.1%})")
 
@@ -251,12 +256,13 @@ def main(
         existing_tables_now = db.sql("SHOW TABLES").df()['name'].tolist()
         _llm_cols = {'scope_LLM', 'confidence_LLM', 'pillar_LLM', 'plant_based_LLM',
                      'fermentation_LLM', 'cultivated_LLM', 'cross_cutting_LLM',
-                     'status_LLM', 'stop_reason_LLM'}
+                     'status_LLM', 'stop_reason_LLM',
+                     'date_LLM', 'date_labelling'}
         if CLASSIFICATION_TABLE in existing_tables_now:
             output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                               if c not in _llm_cols]
         else:
-            output_columns = original_columns + ['proba_scope', 'pred_combined', 'pred_pillar']
+            output_columns = original_columns + ['proba_scope', 'pred_combined', 'pred_pillar', 'date_ML']
 
         data_classified = new_data[output_columns].copy()
         data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})

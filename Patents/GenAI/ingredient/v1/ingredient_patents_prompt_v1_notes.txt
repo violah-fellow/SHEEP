@@ -1,0 +1,120 @@
+Ingredient type prompt — v1 test run optimisation notes
+Applied to: prompt_ingredient_patents_work.md
+
+v1 accuracy (primary / either): 72% / 93%  (n=75)
+Several GT labels were found to be wrong (LLM was correct); true accuracy is higher.
+
+---
+
+1. FAT-PRODUCING ORGANISMS AND PROCESSES → N/A INSTEAD OF FATS — LARGEST ERROR CLASS
+
+Five cases where the LLM correctly identified the patent as organism/process-focused but
+then assigned N/A instead of Fats and oils, despite fat/lipid production being explicitly
+stated as the primary purpose:
+
+- BIOREACTOR AND METHOD FOR THE PRODUCTION OF CULTURED FAT → Fats
+  Viola: "Fat is specifically mentioned in the title, so would stay with Fat."
+  The bioreactor is explicitly for producing cultured fat — fat is the stated output.
+- YEAST FOR INCREASED LIPID PRODUCTION (Yarrowia lipolytica) → Fats
+  Viola: "lipids is the main application/product of this strain, so fats and oils is a
+  good label."
+- Adipocyte maturation (x3 patent family members) → Fats
+  Viola: "both fine, but clearly fat." Fat cell maturation for human consumption.
+
+The current prompt rule ("assign Fats if oil is the described end ingredient; N/A if
+focus is on organism or production process") is too blunt. The LLM treated all organism
+and process patents as N/A, missing cases where fat/lipid IS the explicitly named output.
+
+Fix: Added rule that organism/process patents where fat/lipid is explicitly the PRIMARY
+DESCRIBED PURPOSE OR OUTPUT (stated in title or abstract) → Fats and oils. Added examples:
+bioreactor for cultured fat production, yeast for lipid production, adipocyte maturation
+for consumable fat.
+
+Distinction retained:
+- Organism described without explicit fat/lipid output framing → N/A
+- Equipment (cell culture system) without named fat product → N/A
+
+---
+
+2. COLOUR AS PRIMARY INNOVATION IN A FOOD PRODUCT → N/A INSTEAD OF COLOURS
+
+Two cases (same patent family — rasher analogues with two-phase colour contrast):
+- VEGETARIAN RASHER COMPRISING MUSCLE AND FAT PHASES WITH HIGH CONTRAST → Colours
+- PASTEURIZED MEAT ANALOGUE WITH LITTLE COLOUR MIGRATION → Colours
+  Viola: "yes it describes a complete product but the focus is clearly the colour."
+
+The LLM correctly identified that these are food product patents (not standalone colour
+ingredients) and assigned N/A — but Viola considers the colour ingredient/system to be
+the primary described innovation, making Colours appropriate even within a product context.
+
+Fix: Added rule that if a food product patent's PRIMARY described innovation is a colour
+ingredient or colour-contrast system (a colouring agent, phase-colour-contrast mechanism,
+or colour-change component that functions as a standalone ingredient) → Colours, even if
+the patent describes a complete food product.
+
+---
+
+3. OIL BODY SOLUTION → EMULSIONS INSTEAD OF FATS
+
+CO-EXTRACTION METHOD FOR PREPARING A STABLE OIL BODY SOLUTION FROM SEED MATERIAL AND
+CEREAL BRAN → Fats
+  Viola: "oil because the focus is the production of this oil body solution."
+  LLM assigned Emulsions (inferred from "oil body in aqueous suspension" = emulsion).
+
+Oil bodies (oleosomes) are fat-phase structures from seeds; they are fat ingredients even
+when extracted as an aqueous solution. The emulsion-like format of oleosomes does not make
+them Emulsions — the fat content is the primary ingredient.
+
+Fix: Added explicit clarification that oil bodies (oleosomes) and oil body extracts/solutions
+→ Fats and oils, not Emulsions.
+
+---
+
+4. OVER-CLASSIFICATION OF EMULSIONS FOR INSUFFICIENT-CONTEXT PATENTS
+
+MICROPARTICULATION OF RECOMBINANT BETA-LACTOGLOBULIN AND ASSOCIATED FOOD APPLICATIONS
+→ LLM: Emulsions; GT: N/A; Viola: N/A
+  Viola: "I think N/A is most appropriate here because there is not enough information
+  for classification."
+  The abstract is primarily about the microparticulation method; "food applications" is
+  too vague for an ingredient type assignment.
+
+Fix: Added clarification: proteins described in microparticulate or formulated form without
+an explicit emulsification/gelation/binding function as the primary described purpose →
+N/A, not Emulsions.
+
+---
+
+TRAINING LABEL CORRECTIONS NOTED BY VIOLA (not prompt changes, noted for record):
+
+- FLAVOUR DELIVERY SYSTEM: GT=N/A → corrected to Flavours and aromas
+  (solid/semi-solid flavour delivery system comprising fat + starch + flavour compounds;
+  clearly a standalone flavour ingredient; LLM was correct)
+- LIPID PARTICLES AND THEIR COMESTIBLE USE: GT=Flavours → corrected to Fats and oils
+  (lipid particles are fat-phase ingredients; LLM was correct)
+- MEAT ANALOGUE AND METHOD TO DECREASE THE OFF-FLAVOUR THEREOF: GT=Flavours → N/A
+  (the off-flavour reduction is formulation-level; no standalone flavour ingredient
+  described; LLM was correct)
+- Micro-organism (Metschnikowia pulcherrima strain): GT=Fats → N/A
+  (generic organism abstract, no explicit fat ingredient framing; LLM was correct)
+- System for cell culture: GT=Fats → N/A
+  (equipment patent, no fat product described; LLM was correct)
+- NOVEL FOOD COMPOSITION AND METHOD FOR PRODUCTION THEREOF: GT=Emulsions → Isolates
+  (upcycled lignocellulosic material processed into a flour-like ingredient; Viola agrees
+  Isolates is more appropriate; LLM was correct)
+
+---
+
+ACCEPTED BORDERLINE CASES (no prompt changes):
+- PLANT-BASED MILK COMPRISING SUNFLOWER OLEOSOMES: GT=Emulsions, LLM=N/A (either=TRUE)
+  Viola: "could be N/A or emulsions."
+- PROCESS FOR IMPROVING FLAVOR OF MEAT ANALOGS: GT=Flavours, LLM=N/A (either=TRUE)
+  Viola: "agree with both."
+- SYNTHETIC AND RECOMBINANT COLLAGEN PEPTIDES: GT=Emulsions, LLM=N/A (either=TRUE)
+  Viola: "would be okay with labelling."
+- NON-VITAL WHEAT PROTEIN: GT=Isolates, LLM=Emulsions (either=TRUE)
+  Viola: "both reasonings make sense." (protein has both isolation AND emulsifying focus)
+- Method of Preparing a Food Component from Pulses: GT=N/A, LLM=Isolates (either=TRUE)
+  Viola: "both would be fine."
+- METHOD FOR PRODUCING CASEIN AND USES THEREOF: GT=N/A, LLM=Isolates (either=FALSE)
+  Viola: "both NA and isolates would be fine I guess." (borderline, accepted as miss)

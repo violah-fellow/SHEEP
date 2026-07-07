@@ -36,6 +36,7 @@ def main(
 ):
     # import packages
     from dotenv import load_dotenv
+    from datetime import datetime
     import dimcli
     from dimcli.utils import dsl_escape
     import pandas as pd
@@ -102,6 +103,7 @@ def main(
 
     # clean abstract
     query_df['abstract'] = query_df['abstract'].str.replace(r'<[^>]*>', '', regex=True)
+    query_df['date_dimensions'] = datetime.today().strftime('%y%m%d')
 
     # Filter publications that already are in the final database
     existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
@@ -135,11 +137,13 @@ def main(
             print(f"{len(older_or_same)} older/same-version rows dropped.")
 
         # Reorder columns to match patents_classified
+        # excludes columns computed later in the pipeline (S2_ML_classification.py, S3_LLM_scope.py, S7_LLM_labelling.py)
         expected_cols = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                          if c not in ('pred_combined', 'pred_pillar', 'proba_scope',
                                       'scope_LLM', 'confidence_LLM', 'pillar_LLM',
                                       'plant_based_LLM', 'fermentation_LLM', 'cultivated_LLM',
-                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM')]
+                                      'cross_cutting_LLM', 'status_LLM', 'stop_reason_LLM',
+                                      'date_ML', 'date_LLM', 'date_labelling')]
         query_df = query_df.reindex(columns=expected_cols)
 
     # 4. Add the queries to the database
@@ -161,6 +165,7 @@ def main(
         'proba_pillar':      'DOUBLE',
         'pred_pillar':       'VARCHAR',
         'pred_combined':     'INTEGER',
+        'date_ML':           'VARCHAR',
         'scope_LLM':         'VARCHAR',
         'confidence_LLM':    'DOUBLE',
         'pillar_LLM':        'VARCHAR',
@@ -170,6 +175,7 @@ def main(
         'cross_cutting_LLM': 'BOOLEAN',
         'status_LLM':        'VARCHAR',
         'stop_reason_LLM':   'VARCHAR',
+        'date_LLM':          'VARCHAR',
     }
     for col, dtype in new_columns.items():
         db.sql(f"ALTER TABLE {REVERSE_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
@@ -190,8 +196,9 @@ def main(
     # 6. Append to patents_classified
     print(f"\nAppending to {CLASSIFICATION_TABLE} table.")
 
-    # get output columns for CLASSIFICATION_TABLE
-    output_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+    # get output columns for CLASSIFICATION_TABLE; exclude date_labelling (set by S7, not yet run)
+    output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+                      if c != 'date_labelling']
     
     # get data with predictions from reverse_table
     data = db.sql(f"SELECT * FROM {REVERSE_TABLE}").df()

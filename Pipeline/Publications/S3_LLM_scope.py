@@ -225,6 +225,12 @@ def main(
         return "NA"
 
     results_df["pillar_LLM"] = results_df.apply(derive_pillar, axis=1)
+    date_LLM = datetime.today().strftime('%y%m%d')
+    results_df["date_LLM"] = date_LLM
+
+    # store retrieval date in batch metadata so the log reflects when results were collected
+    metadata["date_LLM"] = date_LLM
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
     # 6. Write results back to RUN_TABLE
     print(f"\nUpdating '{RUN_TABLE}' with LLM columns.")
@@ -239,6 +245,7 @@ def main(
         'cross_cutting_LLM': 'BOOLEAN',
         'status_LLM':        'VARCHAR',
         'stop_reason_LLM':   'VARCHAR',
+        'date_LLM':          'VARCHAR',
     }
     results_df = results_df.reindex(columns=['id'] + list(llm_columns.keys()))
 
