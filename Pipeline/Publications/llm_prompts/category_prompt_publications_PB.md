@@ -11,7 +11,7 @@ Before assigning categories, identify the primary research contribution of the p
 - A paper conducting a life cycle analysis or techno-economic assessment → Impact assessments
 - A paper arguing for dietary or policy change without specific interventions and using environmental considerations as motivation → Other
 
-From the 10 research categories defined below, identify the top 2 most relevant to this article, ranked from most to least relevant. Other should be assigned when no single specific category is the clear primary focus, including for broad review articles spanning multiple topics. Provide one extremely concise sentence of reasoning for your choice.
+From the 10 research categories defined below, identify the top 2 most relevant to this article, ranked from most to least relevant. Other should be assigned when no single specific category is the clear primary focus, including for broad review articles spanning multiple topics.
 
 Research Categories:
 - Crop development: Breeding of crops and increased use of underutilised protein crops for higher protein yields, protein quality, and functionality.

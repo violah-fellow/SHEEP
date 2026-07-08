@@ -62,25 +62,29 @@ def main(
         query_string = i.replace('\\"', '\"')
         
         # only pull 100 publications per search term for testing
-        query.append(dsl.query(f"""search publications for "{dsl_escape(query_string)}"
+        query.append(dsl.query(f"""search publications in title_abstract_only for "{dsl_escape(query_string)}"
                             where year={YEAR} 
                             return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
                             funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]
-                            limit 20"""))
+                            limit 100"""))
         
-        # query.append(dsl.query_iterative(f"""search publications for "{dsl_escape(query_string)}"
+        # query.append(dsl.query_iterative(f"""search publications in title_abstract_only for "{dsl_escape(query_string)}"
         #                     where year={YEAR} 
         #                     return publications[id+title+abstract+year+type+authors+concepts_relevant+date+funders+
         #                     funder_countries+journal+open_access+research_org_names+research_org_countries+research_org_cities+times_cited]"""))
 
     # Convert to pandas dataframe and deduplicate by id
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
+    print(f"\n{len(query_df)} patents retrieved from dimensions.")
+
     query_df = query_df.drop_duplicates(subset="id").reset_index(drop=True)
     query_df['date_dimensions'] = datetime.today().strftime('%y%m%d')
 
     # 3. Filter articles
     # Filter for articles
     query_df = query_df[query_df['type'] == 'article']
+
+    print(f"\n{len(query_df)} patents remain after deduplication and filtering for articles.")
 
     # Filter publications that already are in the final database
     # Connect to SQL database

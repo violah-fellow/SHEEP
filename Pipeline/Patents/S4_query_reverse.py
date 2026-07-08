@@ -59,7 +59,7 @@ def main(
     run_data = db.sql(f"SELECT * FROM {RUN_TABLE}").df()
 
     # Filter for in scope patents and retrieve family ID's
-    run_data = run_data[run_data['pred_combined'] == 1] 
+    run_data = run_data[run_data['pred_combined'] == 1]
     family_ids = run_data['family_id'].tolist()
 
     # Function to batch family ID's    
@@ -79,7 +79,7 @@ def main(
                         publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                         assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                         publications+researchers+times_cited+family_count]
-          limit 150 """)
+          limit 100 """)
         query.append(q)
 
     # full query
@@ -157,8 +157,6 @@ def main(
     print(f"\nUpdating '{REVERSE_TABLE}' in database with prediction columns.")
 
     new_columns = {
-        'embeddings':        'DOUBLE[]',
-        'truncated':         'BOOLEAN',
         'proba_scope':       'DOUBLE',
         'pred_scope':        'INTEGER',
         'threshold_scope':   'DOUBLE',

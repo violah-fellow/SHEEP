@@ -100,6 +100,16 @@ def main(
         new_data = data.copy()
         print(f"No existing classification table. All {len(new_data)} rows treated as new.")
 
+    import json as _json
+    def _to_json(x):
+        if isinstance(x, str):
+            return x
+        if hasattr(x, '__len__'):
+            return _json.dumps(x.tolist() if hasattr(x, 'tolist') else list(x))
+        if x is None or pd.isna(x):
+            return x
+        return _json.dumps(x)
+
     # 4. Known families: propagate pred_combined and pred_pillar from classification table
     if not known_data.empty:
         print(f"\nPropagating predictions for known families.")
@@ -141,18 +151,11 @@ def main(
         known_classified['pred_combined'] = known_classified['pred_combined'].map({1: 'in', 0: 'out'})
         _nested = ['cpc', 'inventor_names', 'assignee_names', 'assignee_cities',
                    'assignee_countries', 'funder_countries']
-        import json as _json
-        def _to_json(x):
-            if isinstance(x, str):
-                return x
-            if hasattr(x, '__len__'):
-                return _json.dumps(x.tolist() if hasattr(x, 'tolist') else list(x))
-            if x is None or pd.isna(x):
-                return x
-            return _json.dumps(x)
         for _c in _nested:
             if _c in known_classified.columns:
                 known_classified[_c] = known_classified[_c].apply(_to_json)
+        _existing_ids = db.sql(f"SELECT id FROM {CLASSIFICATION_TABLE}").df()['id']
+        known_classified = known_classified[~known_classified['id'].isin(_existing_ids)].reset_index(drop=True)
         db.register('known_classified', known_classified)
         _cols_str = ", ".join(f'"{c}"' for c in output_columns)
         db.sql(f"INSERT INTO {CLASSIFICATION_TABLE} ({_cols_str}) SELECT * FROM known_classified")
@@ -262,7 +265,13 @@ def main(
             output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                               if c not in _llm_cols]
         else:
-            output_columns = original_columns + ['proba_scope', 'pred_combined', 'pred_pillar', 'date_ML']
+            _extra = [c for c in ['proba_scope', 'pred_combined', 'pred_pillar', 'date_ML']
+                      if c not in original_columns]
+            output_columns = original_columns + _extra
+
+        # deduplicate while preserving order (guards against partial prior runs)
+        _seen = set()
+        output_columns = [c for c in output_columns if c not in _seen and not _seen.add(c)]
 
         data_classified = new_data[output_columns].copy()
         data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})

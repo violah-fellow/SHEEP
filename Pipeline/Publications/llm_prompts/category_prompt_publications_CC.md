@@ -10,7 +10,7 @@ Before assigning categories, identify the novel contribution or primary focus of
 - A review focused primarily on ingredient modification methods that also mentions health and sustainability → Ingredient Optimisation
 - A review covering ingredient modification, health effects, consumer acceptance, and environmental impacts equally → Other
 
-From the 9 research categories defined below, identify the top 2 categories that best capture the novel contribution and primary focus of the paper, ranked from most to least central. Provide one extremely concise sentence of reasoning for your choice.
+From the 9 research categories defined below, identify the top 2 categories that best capture the novel contribution and primary focus of the paper, ranked from most to least central.
 
 Review articles receive Other only when they span multiple research categories without a clear dominant focus. If a review is organised around a single topic (e.g. fermentation as a method for improving ingredient properties, or consumer acceptance of alternative proteins) assign that category even if other topics are 
 touched on. 

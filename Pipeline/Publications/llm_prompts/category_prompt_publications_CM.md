@@ -10,7 +10,7 @@ Before assigning categories, identify the novel contribution of the paper. The 9
 - A paper arguing for regulatory change without specific interventions → Other
 - A paper analysing novel food regulatory frameworks for cultivated meat → Food safety & quality
 
-From the 10 research categories defined below, identify the top 2 categories that best capture the novel contribution and primary experimental or analytical focus of the paper, ranked from most to least central. Provide one extremely concise sentence of reasoning for your choice.
+From the 10 research categories defined below, identify the top 2 categories that best capture the novel contribution and primary experimental or analytical focus of the paper, ranked from most to least central.
 
 Other should be assigned to broad review articles that span multiple of the defined categories. 
 

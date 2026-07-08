@@ -35,7 +35,7 @@ TEMPERATURE = 0.0
 # directory for batch submission metadata, keyed by RUN_TABLE (allows resuming without resubmitting)
 BATCH_DIR = 'batch_jobs'
 # how often to check whether the batch has finished
-POLL_INTERVAL_SECONDS = 1800
+POLL_INTERVAL_SECONDS = 600
 
 # START OF SCRIPT
 
