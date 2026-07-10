@@ -1,0 +1,130 @@
+Resuming run 'run_260710_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/pipeline_patents.py", line 178, in <module>
+    classify_run(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S2_ML_classification.py", line 63, in main
+    data = db.sql(f"SELECT * FROM {RUN_TABLE}").df()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_duckdb.CatalogException: Catalog Error: Table with name run_260710_0000 does not exist!
+Did you mean "pragma_database_list"?
+Resuming run 'run_260710_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+820 rows loaded from 'run_260710_0000'
+No existing classification table. All 820 rows treated as new.
+
+640 representative patents selected from 640 new families.
+
+Loading PatentSBERTa model.
+Token indices sequence length is longer than the specified maximum sequence length for this model (613 > 512). Running this sequence through the model will result in indexing errors
+
+Texts exceeding 512 tokens: 5 (0.8%)
+
+Computing embeddings.
+Embedding:   0%|          | 0/20 [00:00<?, ?batch/s]Embedding:   5%|5         | 1/20 [00:13<04:22, 13.82s/batch]Embedding:  10%|#         | 2/20 [00:30<04:36, 15.39s/batch]Embedding:  15%|#5        | 3/20 [00:52<05:17, 18.68s/batch]Embedding:  20%|##        | 4/20 [01:25<06:23, 24.00s/batch]Embedding:  25%|##5       | 5/20 [01:44<05:37, 22.47s/batch]Embedding:  30%|###       | 6/20 [02:05<05:07, 21.96s/batch]Embedding:  35%|###5      | 7/20 [02:25<04:34, 21.09s/batch]Embedding:  40%|####      | 8/20 [02:46<04:15, 21.33s/batch]Embedding:  45%|####5     | 9/20 [03:10<04:01, 21.98s/batch]Embedding:  50%|#####     | 10/20 [03:31<03:35, 21.58s/batch]Embedding:  55%|#####5    | 11/20 [04:25<04:43, 31.52s/batch]Embedding:  60%|######    | 12/20 [04:43<03:40, 27.52s/batch]Embedding:  65%|######5   | 13/20 [05:02<02:55, 25.01s/batch]Embedding:  70%|#######   | 14/20 [05:33<02:40, 26.69s/batch]Embedding:  75%|#######5  | 15/20 [06:01<02:16, 27.27s/batch]Embedding:  80%|########  | 16/20 [06:38<02:00, 30.22s/batch]Embedding:  85%|########5 | 17/20 [07:35<01:54, 38.20s/batch]Embedding:  90%|######### | 18/20 [08:21<01:20, 40.36s/batch]Embedding:  95%|#########5| 19/20 [09:04<00:41, 41.29s/batch]Embedding: 100%|##########| 20/20 [09:39<00:00, 39.51s/batch]Embedding: 100%|##########| 20/20 [09:39<00:00, 29.00s/batch]
+Embeddings shape: (640, 768)
+
+Appending to patents_embeddings table.
+
+Running scope classifier.
+Scope threshold: 0.189
+Running pillar classifier.
+Predicted in scope: 468 / 640 (73.1%)
+
+Updating 'run_260710_0000' with predictions for new families.
+
+Appending to patents_classified table.
+820 rows appended to patents_classified.
+
+Done!
+
+Starting Step 3: LLM scoping.
+
+Connecting to the Anthropic API
+820 rows loaded from 'run_260710_0000'
+Scope threshold: 0.189
+624 rows above threshold, sending to LLM.
+
+Submitting batch
+Batch ID: msgbatch_019dbuy3SpRWbSZbequ3SjAu
+Status:   in_progress
+Batch metadata saved to batch_jobs/run_260710_0000_llm_scope.json
+
+Waiting for batch to complete
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=624, succeeded=0)
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=624, succeeded=0)
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=624, succeeded=0)
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=624)
+
+Retrieving results
+Results: 624 total, 624 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 403
+
+Updating 'run_260710_0000' with LLM columns.
+'run_260710_0000' updated with LLM columns for 624 rows.
+'patents_classified' updated with LLM columns for 624 rows.
+
+Done!
+
+Starting Step 4: Reverse search for family members.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+
+Start reverse query
+Returned Patents: 100 (total = 2325)
+Time: 5.04s
+Returned Patents: 100 (total = 707)
+Time: 1.98s
+103 rows already in patents_classified.
+1 older/same-version rows dropped.
+
+Storing publications in database as run_260710_0000_reverse
+83 rows appended to run_260710_0000_reverse.
+
+Updating 'run_260710_0000_reverse' in database with prediction columns.
+
+Appending to patents_classified table.
+83 rows appended to patents_classified.
+Done!
+
+Starting Step 5: Clean-up of assignee names.
+Traceback (most recent call last):
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3641, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 168, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 197, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7668, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7676, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'assignee_names'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/pipeline_patents.py", line 228, in <module>
+    assignee_cleanup(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S5_Assignee_cleanup.py", line 102, in main
+    data['tmp'] = data[ASSIGNEE_COLUMN].apply(lambda x: map_companies(x, name_map))
+                  ~~~~^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/frame.py", line 4378, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 3648, in get_loc
+    raise KeyError(key) from err
+KeyError: 'assignee_names'

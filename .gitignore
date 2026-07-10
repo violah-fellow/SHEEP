@@ -1,6 +1,8 @@
 .env
 
 data/raw/
+Patents/Patents_Data/*
+Publications/Publications_Data/*
 
 __pycache__/
 *.pyc
@@ -12,3 +14,6 @@ Funding/1_deduplication/data_changes/
 Patents/ML/Plots/*
 
 Pipeline/Publications/data/*
+Pipeline/Publications/embeddings/*
+Pipeline/Patents/data/*
+Pipeline/Patents/embeddings/*
