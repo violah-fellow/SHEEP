@@ -1,7 +1,7 @@
 ## LLM labelling script: sends in-scope, pillar-curated patents to Claude via the Batch API and
-## stores research category, end product, and ingredient labels in patents_labelled.
-## The three label types are independent sub-runs, each with their own batch/metadata file, so a
-## crash or slow batch on one type doesn't force resubmitting the others on the next run.
+## stores research category, end product, ingredient, and fermentation subpillar labels in
+## patents_labelled. Each label type is an independent sub-run with its own batch/metadata file,
+## so a crash or slow batch on one type doesn't force resubmitting the others on the next run.
 ## Can be run standalone (uses CONFIG defaults) or imported and called as main().
 
 import os
@@ -50,9 +50,13 @@ PILLAR_CATS = {'PB': PB_CATS, 'F': F_CATS, 'CM': CM_CATS, 'CC': CC_CATS}
 # recognised pillar_curated values
 RECOGNISED_PILLARS = set(PILLAR_CATS.keys())
 
-# End product and ingredient use a single prompt/category list across all pillars 
+# End product and ingredient use a single prompt/category list across all pillars
 END_PRODUCT_CATS = ["Meat", "Fish and seafood", "Milk and milk proteins", "Yoghurt and fermented dairy", "Cheese", "Cream and ice cream", "Agnostic", "Chocolate, desserts, and confectionery", "Eggs and egg proteins", "Cross-cutting", "Spreads, sauces, and condiments", "Dairy"]
 INGREDIENT_CATS = ["Isolates, concentrates, and flours", "Emulsions, gels, and binders", "N/A", "Flavours and aromas", "Colours", "Fats and oils"]
+
+# Subpillar (biomass vs precision fermentation) only applies to Fermentation-pillar patents;
+# a single label, not a primary/secondary pair (see LABEL_TYPES below)
+SUBPILLAR_CATS = ["BF", "PF", "NA"]
 
 # sentinel group key for label types that use one prompt/category list for every pillar
 _UNGROUPED = '_all_'
@@ -92,6 +96,21 @@ LABEL_TYPES = {
         'tool_name': 'label_ingredient_type',
         'tool_description': "Record the primary and secondary ingredient type for a patent.",
     },
+    'subpillar': {
+        'grouped_by_pillar': False,
+        # single BF/PF/NA label, not a primary/secondary pair
+        'has_secondary': False,
+        # only Fermentation-pillar patents go through the LLM for this label; every other
+        # pillar gets 'NA' written directly, with no API call
+        'restrict_to_pillars': {'F'},
+        'auto_value_for_other_pillars': 'NA',
+        'prompt_paths': {_UNGROUPED: 'llm_prompts/subpillar_prompt_patents.md'},
+        'categories': {_UNGROUPED: SUBPILLAR_CATS},
+        'output_column': 'subpillar',
+        'diagnostic_prefix': 'subpillar',
+        'tool_name': 'label_subpillar',
+        'tool_description': "Record the fermentation subpillar classification (BF, PF, or NA) for a patent.",
+    },
 }
 
 # columns on CLASSIFICATION_TABLE that are ML/LLM working columns, not patent metadata,
@@ -115,25 +134,33 @@ NESTED_JSON_COLS = ('assignee_cities', 'assignee_countries', 'publications')
 
 # START OF SCRIPT
 
-def _build_category_tool(categories, tool_name, tool_description):
+def _build_category_tool(categories, tool_name, tool_description, has_secondary=True):
+    properties = {
+        "primary": {
+            "type": "string",
+            "enum": categories,
+            "description": (
+                "The category that best captures the patent's primary focus."
+                if has_secondary else
+                "The classification that applies to this patent."
+            ),
+        },
+    }
+    required = ["primary"]
+    if has_secondary:
+        properties["secondary"] = {
+            "type": "string",
+            "enum": categories,
+            "description": "The second most relevant category."
+        }
+        required.append("secondary")
     return {
         "name": tool_name,
         "description": tool_description,
         "input_schema": {
             "type": "object",
-            "properties": {
-                "primary": {
-                    "type": "string",
-                    "enum": categories,
-                    "description": "The category that best captures the patent's primary focus."
-                },
-                "secondary": {
-                    "type": "string",
-                    "enum": categories,
-                    "description": "The second most relevant category."
-                },
-            },
-            "required": ["primary", "secondary"],
+            "properties": properties,
+            "required": required,
         }
     }
 
@@ -197,6 +224,40 @@ def main(
                 return meta['run_label']
         return None
 
+    def write_label_diagnostics(db, results_df, primary_col, secondary_col, status_col,
+                                 stopreason_col, has_secondary):
+        """ALTER + UPDATE CLASSIFICATION_TABLE with this label type's diagnostic columns.
+        Shared by both the LLM-results path and the auto-value path (e.g. subpillar's 'NA'
+        for non-Fermentation pillars), so the two stay in sync. date_labelled is merged as
+        the max of the old and new value, since label types can complete on different days."""
+        llm_columns = {
+            primary_col:    'VARCHAR',
+            status_col:     'VARCHAR',
+            stopreason_col: 'VARCHAR',
+        }
+        if has_secondary:
+            llm_columns[secondary_col] = 'VARCHAR'
+        results_df = results_df.reindex(columns=['id'] + list(llm_columns.keys()) + ['date_labelled'])
+
+        for col, dtype in llm_columns.items():
+            db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
+        db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS date_labelled VARCHAR")
+
+        db.register('llm_results', results_df)
+        set_clause = ", ".join(f"{col} = llm_results.{col}" for col in llm_columns)
+        set_clause += (
+            f", date_labelled = GREATEST("
+            f"COALESCE({CLASSIFICATION_TABLE}.date_labelled, llm_results.date_labelled), "
+            f"llm_results.date_labelled)"
+        )
+        db.sql(f"""
+            UPDATE {CLASSIFICATION_TABLE}
+            SET {set_clause}
+            FROM llm_results
+            WHERE {CLASSIFICATION_TABLE}.id = llm_results.id
+        """)
+        return len(results_df)
+
     # 2. Run each label type's batch independently: submit-or-resume, poll, parse, write
     # diagnostic columns back to CLASSIFICATION_TABLE. A crash or slow batch on one label type
     # doesn't block or resubmit the others on the next call.
@@ -244,6 +305,30 @@ def main(
                     data = data[data[status_col] != 'ok'].reset_index(drop=True)
                     print(f"{n_before - len(data)} rows already labelled for '{label_type}', skipped.")
 
+                # Some label types only apply to a subset of pillars (e.g. subpillar only makes
+                # sense for Fermentation patents). Rows outside that subset get an automatic
+                # value written directly, with no LLM call and no batch involvement at all.
+                restrict_to = cfg.get('restrict_to_pillars')
+                if restrict_to is not None:
+                    auto_mask = ~data[PILLAR_COL].isin(restrict_to)
+                    if auto_mask.any():
+                        auto_value = cfg['auto_value_for_other_pillars']
+                        has_secondary = cfg.get('has_secondary', True)
+                        auto_results = pd.DataFrame({'id': data.loc[auto_mask, 'id']})
+                        auto_results[primary_col] = auto_value
+                        if has_secondary:
+                            auto_results[secondary_col] = None
+                        auto_results[status_col] = 'ok'
+                        auto_results[stopreason_col] = None
+                        auto_results['date_labelled'] = datetime.today().strftime('%y%m%d')
+                        n_auto = write_label_diagnostics(
+                            db, auto_results, primary_col, secondary_col, status_col,
+                            stopreason_col, has_secondary,
+                        )
+                        print(f"{n_auto} rows outside {sorted(restrict_to)} auto-set to "
+                              f"'{auto_value}' for '{label_type}' (no LLM call).")
+                    data = data[~auto_mask].reset_index(drop=True)
+
             if len(data) == 0:
                 print(f"No new rows to label for '{label_type}'.")
                 continue
@@ -259,7 +344,8 @@ def main(
                 with open(prompt_path, "r", encoding="utf-8") as f:
                     system_prompts[group] = f.read().strip()
                 tools[group] = _build_category_tool(
-                    cfg['categories'][group], cfg['tool_name'], cfg['tool_description']
+                    cfg['categories'][group], cfg['tool_name'], cfg['tool_description'],
+                    cfg.get('has_secondary', True),
                 )
 
             def build_batch_request(row):
@@ -321,6 +407,8 @@ def main(
         # 5. Retrieve and parse results
         print("\nRetrieving results")
 
+        has_secondary = cfg.get('has_secondary', True)
+
         raw_results = []
         for result in client.messages.batches.results(batch_id):
             row_id = result.custom_id.replace("_", ".")
@@ -333,25 +421,19 @@ def main(
                 if primary is None:
                     record = {"id": row_id, "status": "parse_error", "stop_reason": stop_reason}
                 else:
-                    record = {
-                        "id": row_id,
-                        "primary": primary,
-                        "secondary": _normalise_category(tool_block.input.get("secondary"), categories),
-                        "status": "ok",
-                        "stop_reason": stop_reason,
-                    }
+                    record = {"id": row_id, "primary": primary, "status": "ok", "stop_reason": stop_reason}
+                    if has_secondary:
+                        record["secondary"] = _normalise_category(tool_block.input.get("secondary"), categories)
             else:
                 record = {"id": row_id, "status": result.result.type, "stop_reason": None}
             raw_results.append(record)
 
         results_df = pd.DataFrame(raw_results)
         results_df["date_labelled"] = datetime.today().strftime('%y%m%d')
-        results_df = results_df.rename(columns={
-            "primary":     primary_col,
-            "secondary":   secondary_col,
-            "status":      status_col,
-            "stop_reason": stopreason_col,
-        })
+        rename_map = {"primary": primary_col, "status": status_col, "stop_reason": stopreason_col}
+        if has_secondary:
+            rename_map["secondary"] = secondary_col
+        results_df = results_df.rename(columns=rename_map)
 
         n_ok = (results_df[status_col] == "ok").sum()
         print(f"Results: {len(results_df)} total, {n_ok} succeeded.")
@@ -359,38 +441,16 @@ def main(
         # 6. Write diagnostic columns for this label type back to CLASSIFICATION_TABLE. 
         print(f"\nUpdating '{CLASSIFICATION_TABLE}' with {label_type} columns.")
 
-        llm_columns = {
-            primary_col:     'VARCHAR',
-            secondary_col:   'VARCHAR',
-            status_col:      'VARCHAR',
-            stopreason_col:  'VARCHAR',
-        }
-        results_df = results_df.reindex(columns=['id'] + list(llm_columns.keys()) + ['date_labelled'])
-
         with duckdb.connect(database=DB_PATH) as db:
-            for col, dtype in llm_columns.items():
-                db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
-            db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS date_labelled VARCHAR")
-
-            db.register('llm_results', results_df)
-            set_clause = ", ".join(f"{col} = llm_results.{col}" for col in llm_columns)
-            set_clause += (
-                f", date_labelled = GREATEST("
-                f"COALESCE({CLASSIFICATION_TABLE}.date_labelled, llm_results.date_labelled), "
-                f"llm_results.date_labelled)"
+            n_written = write_label_diagnostics(
+                db, results_df, primary_col, secondary_col, status_col, stopreason_col, has_secondary,
             )
-            db.sql(f"""
-                UPDATE {CLASSIFICATION_TABLE}
-                SET {set_clause}
-                FROM llm_results
-                WHERE {CLASSIFICATION_TABLE}.id = llm_results.id
-            """)
-            print(f"'{CLASSIFICATION_TABLE}' updated with {label_type} columns for {len(results_df)} rows.")
+            print(f"'{CLASSIFICATION_TABLE}' updated with {label_type} columns for {n_written} rows.")
 
         metadata['completed_at'] = datetime.now().isoformat()
         metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
-    # 7. Assemble LABELLED_TABLE: only rows successfully labelled by ALL THREE label types get added.
+    # 7. Assemble LABELLED_TABLE: only rows successfully labelled by every label type get added.
     print(f"\n{'=' * 60}\nAssembling '{LABELLED_TABLE}'\n{'=' * 60}")
 
     status_cols = {lt: f"{cfg['diagnostic_prefix']}_status_LLM" for lt, cfg in LABEL_TYPES.items()}

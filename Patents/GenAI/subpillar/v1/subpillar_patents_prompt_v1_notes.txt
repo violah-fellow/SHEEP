@@ -1,0 +1,86 @@
+Subpillar (BF/PF/NA) prompt — v1 test run notes
+Applied to: prompt_subpillar_patents_v1.md
+
+v1 accuracy: 93% (n=60)
+By category: BF 100% (30/30), PF 87% (26/30)
+Confusion: of 30 PF ground-truth patents, 26 correct, 3 predicted NA, 1 predicted BF.
+
+All 4 errors were PF ground truth misclassified as NA or BF — no BF patents were ever
+wrongly predicted PF or NA, so the fix should focus entirely on tightening PF recall
+without touching what's already working for BF.
+
+---
+
+1. NAMED PF TARGET MOLECULES DEFAULTING TO NA WHEN PRODUCTION ISN'T DESCRIBED
+
+METHOD FOR PRODUCING CASEIN AND USES THEREOF (EP-4747269-A1) → LLM: NA; GT: PF
+  Abstract only describes a heat-treatment step to increase casein ratio in an existing
+  composition ("for producing cheese substitute") — no mention of fermentation, a host
+  organism, or recombinant expression anywhere.
+  Reasoning: "no mention of fermentation, microbial production, or recombinant expression
+  of casein."
+
+The LLM only assigns PF when the abstract itself narrates a production/expression step.
+But casein, whey protein, egg proteins, collagen, and heme/myoglobin are specifically
+called out in the prompt as canonical PF products (established recombinant targets in
+this space) — when a patent names one of these as its subject, the fermentation-derived
+route should be the default assumption even if the abstract only describes downstream
+processing of it, since a fermentation-pillar patent about "casein" is very unlikely to
+mean animal-extracted casein.
+
+Fix: Added a rule that these named target molecules → PF by default, even without the
+words "fermentation"/"recombinant" appearing and even when the abstract's focus is a
+downstream processing step, unless the abstract explicitly states a natural animal/plant
+source instead.
+
+---
+
+2. MIXED BF+PF PATENTS DEFAULTING TO NA INSTEAD OF THE MORE NOVEL PF CLAIM
+
+COMPOSITIONS AND APPLICATIONS DERIVED FROM OGATAEA POLYMORPHA (AR-130716-A1) → LLM: NA; GT: PF
+  Reasoning: "The patent describes both whole-cell biomass/extracts... used directly as
+  food ingredients/flavor precursors (BF) and recombinant expression of specific
+  hemoproteins (e.g., bovine myoglobin) purified from transgenic O. polymorpha (PF), with
+  comparable emphasis on both routes across the claims."
+
+The LLM correctly spotted both routes, but the v1 prompt's NA rule ("comparable emphasis,
+neither clearly primary") fired as soon as both were present, rather than recognising that
+transgenic/recombinant production of a specific named molecule is usually the more novel,
+patent-worthy claim even when broader biomass/extract embodiments are also described.
+
+Fix: Added an explicit tie-break — when a patent mixes biomass/extract use with
+transgenic/recombinant/engineered production of a specific named molecule from the same
+organism, prefer PF. Narrowed the "comparable emphasis → NA" rule so it only applies when
+neither side involves engineered production of a named molecule (i.e. genuine dual-use
+patents, not this pattern).
+
+---
+
+3. ACCEPTED CASES — NO PROMPT CHANGE (genuine information limits in the abstract)
+
+- OGATAEA POLYMORPHA DERIVED COMPOSITIONS AND APPLICATIONS (US-20250134149-A1) → LLM: BF; GT: PF
+  Same organism/family as case #2 above, but this abstract is much shorter and only says
+  "the use of a methylotrophic yeast and its derivatives as a food additive and source of
+  flavoring compounds" — no mention of the transgenic myoglobin/heme production present in
+  the sibling family member's abstract. Given only this text, BF is the reasonable read;
+  the ground truth here likely reflects knowledge from the fuller patent family that this
+  abstract doesn't contain. Not fixable by prompt wording — the abstract itself doesn't
+  carry the distinguishing signal. Flagging in case family-level context (e.g. family_id)
+  becomes available to the pipeline later, since that would resolve this class of case
+  directly rather than needing the prompt to guess.
+
+- NOVEL FOOD COMPOSITION AND METHOD FOR PRODUCTION THEREOF (WO-2025078458-A3) → LLM: NA; GT: PF
+  Describes enzymatic hydrolysis (glucanase/xylanase) of a lignocellulosic waste stream
+  into a flour-like "upcycled material" — no organism, fermentation step, or specific
+  named target molecule mentioned; glucanase/xylanase are named generically as tools, not
+  as the patent's product. NA is the defensible read from the abstract alone. Did not add
+  a general "any enzyme mention → PF" rule, since that would be over-broad and likely
+  create false positives on genuine BF/bioprocess patents that also use enzymes
+  incidentally (e.g. downstream processing steps in biomass patents).
+
+---
+
+Net effect of the two fixes: directly addresses 2 of the 4 v1 errors (EP-4747269-A1,
+AR-130716-A1). The other 2 are information-limited rather than prompt-logic errors, so v2
+should land around 28/30 PF (93%) rather than 30/30 — the remaining gap looks like a data/
+pipeline question (patent family context) more than a prompt one.
