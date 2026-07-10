@@ -10,7 +10,7 @@ import importlib.util, sys, os
 # path to DuckDB database
 DB_PATH = 'patents_training.db'
 # table containing new training data
-TRAINING_TABLE = 'patents_new_training'
+TRAINING_TABLE = 'patents_raw'
 # table for embeddings
 EMBEDDINGS_TABLE = 'patents_embeddings'
 
@@ -34,7 +34,7 @@ THRESHOLD_PATH    = 'Models/LR_scope_threshold.txt'
 # Classifier hyperparameters (passed as kwargs to train_scope / train_pillar)
 SCOPE_MODEL_KWARGS  = {'C': 100, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
 PILLAR_MODEL_KWARGS = {'C': 1000, 'class_weight': 'balanced', 'max_iter': 1000, 'kernel': 'rbf', 'gamma': 0.01}
-MAX_FN              = 0.01
+MAX_FN              = 0.004
 
 # START OF SCRIPT
 

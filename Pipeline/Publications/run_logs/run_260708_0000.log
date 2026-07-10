@@ -1,0 +1,241 @@
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+16 rows already in publications_classified, skipped.
+0 rows already in publications_embedding, skipped.
+204 rows remaining for embedding.
+
+Loading SPECTER2 model.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|##########| 4/4 [00:00<00:00, 26546.23it/s]
+There are adapters available but none are activated for the forward pass.
+
+Texts exceeding 512 tokens: 7 (3.4%)
+
+Computing embeddings.
+Resuming from 468
+Embedding: 14batch [00:00, ?batch/s]Embedding: 14batch [00:00, ?batch/s]
+Embeddings shape: (468, 768)
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/pipeline_publications.py", line 151, in <module>
+    classify_run(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/S2_ML_classification.py", line 139, in main
+    data['embeddings'] = list(embeddings)
+    ~~~~^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/frame.py", line 4672, in __setitem__
+    self._set_item(key, value)
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/frame.py", line 4872, in _set_item
+    value, refs = self._sanitize_column(value)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/frame.py", line 5754, in _sanitize_column
+    com.require_length_match(value, self.index)
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/common.py", line 601, in require_length_match
+    raise ValueError(
+ValueError: Length of values (468) does not match length of index (204)
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+16 rows already in publications_classified, skipped.
+0 rows already in publications_embedding, skipped.
+204 rows remaining for embedding.
+
+Loading SPECTER2 model.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|##########| 4/4 [00:00<00:00, 41630.81it/s]
+There are adapters available but none are activated for the forward pass.
+
+Texts exceeding 512 tokens: 7 (3.4%)
+
+Computing embeddings.
+Embedding:   0%|          | 0/7 [00:00<?, ?batch/s]Embedding:  14%|#4        | 1/7 [00:45<04:30, 45.10s/batch]Embedding:  29%|##8       | 2/7 [01:17<03:09, 37.84s/batch]Embedding:  43%|####2     | 3/7 [01:51<02:24, 36.03s/batch]Embedding:  57%|#####7    | 4/7 [02:23<01:42, 34.22s/batch]Embedding:  71%|#######1  | 5/7 [02:55<01:07, 33.65s/batch]Embedding:  86%|########5 | 6/7 [03:27<00:32, 32.97s/batch]Embedding: 100%|##########| 7/7 [03:36<00:00, 25.02s/batch]Embedding: 100%|##########| 7/7 [03:36<00:00, 30.87s/batch]
+Embeddings shape: (204, 768)
+
+Appending to publications_embedding table.
+
+Running scope classifier.
+Scope threshold: 0.141
+Running pillar classifier.
+Predicted in scope: 155 / 204 (76.0%)
+
+Updating 'run_260708_0000' in database with prediction columns.
+
+Appending to publications_classified table.
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/pipeline_publications.py", line 151, in <module>
+    classify_run(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/S2_ML_classification.py", line 233, in main
+    data_classified = data_to_append[output_columns].copy()
+                      ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/frame.py", line 4384, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6302, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/indexes/base.py", line 6355, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['scope_curated', 'pillar_curated'] not in index"
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+16 rows already in publications_classified, skipped.
+204 rows already classified in a previous attempt, appending directly.
+
+Appending to publications_classified table.
+204 rows appended to publications_classified.
+
+Done!
+
+Starting Step 3: LLM scope classification.
+
+Connecting to the Anthropic API
+220 rows loaded from 'run_260708_0000'
+Scope threshold: 0.141
+154 rows above threshold, sending to LLM.
+
+Submitting batch
+Batch ID: msgbatch_01BiY3mTKAp1yZdspYJ6PEw8
+Status:   in_progress
+Batch metadata saved to batch_jobs/run_260708_0000_llm_scope.json
+
+Waiting for batch to complete
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=154, succeeded=0)
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query', 'classify']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Step 2 (classify) already done, skipping.
+
+Starting Step 3: LLM scope classification.
+
+Connecting to the Anthropic API
+Found existing batch for 'run_260708_0000': msgbatch_01BiY3mTKAp1yZdspYJ6PEw8. Resuming without resubmitting.
+
+Waiting for batch to complete
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=154)
+
+Retrieving results
+Results: 154 total, 154 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 115
+
+Updating 'run_260708_0000' with LLM columns.
+'run_260708_0000' updated with LLM columns for 154 rows.
+'publications_classified' updated with LLM columns for 154 rows.
+
+Done!
+
+Starting Step 4: Reverse search for researcher IDs.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+Retrieve top researcher ID's from dimensions
+Returned Researchers: 757
+Time: 11.21s
+
+Start reverse query
+Returned Publications: 10 (total = 2503)
+Time: 1.86s
+1 rows already in publications_classified.
+
+Storing publications in database as run_260708_0000_reverse
+5 rows appended to run_260708_0000_reverse.
+Done!
+
+Starting Step 5: Classify reverse search publications.
+5 rows loaded from 'run_260708_0000_reverse'
+0 rows already in publications_classified, skipped.
+0 rows already in publications_embedding, skipped.
+5 rows remaining for embedding.
+
+Loading SPECTER2 model.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files: 100%|##########| 4/4 [00:00<00:00, 24070.61it/s]
+There are adapters available but none are activated for the forward pass.
+
+Texts exceeding 512 tokens: 0 (0.0%)
+
+Computing embeddings.
+Embedding:   0%|          | 0/1 [00:00<?, ?batch/s]Embedding: 100%|##########| 1/1 [00:10<00:00, 10.08s/batch]Embedding: 100%|##########| 1/1 [00:10<00:00, 10.08s/batch]
+Embeddings shape: (5, 768)
+
+Appending to publications_embedding table.
+
+Running scope classifier.
+Scope threshold: 0.141
+Running pillar classifier.
+Predicted in scope: 0 / 5 (0.0%)
+
+Updating 'run_260708_0000_reverse' in database with prediction columns.
+
+Appending to publications_classified table.
+5 rows appended to publications_classified.
+
+Done!
+
+Starting Step 6: LLM scope classification for reverse search publications.
+
+Connecting to the Anthropic API
+5 rows loaded from 'run_260708_0000_reverse'
+Scope threshold: 0.141
+0 rows above threshold, sending to LLM.
+
+Submitting batch
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/pipeline_publications.py", line 210, in <module>
+    scope_llm(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Publications/S3_LLM_scope.py", line 152, in main
+    batch = client.messages.batches.create(requests=batch_requests)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/anthropic/resources/messages/batches.py", line 87, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/anthropic/_base_client.py", line 1536, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/anthropic/_base_client.py", line 1195, in request
+    raise self._make_status_error_from_response(response) from None
+anthropic.BadRequestError: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'requests: List should have at least 1 item after validation, not 0'}, 'request_id': 'req_011CcrXAJnicVkoTE9z6ndZ7'}
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query', 'classify', 'llm_scope', 'reverse_query', 'reverse_classify']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Step 2 (classify) already done, skipping.
+
+Step 3 (llm_scope) already done, skipping.
+
+Step 4 (reverse_query) already done, skipping.
+
+Step 5 (reverse_classify) already done, skipping.
+
+Starting Step 6: LLM scope classification for reverse search publications.
+
+Connecting to the Anthropic API
+5 rows loaded from 'run_260708_0000_reverse'
+Scope threshold: 0.141
+0 rows above threshold, sending to LLM.
+No rows to submit. Skipping batch.
+
+Pipeline complete for run 'run_260708_0000'.

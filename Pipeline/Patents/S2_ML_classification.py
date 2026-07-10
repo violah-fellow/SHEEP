@@ -147,7 +147,7 @@ def main(
                      'date_LLM', 'date_labelling'}
         output_columns = [c for c in db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
                           if c not in _llm_cols]
-        known_classified = known_data[output_columns].copy()
+        known_classified = known_data.reindex(columns=output_columns).copy()
         known_classified['pred_combined'] = known_classified['pred_combined'].map({1: 'in', 0: 'out'})
         _nested = ['cpc', 'inventor_names', 'assignee_names', 'assignee_cities',
                    'assignee_countries', 'funder_countries']
@@ -273,7 +273,7 @@ def main(
         _seen = set()
         output_columns = [c for c in output_columns if c not in _seen and not _seen.add(c)]
 
-        data_classified = new_data[output_columns].copy()
+        data_classified = new_data.reindex(columns=output_columns).copy()
         data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
         _nested = ['cpc', 'inventor_names', 'assignee_names', 'assignee_cities',
                    'assignee_countries', 'funder_countries']

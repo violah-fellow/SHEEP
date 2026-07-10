@@ -202,7 +202,7 @@ def main(
     data = db.sql(f"SELECT * FROM {REVERSE_TABLE}").df()
 
     # convert prediction in / out and add to CLASSIFICATION_TABLE
-    data_classified = data[output_columns].copy()
+    data_classified = data.reindex(columns=output_columns).copy()
     data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
     db.register('data_classified', data_classified)
 

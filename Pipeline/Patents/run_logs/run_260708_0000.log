@@ -177,3 +177,63 @@ Done!
 
 Starting Step 5: Clean-up of assignee names.
 Done! 'assignee_names_cleaned' added to patents_classified.
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+220 rows from 208 known families, predictions will be added from patents_classified.
+0 rows from 0 new families, will be embedded and classified.
+
+Propagating predictions for known families.
+220 rows updated in 'run_260708_0000'.
+0 rows from known families appended to patents_classified.
+
+Done!
+
+Starting Step 3: LLM scoping.
+
+Connecting to the Anthropic API
+Found existing batch for 'run_260708_0000': msgbatch_01VnrDF2tbp1cXSM4D6JYf34. Resuming without resubmitting.
+
+Waiting for batch to complete
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=150)
+
+Retrieving results
+Results: 150 total, 150 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 98
+
+Updating 'run_260708_0000' with LLM columns.
+'run_260708_0000' updated with LLM columns for 150 rows.
+'patents_classified' updated with LLM columns for 150 rows.
+
+Done!
+
+Starting Step 4: Reverse search for family members.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+
+Start reverse query
+Returned Patents: 100 (total = 822)
+Time: 1.93s
+94 rows already in patents_classified.
+
+Storing publications in database as run_260708_0000_reverse
+0 rows appended to run_260708_0000_reverse.
+
+Updating 'run_260708_0000_reverse' in database with prediction columns.
+
+Appending to patents_classified table.
+0 rows appended to patents_classified.
+Done!
+
+Starting Step 5: Clean-up of assignee names.
+Done! 'assignee_names_cleaned' added to patents_classified.

@@ -121,6 +121,11 @@ def main(
         data = data[data['proba_scope'] >= threshold].reset_index(drop=True)
         print(f"{len(data)} rows above threshold, sending to LLM.")
 
+        if len(data) == 0:
+            print("No rows to submit. Skipping batch.")
+            db.close()
+            return
+
         # 3. Build and submit batch requests
         with open(PROMPT_PATH, "r", encoding="utf-8") as f:
             system_prompt = f.read().strip()
