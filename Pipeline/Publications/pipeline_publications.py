@@ -3,6 +3,7 @@
 ## To restart a completed or unwanted run, delete its status file from status_logs/.
 
 import os
+import sys
 from datetime import datetime
 
 from Helper_pipeline_functions import save_status, mark_done, find_incomplete_run
@@ -40,7 +41,21 @@ EMBEDDINGS_PATH_TRAIN = 'embeddings/embeddings_new_training.npy'
 MAX_FN                = 0.01
 
 STATUS_DIR = 'status_logs'
+LOG_DIR    = 'run_logs'
 os.makedirs(STATUS_DIR, exist_ok=True)
+os.makedirs(LOG_DIR, exist_ok=True)
+
+
+class _Tee:
+    def __init__(self, *streams):
+        self._streams = streams
+    def write(self, data):
+        for s in self._streams:
+            s.write(data)
+            s.flush()
+    def flush(self):
+        for s in self._streams:
+            s.flush()
 
 
 # START SCRIPT
@@ -51,6 +66,9 @@ incomplete = find_incomplete_run(STATUS_DIR) if RESUME else None
 if incomplete:
     cfg = incomplete['config']
     status = incomplete
+    _log_path = os.path.join(LOG_DIR, f"{cfg['RUN_TABLE']}.log")
+    _log_file = open(_log_path, 'a', encoding='utf-8')
+    sys.stdout = sys.stderr = _Tee(sys.__stdout__, _log_file)
     print(f"Resuming run '{cfg['RUN_TABLE']}'"
           f"\ncompleted steps: {[k for k,v in status['steps'].items() if v == 'done']}")
 else:
@@ -91,6 +109,9 @@ else:
         }
     }
     save_status(status, STATUS_DIR)
+    _log_path = os.path.join(LOG_DIR, f"{RUN_TABLE}.log")
+    _log_file = open(_log_path, 'w', encoding='utf-8')
+    sys.stdout = sys.stderr = _Tee(sys.__stdout__, _log_file)
     print(f"Starting new run '{cfg['RUN_TABLE']}'")
 
 

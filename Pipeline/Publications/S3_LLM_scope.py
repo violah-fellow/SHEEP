@@ -19,10 +19,6 @@ RUN_TABLE = 'test_llm_scope'
 # table for final classifications
 CLASSIFICATION_TABLE = 'publications_classified'
 
-# ML threshold
-# path to the scope threshold used by S2_ML_classification
-THRESHOLD_PATH = 'Models/LR_scope_threshold.txt'
-
 # LLM
 # path to the system prompt used for scoping
 PROMPT_PATH = 'llm_prompts/scope_prompt_publications.md'
@@ -74,7 +70,6 @@ def main(
     DB_PATH=DB_PATH,
     RUN_TABLE=RUN_TABLE,
     CLASSIFICATION_TABLE=CLASSIFICATION_TABLE,
-    THRESHOLD_PATH=THRESHOLD_PATH,
     PROMPT_PATH=PROMPT_PATH,
     LLM_MODEL_SCOPE=LLM_MODEL_SCOPE,
     MAX_TOKENS=MAX_TOKENS,
@@ -114,12 +109,13 @@ def main(
         data = db.sql(f"SELECT * FROM {RUN_TABLE}").df()
         print(f"{len(data)} rows loaded from '{RUN_TABLE}'")
 
-        with open(THRESHOLD_PATH, 'r') as f:
-            threshold = float(f.read().strip())
-        print(f"Scope threshold: {threshold:.3f}")
+        data = data[data['pred_combined'] == 'in'].reset_index(drop=True)
+        print(f"{len(data)} rows flagged as in scope by ML, sending to LLM.")
 
-        data = data[data['proba_scope'] >= threshold].reset_index(drop=True)
-        print(f"{len(data)} rows above threshold, sending to LLM.")
+        if len(data) == 0:
+            print("No rows to submit. Skipping batch.")
+            db.close()
+            return
 
         # 3. Build and submit batch requests
         with open(PROMPT_PATH, "r", encoding="utf-8") as f:

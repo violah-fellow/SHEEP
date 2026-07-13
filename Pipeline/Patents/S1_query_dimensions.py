@@ -81,7 +81,7 @@ def main(
                                 publication_year+granted_year+filing_status+legal_status+inventor_names+original_assignee_names+current_assignee_names+
                                 assignee_names+assignee_cities+assignee_countries+associated_grant_ids+funders+funder_countries+federal_support+
                                 publications+researchers+times_cited+family_count] 
-                               limit 150"""))
+                               limit 100"""))
         
     # CPC code search
     query.append(dsl.query(f"""search patents 
@@ -114,12 +114,16 @@ def main(
     #                         publications+researchers+times_cited+family_count]
     #             """))
 
-    # Convert to pandas dataframe and deduplicate by id    
+    # Convert to pandas dataframe  
     query_df = pd.concat([q.as_dataframe() for q in query], ignore_index=True)
+    print(f"\n{len(query_df)} patents retrieved from dimensions.")
+
+    # deduplicate by id
     query_df = query_df.drop_duplicates(subset="id").reset_index(drop=True)
 
     # Remove version duplicates of the same patent
     query_df = query_df.sort_values(['publication_year', 'kind'], ascending=[False, False]).groupby(["family_id", "jurisdiction", "application_number"]).head(1)
+    print(f"\n{len(query_df)} patents remain after deduplication.")
 
     # clean abstract
     query_df['abstract'] = query_df['abstract'].str.replace(r'<[^>]*>', '', regex=True)
@@ -136,6 +140,7 @@ def main(
     )
     
     query_df = query_df[cpc_mask]
+    print(f"\n{len(query_df)} patents remain after filtering by CPC codes.")
 
     # Filter patents that already are in the final database
     # Connect to SQL database

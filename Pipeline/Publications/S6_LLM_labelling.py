@@ -173,38 +173,37 @@ def main(
 
     metadata_path = batch_dir / f"{RUN_LABEL}_llm_labelling.json"
 
-    # 2. Load and filter input data
-    db = duckdb.connect(database=DB_PATH)
-
+    # 2. Load and filter input data. The connection is only open for this lookup, not for the
+    # submission/poll/parse steps below, so it isn't held locked for however long the batch takes.
     if metadata_path.exists():
         # A batch for this run was already submitted; resume from its metadata instead of resubmitting.
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         batch_id = metadata["batch_id"]
         print(f"Found existing batch for '{RUN_LABEL}': {batch_id}. Resuming without resubmitting.")
     else:
-        data = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE}").df()
-        print(f"{len(data)} rows loaded from '{CLASSIFICATION_TABLE}'")
+        with duckdb.connect(database=DB_PATH) as db:
+            data = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE}").df()
+            print(f"{len(data)} rows loaded from '{CLASSIFICATION_TABLE}'")
 
-        data = data[data[SCOPE_COL] == 'in'].reset_index(drop=True)
-        print(f"{len(data)} rows in scope (curated).")
+            data = data[data[SCOPE_COL] == 'in'].reset_index(drop=True)
+            print(f"{len(data)} rows in scope (curated).")
 
-        existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
-        if LABELLED_TABLE in existing_tables:
-            labelled_ids = db.sql(f"SELECT id FROM {LABELLED_TABLE}").df()['id']
+            existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+            if LABELLED_TABLE in existing_tables:
+                labelled_ids = db.sql(f"SELECT id FROM {LABELLED_TABLE}").df()['id']
+                n_before = len(data)
+                data = data[~data['id'].isin(labelled_ids)].reset_index(drop=True)
+                print(f"{n_before - len(data)} rows already in '{LABELLED_TABLE}', skipped.")
+            else:
+                print(f"'{LABELLED_TABLE}' does not exist yet, will be created.")
+
             n_before = len(data)
-            data = data[~data['id'].isin(labelled_ids)].reset_index(drop=True)
-            print(f"{n_before - len(data)} rows already in '{LABELLED_TABLE}', skipped.")
-        else:
-            print(f"'{LABELLED_TABLE}' does not exist yet, will be created.")
-
-        n_before = len(data)
-        data = data[data[PILLAR_COL].isin(PILLAR_CATS.keys())].reset_index(drop=True)
-        if n_before - len(data) > 0:
-            print(f"{n_before - len(data)} rows dropped for missing/unrecognised '{PILLAR_COL}'.")
+            data = data[data[PILLAR_COL].isin(PILLAR_CATS.keys())].reset_index(drop=True)
+            if n_before - len(data) > 0:
+                print(f"{n_before - len(data)} rows dropped for missing/unrecognised '{PILLAR_COL}'.")
 
         if len(data) == 0:
             print("No new rows to label.")
-            db.close()
             return
 
         # 3. Build and submit batch requests: one system prompt/tool schema per pillar, all
@@ -328,81 +327,82 @@ def main(
     }
     results_df = results_df.reindex(columns=['id'] + list(llm_columns.keys()))
 
-    for col, dtype in llm_columns.items():
-        db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
+    with duckdb.connect(database=DB_PATH) as db:
+        for col, dtype in llm_columns.items():
+            db.sql(f"ALTER TABLE {CLASSIFICATION_TABLE} ADD COLUMN IF NOT EXISTS {col} {dtype}")
 
-    db.register('llm_results', results_df)
-    set_clause = ", ".join(f"{col} = llm_results.{col}" for col in llm_columns)
-    db.sql(f"""
-        UPDATE {CLASSIFICATION_TABLE}
-        SET {set_clause}
-        FROM llm_results
-        WHERE {CLASSIFICATION_TABLE}.id = llm_results.id
-    """)
-    print(f"'{CLASSIFICATION_TABLE}' updated with LLM category columns for {len(results_df)} rows.")
+        db.register('llm_results', results_df)
+        set_clause = ", ".join(f"{col} = llm_results.{col}" for col in llm_columns)
+        db.sql(f"""
+            UPDATE {CLASSIFICATION_TABLE}
+            SET {set_clause}
+            FROM llm_results
+            WHERE {CLASSIFICATION_TABLE}.id = llm_results.id
+        """)
+        print(f"'{CLASSIFICATION_TABLE}' updated with LLM category columns for {len(results_df)} rows.")
 
     # 7. Build clean rows for LABELLED_TABLE: Dimensions metadata columns + curated scope/pillar
     # + research_category. Rows that failed or didn't parse are left out so they get retried on
     # the next run (they'll still be missing from LABELLED_TABLE).
     ok_ids = results_df.loc[results_df["category_status_LLM"] == "ok", "id"].tolist()
 
-    # guard against duplicate inserts if this run is resumed after already writing results once
-    # (e.g. a crash between the LABELLED_TABLE write below and mark_batch_complete())
-    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
-    if LABELLED_TABLE in existing_tables:
-        already_labelled = set(db.sql(f"SELECT id FROM {LABELLED_TABLE}").df()['id'])
-        n_before = len(ok_ids)
-        ok_ids = [i for i in ok_ids if i not in already_labelled]
-        if n_before - len(ok_ids) > 0:
-            print(f"{n_before - len(ok_ids)} rows already in '{LABELLED_TABLE}' (resumed run), skipped.")
+    with duckdb.connect(database=DB_PATH) as db:
+        # guard against duplicate inserts if this run is resumed after already writing results once
+        # (e.g. a crash between the LABELLED_TABLE write below and mark_batch_complete())
+        existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+        if LABELLED_TABLE in existing_tables:
+            already_labelled = set(db.sql(f"SELECT id FROM {LABELLED_TABLE}").df()['id'])
+            n_before = len(ok_ids)
+            ok_ids = [i for i in ok_ids if i not in already_labelled]
+            if n_before - len(ok_ids) > 0:
+                print(f"{n_before - len(ok_ids)} rows already in '{LABELLED_TABLE}' (resumed run), skipped.")
 
-    if not ok_ids:
-        print("\nNo successfully labelled rows to add to LABELLED_TABLE.")
+        if not ok_ids:
+            print("\nNo successfully labelled rows to add to LABELLED_TABLE.")
+            mark_batch_complete()
+            print("\nDone!")
+            return
+
+        all_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
+        dimensions_columns = [c for c in all_columns if c not in NON_METADATA_COLS]
+
+        db.register('ok_ids', pd.DataFrame({'id': ok_ids}))
+        labelled_data = db.sql(f"""
+            SELECT {', '.join(f'"{c}"' for c in dimensions_columns)}
+            FROM {CLASSIFICATION_TABLE}
+            JOIN ok_ids USING (id)
+        """).df()
+
+        labelled_data = labelled_data.merge(
+            results_df.loc[results_df["category_status_LLM"] == "ok", ["id", "primary_category_LLM"]],
+            on="id", how="left"
+        ).rename(columns={"primary_category_LLM": "research_category"})
+
+        # serialize nested Dimensions fields to JSON text (see S2_ML_classification.py for why)
+        def _to_json(x):
+            if x is None:
+                return None
+            if isinstance(x, np.ndarray):
+                x = x.tolist()
+            return json.dumps(x, default=str)
+
+        for col in NESTED_JSON_COLS:
+            if col in labelled_data.columns:
+                labelled_data[col] = labelled_data[col].apply(_to_json)
+
+        print(f"\nAdding {len(labelled_data)} rows to '{LABELLED_TABLE}'.")
+
+        db.register('labelled_data', labelled_data)
+        existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
+        if LABELLED_TABLE in existing_tables:
+            cols_sql = ", ".join(f'"{c}"' for c in labelled_data.columns)
+            db.sql(f"INSERT INTO {LABELLED_TABLE} ({cols_sql}) SELECT * FROM labelled_data")
+        else:
+            db.sql(f"CREATE TABLE {LABELLED_TABLE} AS SELECT * FROM labelled_data")
+        print(f"'{LABELLED_TABLE}' now contains the newly labelled rows.")
+
         mark_batch_complete()
-        db.close()
-        print("\nDone!")
-        return
 
-    all_columns = db.sql(f"SELECT * FROM {CLASSIFICATION_TABLE} LIMIT 0").df().columns.tolist()
-    dimensions_columns = [c for c in all_columns if c not in NON_METADATA_COLS]
-
-    db.register('ok_ids', pd.DataFrame({'id': ok_ids}))
-    labelled_data = db.sql(f"""
-        SELECT {', '.join(f'"{c}"' for c in dimensions_columns)}
-        FROM {CLASSIFICATION_TABLE}
-        JOIN ok_ids USING (id)
-    """).df()
-
-    labelled_data = labelled_data.merge(
-        results_df.loc[results_df["category_status_LLM"] == "ok", ["id", "primary_category_LLM"]],
-        on="id", how="left"
-    ).rename(columns={"primary_category_LLM": "research_category"})
-
-    # serialize nested Dimensions fields to JSON text (see S2_ML_classification.py for why)
-    def _to_json(x):
-        if x is None:
-            return None
-        if isinstance(x, np.ndarray):
-            x = x.tolist()
-        return json.dumps(x, default=str)
-
-    for col in NESTED_JSON_COLS:
-        if col in labelled_data.columns:
-            labelled_data[col] = labelled_data[col].apply(_to_json)
-
-    print(f"\nAdding {len(labelled_data)} rows to '{LABELLED_TABLE}'.")
-
-    db.register('labelled_data', labelled_data)
-    existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
-    if LABELLED_TABLE in existing_tables:
-        cols_sql = ", ".join(f'"{c}"' for c in labelled_data.columns)
-        db.sql(f"INSERT INTO {LABELLED_TABLE} ({cols_sql}) SELECT * FROM labelled_data")
-    else:
-        db.sql(f"CREATE TABLE {LABELLED_TABLE} AS SELECT * FROM labelled_data")
-    print(f"'{LABELLED_TABLE}' now contains the newly labelled rows.")
-
-    mark_batch_complete()
-    db.close()
     print("\nDone!")
 
 

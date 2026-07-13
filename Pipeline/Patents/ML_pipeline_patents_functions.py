@@ -70,9 +70,13 @@ def get_embeddings(data, text_column, file_path, model=None, batch_size=32, chec
     if checkpoint == True:
         if os.path.exists(file_path):
             embeddings = list(np.load(file_path, allow_pickle=True))
+            if len(embeddings) > len(texts):
+                print(f"Checkpoint has {len(embeddings)} embeddings but only {len(texts)} texts — discarding stale checkpoint.")
+                embeddings = []
             start_idx = len(embeddings)
             start_batch = start_idx // batch_size
-            print(f"Resuming from {start_idx}")
+            if start_idx > 0:
+                print(f"Resuming from {start_idx}")
         else:
             embeddings = []
             start_idx = 0

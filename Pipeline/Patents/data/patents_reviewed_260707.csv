@@ -1,0 +1,59 @@
+,id,title,abstract,application_number,assignee_cities,assignee_countries,assignee_names,cpc,family_count,family_id,filing_status,inventor_names,jurisdiction,kind,legal_status,original_assignee_names,priority_year,publication_year,times_cited,year,current_assignee_names,publications,researchers,proba_scope,pred_combined,pred_pillar,assignee_names_cleaned,scope_LLM,confidence_LLM,pillar_LLM,plant_based_LLM,fermentation_LLM,cultivated_LLM,cross_cutting_LLM,status_LLM,stop_reason_LLM,scope_curated,pillar_curated,date_review
+268,WO-2025133158-A2,METHOD TO PRODUCE PHOSPHORYLATED MILK PROTEINS IN MICROBES,"The present disclosure relates to methods for production of phosphorylated recombinant animal proteins, phosphorylated phosphomimetic animal proteinsand phosphomimetic animal proteins, as well as the use of such animal proteins.",EP2024/087960,"[{'id': '2618468', 'name': 'Kongens Lyngby'}]","[{'id': 'DK', 'name': 'Denmark'}]",['Danmarks Tekniske Universitet'],['C07K14/4732' 'C12Y207/11001' 'C12N9/12' 'C12R2001/19' 'C12N1/205'],3,94284158,Application,"['BALASUBRAMANIAN SUVASINI' 'JENSEN PETER RUHDAL' 'JERS CARSTEN'
+ 'MOBASSERI GOLNAZ' 'MIJAKOVIC IVAN' 'SHI LEI']",WO,A2,Pending,['Danmarks Tekniske Universitet'],2023,2025,0,2024,['Danmarks Tekniske Universitet'],"[{'doi': '10.1021/jf00094a049', 'id': 'pub.1055896471'}
+ {'doi': '10.1111/j.1432-1033.1985.tb09254.x', 'id': 'pub.1032226148', 'pmid': '3863754'}
+ {'doi': '10.1038/nbt1240', 'id': 'pub.1011188595', 'pmid': '16964243'}
+ {'doi': '10.1006/prep.1997.0737', 'id': 'pub.1012362539', 'pmid': '9226716'}
+ {'doi': '10.1126/science.1217817', 'id': 'pub.1016380657', 'pmcid': 'PMC3754843', 'pmid': '22582013'}]",,0.8246435588,in,F,['DTU'],out,7,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,F,260707
+271,WO-2025079037-A2,"PRODUCT, SYSTEM AND METHOD OF CELL CULTIVATION","The present invention relates to a cell biomass (e.g. food product or pet food product) or its components prepared from cultivated metazoan cells, method of its preparation and a system for its preparation.",IB2024/059990,,"[{'id': 'CZ', 'name': 'Czechia'}]",['BTL Healthcare Technologies AS'],"['C12P21/02' 'C12N2500/38' 'C12N2500/32' 'C12P21/06' 'C12N5/0018'
+ 'C12N2500/76' 'C12N2500/46' 'A23J3/34' 'C12N2500/72' 'C12N2500/24'
+ 'C12N2500/50' 'C12N2500/74']",4,99798170,Application,"['JANOUSEK JIRI' 'BREZINA JAN' 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN'
+ ""O'NEILL JOAO MIGUEL"" 'SIRL MAREK' 'KUBOVCAK MATEJ' 'GORILAK PETER'
+ 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA' 'SEDIVA SARA' 'VERESOVA MARKETA'
+ 'POPOV MAREK' 'SMOLA MIROSLAV' 'DUCHON TOMAS']",WO,A2,Pending,['BTL Healthcare Technologies AS'],2023,2025,0,2024,['BTL Healthcare Technologies AS'],,,0.8779419689,in,CM,['BTL HEALTHCARE TECHNOLOGIES AS'],out,4,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+277,WO-2025178050-A1,ENZYME AGENT FOR PROTEIN DEAMIDATION AND PROTEIN CROSSLINKING AND USE THEREOF,"The problem addressed by the present invention is to provide an enzyme agent for protein deamidation and protein crosslinking containing an enzyme having protein deamidation activity and transglutaminase activity, and the use thereof. The present invention provides an enzyme agent for protein deamidation and protein crosslinking that contains as an active ingredient an enzyme having protein deamidation activity and transglutaminase activity comprising an amino acid sequence having 90% or more sequence identity with the amino acid sequence of SEQ ID NO: 1.",JP2025/005554,"[{'id': '1856057', 'name': 'Nagoya'}]","[{'id': 'JP', 'name': 'Japan'}]",['Amano Enzyme Inc'],"['A23L17/00' 'C07K14/195' 'A23L35/00' 'A23L25/00' 'C12P21/02' 'A23J3/06'
+ 'A23J3/10' 'A23J3/16' 'A23L15/00' 'A23C20/00' 'C07K1/107' 'A23C19/06'
+ 'A01J25/12' 'A23C9/123' 'C07K1/12' 'C12N9/80' 'A23L17/50' 'A23L13/60'
+ 'A21D2/26' 'A23J3/14' 'A23J3/04' 'A23C20/02' 'C12N9/10' 'C12N9/14'
+ 'C12P1/04' 'A23G9/36' 'A23L11/00' 'A23L11/45' 'A23L5/00' 'A23L29/281'
+ 'A23J3/00' 'A01J15/00' 'A21D13/80' 'C12P21/00' 'A23L17/40' 'A23L7/10'
+ 'C12N9/78' 'A23L13/50' 'A23C9/12' 'A23L7/109' 'A23L13/00' 'A23L33/18']",1,96847330,Application,"['UCHIDA YURI' 'SAKAI KIYOTA' 'HAYAKAWA MARI' 'SUGIURA MAHIRU'
+ 'KURAHASHI Yumi' 'HAMADA TATSUYA']",WO,A1,Pending,['Amano Enzyme Inc'],2024,2025,0,2025,['Amano Enzyme Inc'],,,0.6516381391,in,NA,['AMANO ENZYME INC'],out,3,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,out,NA,260707
+354,WO-2025081236-A1,SUSPENSION CULTURES,"The present disclosure relates to cell cultures, and in particular, to cell cultures comprising cells that are capable of anchorage-independent growth. In some aspects, ZIC1 activity has been suppressed or inactivated in the cells. The cells described herein may have several applications, including in the production of comestible products and therapeutic products.",AU2024/051094,"[{'id': '2147714', 'name': 'Sydney'}]","[{'id': 'AU', 'name': 'Australia'}]",['Vow Group Pty Ltd'],"['C07K14/47' 'C12N5/0656' 'C12N2510/00' 'C12N5/0658' 'A23L13/50'
+ 'A23L13/00' 'C12N5/0653']",2,95447514,Application,['RYALL JAMES' 'WARD ALEXANDER' 'TOPFER SARAH'],WO,A1,Pending,['Vow Group Pty Ltd'],2023,2025,0,2024,['Vow Group Pty Ltd'],"[{'doi': '10.1093/stmcls/sxad047', 'id': 'pub.1159801627', 'pmcid': 'PMC10502786', 'pmid': '37317792'}
+ {'doi': '10.1091/mbc.e06-11-1047', 'id': 'pub.1042276960', 'pmcid': 'PMC1877120', 'pmid': '17409353'}]",,0.8799487967,in,CM,['VOW GROUP PTY LTD'],out,4,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+358,WO-2025075996-A1,MOBILE BIOREACTOR SERVICE SYSTEM,"A mobile bioreactor service system includes a control interface, a physical interface, and a service system. The control interface connects to one or more valves. The physical interface connects one or more tubes to a bioreactor enabling process fluids to be physically transferred to/from the bioreactor based on a corresponding state of the one or more valves. The service system performs a service on the bioreactor.",US2024/049473,"[{'id': '4931972', 'name': 'Cambridge'}]","[{'id': 'US', 'name': 'United States'}]",['Ark Biotech Inc'],['B01L13/02' 'B01L2300/0681' 'C12M41/48' 'C12M23/52' 'C12M37/00'],3,95157195,Application,['HUANG ZHENG'],WO,A1,Pending,['Ark Biotech Inc'],2023,2025,0,2024,['Ark Biotech Inc'],,,0.6861843557,in,CM,['Ark Biotech'],out,3,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+370,AU-2024365097-A1,SUSPENSION CULTURES,"The present disclosure relates to cell cultures, and in particular, to cell cultures comprising cells that are capable of anchorage-independent growth. In some aspects, ZIC1 activity has been suppressed or inactivated in the cells. The cells described herein may have several applications, including in the production of comestible products and therapeutic products.",AU2024365097,"[{'id': '2147714', 'name': 'Sydney'}]","[{'id': 'AU', 'name': 'Australia'}]",['Vow Group Pty Ltd'],"['C12N2510/00' 'C12N5/0658' 'A23L13/50' 'C07K14/47' 'C12N5/0653'
+ 'C12N5/0656' 'A23L13/00']",2,95447514,Application,['RYALL JAMES' 'WARD ALEXANDER' 'TOPFER SARAH'],AU,A1,Pending,['Vow Group Pty Ltd'],2023,2026,0,2024,['Vow Group Pty Ltd'],,,0.8799487967,in,CM,['VOW GROUP PTY LTD'],out,4,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+371,AU-2024358882-A1,"PRODUCT, SYSTEM AND METHOD OF CELL CULTIVATION","The present invention relates to a cell biomass (e.g. food product or pet food product) or its components prepared from cultivated metazoan cells, method of its preparation and a system for its preparation.",AU2024358882,,"[{'id': 'CZ', 'name': 'Czechia'}]",['BTL Healthcare Technologies AS'],"['C12N2500/76' 'C12N2500/74' 'C12N2500/38' 'C12N2500/32' 'C12P21/02'
+ 'C12N5/0018' 'C12N2500/50' 'C12P21/06' 'C12N2500/46' 'A23J3/34'
+ 'C12N2500/24' 'C12N2500/72']",4,99798170,Application,"['JANOUSEK JIRI' 'BREZINA JAN' 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN'
+ ""O'NEILL JOAO MIGUEL"" 'SIRL MAREK' 'KUBOVCAK MATEJ' 'GORILAK PETER'
+ 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA' 'SEDIVA SARA' 'VERESOVA MARKETA'
+ 'POPOV MAREK' 'SMOLA MIROSLAV' 'DUCHON TOMAS']",AU,A1,Pending,['BTL Healthcare Technologies AS'],2023,2026,0,2024,['BTL Healthcare Technologies AS'],,,0.8779419689,in,CM,['BTL HEALTHCARE TECHNOLOGIES AS'],out,4,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+376,IL-327360-A,"PRODUCT, SYSTEM AND METHOD OF CELL CULTIVATION","The present invention relates to a cell biomass (e.g. food product or pet food product) or its components prepared from cultivated metazoan cells, method of its preparation and a system for its preparation.",IL327360,,"[{'id': 'CZ', 'name': 'Czechia'} {'id': 'PT', 'name': 'Portugal'}
+ {'id': 'SK', 'name': 'Slovakia'}]","['BTL HEALTHCARE TECHNOLOGIES AS' 'JANOUSEK JIRI' 'BREZINA JAN'
+ 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN' 'ONEILL JOAO MIGUEL' 'SIRL MAREK'
+ 'KUBOVCAK MATEJ' 'GORILAK PETER' 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA'
+ 'SEDIVA SARA' 'VERESOVA MARKETA' 'POPOV MAREK' 'SMOLA MIROSLAV'
+ 'DUCHON TOMAS']","['C12N2500/32' 'C12P21/02' 'C12P21/06' 'C12N2500/72' 'C12N2500/46'
+ 'C12N2500/50' 'C12N2500/74' 'C12N2500/24' 'A23J3/34' 'C12N2500/76'
+ 'C12N5/0018' 'C12N2500/38']",4,99798170,N/A,"['JANOUSEK JIRI' 'BREZINA JAN' 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN'
+ ""O'NEILL JOAO MIGUEL"" 'SIRL MAREK' 'KUBOVCAK MATEJ' 'GORILAK PETER'
+ 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA' 'SEDIVA SARA' 'VERESOVA MARKETA'
+ 'POPOV MAREK' 'SMOLA MIROSLAV' 'DUCHON TOMAS' 'JANOUSEK JIRI'
+ 'BREZINA JAN' 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN' ""O'NEILL JOAO MIGUEL""
+ 'SIRL MAREK' 'KUBOVCAK MATEJ' 'GORILAK PETER' 'HERMANOVA KATERINA'
+ 'KOHOUTOVA ANNA' 'SEDIVA SARA' 'VERESOVA MARKETA' 'POPOV MAREK'
+ 'SMOLA MIROSLAV' 'DUCHON TOMAS']",IL,A,N/A,"['BTL HEALTHCARE TECHNOLOGIES AS' 'JANOUSEK JIRI' 'BREZINA JAN'
+ 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN' 'ONEILL JOAO MIGUEL' 'SIRL MAREK'
+ 'KUBOVCAK MATEJ' 'GORILAK PETER' 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA'
+ 'SEDIVA SARA' 'VERESOVA MARKETA' 'POPOV MAREK' 'SMOLA MIROSLAV'
+ 'DUCHON TOMAS']",2023,2026,0,2026,,,,0.8779419689,in,CM,"['BTL HEALTHCARE TECHNOLOGIES AS' 'JANOUSEK JIRI' 'BREZINA JAN'
+ 'BUBENICEK PETR' 'NEUBAUEROVA KATRIN' 'ONEILL JOAO MIGUEL' 'SIRL MAREK'
+ 'KUBOVCAK MATEJ' 'GORILAK PETER' 'HERMANOVA KATERINA' 'KOHOUTOVA ANNA'
+ 'SEDIVA SARA' 'VERESOVA MARKETA' 'POPOV MAREK' 'SMOLA MIROSLAV'
+ 'DUCHON TOMAS']",out,4,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+382,US-12330149-B2,Mobile bioreactor service system,"A mobile bioreactor service system includes a control interface, a physical interface, and a service system. The control interface connects to one or more valves. The physical interface connects one or more tubes to a bioreactor enabling process fluids to be physically transferred to/from the bioreactor based on a corresponding state of the one or more valves. The service system performs a service on the bioreactor.",US18830226,"[{'id': '4931972', 'name': 'Cambridge'}]","[{'id': 'US', 'name': 'United States'}]",['Ark Biotech Inc'],['C12M37/00' 'B01L2300/0681' 'C12M41/48' 'C12M23/52' 'B01L13/02'],3,95157195,Grant,['HUANG ZHENG'],US,B2,Active,['Ark Biotech Inc'],2023,2025,0,2024,['Ark Biotech Inc'],,,0.6861843557,in,CM,['Ark Biotech'],out,3,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,CM,260707
+391,US-20250206792-A1,METHOD TO PRODUCE PHOSPHORYLATED MILK PROTEINS IN MICROBES,"The present disclosure relates to methods for production of phosphorylated casein, phosphorylated phosphomimetic casein and phosphomimetic casein, as well as the use of such caseins.",US18390266,"[{'id': '2618468', 'name': 'Kongens Lyngby'}]","[{'id': 'DK', 'name': 'Denmark'}]",['Danmarks Tekniske Universitet'],['C12Y207/11001' 'C12N1/205' 'C12R2001/19' 'C12N9/12' 'C07K14/4732'],3,94284158,Application,"['BALASUBRAMANIAN SUVASINI' 'JENSEN PETER RUHDAL' 'JERS CARSTEN'
+ 'MOBASSERI GOLNAZ' 'MIJAKOVIC IVAN' 'SHI LEI']",US,A1,Pending,['Danmarks Tekniske Universitet'],2023,2025,0,2023,['Danmarks Tekniske Universitet'],,,0.8246435588,in,F,['DTU'],out,7,NA,FALSE,FALSE,FALSE,FALSE,ok,tool_use,in,F,260707

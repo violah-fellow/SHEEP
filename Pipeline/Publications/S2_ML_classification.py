@@ -227,10 +227,10 @@ def main(
                                         'status_LLM', 'stop_reason_LLM',
                                         'date_LLM', 'date_labelling')]
     else:
-        output_columns = original_columns + ['pred_combined', 'pred_pillar', 'date_ML']
+        output_columns = original_columns + ['proba_scope', 'pred_combined', 'pred_pillar', 'date_ML']
 
     # convert prediction in / out and add to CLASSIFICATION_TABLE
-    data_classified = data_to_append[output_columns].copy()
+    data_classified = data_to_append.reindex(columns=output_columns).copy()
     data_classified['pred_combined'] = data_classified['pred_combined'].map({1: 'in', 0: 'out'})
 
     # serialize nested Dimensions fields to JSON text: their native shape (STRUCT vs MAP) can

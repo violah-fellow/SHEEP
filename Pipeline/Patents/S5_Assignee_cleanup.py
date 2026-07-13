@@ -47,6 +47,8 @@ def main(
     # Function to map the different versions of company names to the cleaned-up versions
     # Returns the mapped value for a single cell (string or list of strings)
     def map_companies(names, name_map):
+        if names is None or (not isinstance(names, (list, np.ndarray)) and pd.isna(names)):
+            return names
         if isinstance(names, (list, np.ndarray)):
             return [name_map.get(n, n).upper() for n in names]
         return name_map.get(names, names).upper()
@@ -57,7 +59,7 @@ def main(
 
     # Function to match slightly different versions of company names to companies in database
     # Returns the matched value for a single cell (string or list of strings)
-    def match_company(names, companies_normalized, companies, cutoff=90):
+    def match_company(names, companies_normalized, companies, cutoff=95):
 
         def get_match(n):
             result = process.extractOne(
@@ -73,6 +75,8 @@ def main(
                     return original_match
             return n
 
+        if names is None or (not isinstance(names, (list, np.ndarray)) and pd.isna(names)):
+            return names
         if isinstance(names, (list, np.ndarray)):
             return [get_match(n) for n in names]
         return get_match(names)
@@ -101,6 +105,10 @@ def main(
     data[CLEAN_COLUMN] = data['tmp'].apply(lambda x: match_company(x, companies_normalized, companies))
 
     data = data.drop(columns='tmp')
+    # ensure result is always a list so DuckDB can cast to VARCHAR[]
+    data[CLEAN_COLUMN] = data[CLEAN_COLUMN].apply(
+        lambda x: list(x) if isinstance(x, (list, np.ndarray)) else ([x] if isinstance(x, str) else x)
+    )
 
     # 4. Add the cleaned-up column to CLASSIFICATION_TABLE
 

@@ -1,0 +1,239 @@
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query', 'classify', 'llm_scope']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Step 2 (classify) already done, skipping.
+
+Step 3 (llm_scope) already done, skipping.
+
+Starting Step 4: Reverse search for family members.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+
+Start reverse query
+Returned Patents: 100 (total = 813)
+Time: 4.48s
+33 rows already in patents_classified.
+
+Storing publications in database as run_260708_0000_reverse
+60 rows appended to run_260708_0000_reverse.
+
+Updating 'run_260708_0000_reverse' in database with prediction columns.
+
+Appending to patents_classified table.
+60 rows appended to patents_classified.
+Done!
+
+Starting Step 5: Clean-up of assignee names.
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/pipeline_patents.py", line 228, in <module>
+    assignee_cleanup(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S5_Assignee_cleanup.py", line 98, in main
+    data['tmp'] = data[ASSIGNEE_COLUMN].apply(lambda x: map_companies(x, name_map))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/series.py", line 5084, in apply
+    ).apply()
+      ^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/apply.py", line 1520, in apply
+    return self.apply_standard()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/apply.py", line 1578, in apply_standard
+    mapped = obj._map_values(mapper=curried)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/base.py", line 1020, in _map_values
+    return arr.map(mapper, na_action=na_action)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/arrays/base.py", line 2745, in map
+    return map_array(self, mapper, na_action=na_action)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/violah/miniconda3/envs/sheep/lib/python3.12/site-packages/pandas/core/algorithms.py", line 1715, in map_array
+    return lib.map_infer(values, mapper)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "pandas/_libs/lib.pyx", line 3071, in pandas._libs.lib.map_infer
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S5_Assignee_cleanup.py", line 98, in <lambda>
+    data['tmp'] = data[ASSIGNEE_COLUMN].apply(lambda x: map_companies(x, name_map))
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S5_Assignee_cleanup.py", line 52, in map_companies
+    return name_map.get(names, names).upper()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'float' object has no attribute 'upper'
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query', 'classify', 'llm_scope', 'reverse_query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Step 2 (classify) already done, skipping.
+
+Step 3 (llm_scope) already done, skipping.
+
+Step 4 (reverse_query) already done, skipping.
+
+Starting Step 5: Clean-up of assignee names.
+Done! 'assignee_names_cleaned' added to patents_classified.
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+Traceback (most recent call last):
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/pipeline_patents.py", line 178, in <module>
+    classify_run(
+  File "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/S2_ML_classification.py", line 62, in main
+    db = duckdb.connect(database=DB_PATH)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_duckdb.IOException: IO Error: Cannot open file "/mnt/c/Users/Viola Hollek/Documents/SHEEP/Pipeline/Patents/patents.db": Permission denied
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+15 rows from 15 known families, predictions will be added from patents_classified.
+205 rows from 193 new families, will be embedded and classified.
+
+Propagating predictions for known families.
+15 rows updated in 'run_260708_0000'.
+2 rows from known families appended to patents_classified.
+
+193 representative patents selected from 193 new families.
+
+Loading PatentSBERTa model.
+
+Texts exceeding 512 tokens: 0 (0.0%)
+
+Computing embeddings.
+Resuming from 192
+Embedding:  86%|########5 | 6/7 [00:00<?, ?batch/s]Embedding: 100%|##########| 7/7 [00:00<00:00,  1.60batch/s]Embedding: 100%|##########| 7/7 [00:00<00:00,  1.60batch/s]
+Embeddings shape: (193, 768)
+
+Appending to patents_embeddings table.
+
+Running scope classifier.
+Scope threshold: 0.283
+Running pillar classifier.
+Predicted in scope: 127 / 193 (65.8%)
+
+Updating 'run_260708_0000' with predictions for new families.
+
+Appending to patents_classified table.
+205 rows appended to patents_classified.
+
+Done!
+
+Starting Step 3: LLM scoping.
+
+Connecting to the Anthropic API
+Found existing batch for 'run_260708_0000': msgbatch_01VnrDF2tbp1cXSM4D6JYf34. Resuming without resubmitting.
+
+Waiting for batch to complete
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=150)
+
+Retrieving results
+Results: 150 total, 150 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 98
+
+Updating 'run_260708_0000' with LLM columns.
+'run_260708_0000' updated with LLM columns for 150 rows.
+'patents_classified' updated with LLM columns for 150 rows.
+
+Done!
+
+Starting Step 4: Reverse search for family members.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+
+Start reverse query
+Returned Patents: 100 (total = 822)
+Time: 2.32s
+32 rows already in patents_classified.
+
+Storing publications in database as run_260708_0000_reverse
+62 rows appended to run_260708_0000_reverse.
+
+Updating 'run_260708_0000_reverse' in database with prediction columns.
+
+Appending to patents_classified table.
+62 rows appended to patents_classified.
+Done!
+
+Starting Step 5: Clean-up of assignee names.
+Done! 'assignee_names_cleaned' added to patents_classified.
+Resuming run 'run_260708_0000'
+completed steps: ['train', 'query']
+
+Step 0 (train) already done, skipping.
+
+Step 1 (query) already done, skipping.
+
+Starting Step 2: Classify queried publications.
+220 rows loaded from 'run_260708_0000'
+220 rows from 208 known families, predictions will be added from patents_classified.
+0 rows from 0 new families, will be embedded and classified.
+
+Propagating predictions for known families.
+220 rows updated in 'run_260708_0000'.
+0 rows from known families appended to patents_classified.
+
+Done!
+
+Starting Step 3: LLM scoping.
+
+Connecting to the Anthropic API
+Found existing batch for 'run_260708_0000': msgbatch_01VnrDF2tbp1cXSM4D6JYf34. Resuming without resubmitting.
+
+Waiting for batch to complete
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=150)
+
+Retrieving results
+Results: 150 total, 150 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 98
+
+Updating 'run_260708_0000' with LLM columns.
+'run_260708_0000' updated with LLM columns for 150 rows.
+'patents_classified' updated with LLM columns for 150 rows.
+
+Done!
+
+Starting Step 4: Reverse search for family members.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+
+Start reverse query
+Returned Patents: 100 (total = 822)
+Time: 1.93s
+94 rows already in patents_classified.
+
+Storing publications in database as run_260708_0000_reverse
+0 rows appended to run_260708_0000_reverse.
+
+Updating 'run_260708_0000_reverse' in database with prediction columns.
+
+Appending to patents_classified table.
+0 rows appended to patents_classified.
+Done!
+
+Starting Step 5: Clean-up of assignee names.
+Done! 'assignee_names_cleaned' added to patents_classified.

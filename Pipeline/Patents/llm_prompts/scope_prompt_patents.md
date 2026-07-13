@@ -57,5 +57,3 @@ Flag assignment guidance
 Set the pillar flags (plant_based, fermentation, cultivated) based on the protein source of the AP product being developed, not on auxiliary ingredients, enzymes, or processing steps mentioned in the patent.
 - When cross_cutting is True because the protein source is unspecified or spans multiple pillars: set plant_based, fermentation, and cultivated all to False.
 - When cross_cutting is True because the patent genuinely addresses multiple distinct AP pillars as core elements: the relevant pillar flags may also be True.
-
-Output Reasoning: 1 concise sentence explaining the scope decision.

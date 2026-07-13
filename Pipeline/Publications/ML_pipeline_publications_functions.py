@@ -97,6 +97,12 @@ def get_embeddings(data, text_column, file_path, model=None, tokenizer=None, bat
         if os.path.exists(file_path):
             embeddings = list(np.load(file_path, allow_pickle=True))
             start_idx = len(embeddings)
+            if start_idx >= len(texts):
+                # checkpoint is stale (e.g. from a previous run whose rows were already saved
+                # to the embeddings table and filtered out of the current batch)
+                print(f"Checkpoint has {start_idx} entries but only {len(texts)} texts — starting fresh.")
+                embeddings = []
+                start_idx = 0
             start_batch = start_idx // batch_size
             print(f"Resuming from {start_idx}")
         else:
