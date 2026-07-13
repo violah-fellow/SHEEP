@@ -1,0 +1,5 @@
+v3 comes direct from v1. v2 was an attempt to improve scope decisions and while it improved confidence 5-7 accuracy, it also increased manual review workload, without changing overall accuracy including manual review bucket.
+
+Changes v1 -> v3 to improve pillar labelling were:
+- Minor simplification of traditional fermentation caveats in PB and F.
+- Addition of plant cell culture into PB

@@ -1,0 +1,3 @@
+Changes to v1 did improve accuracy of auto-include but it also increased the manual review. No change to overall accuracy considering updated scope labels and all in scope caught within manual review and auto-include.
+
+Stick to v1 but work on AP pillar labelling.

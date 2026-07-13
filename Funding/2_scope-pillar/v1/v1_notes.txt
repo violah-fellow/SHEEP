@@ -1,0 +1,7 @@
+The main changes from the publication prompt are: the multi-workstream inclusion rule is now explicit; the agronomic boundary is relaxed to allow implied AP application; the socioeconomic boundary is relaxed from "explicitly named" to "named focus"; the out-of-scope list is consolidated from eleven bullets to seven broader principles; the in-scope boundaries are simplified from eight detailed rules to four; and equipment/infrastructure grants are explicitly handled. The category definitions are also shortened since grants don't need the same level of labelling nuance as publications.
+
+I actually only changed:
+- Addition of note on including grants where only one of multiple workstreams are AP related
+- Expansion of first category on societal research to include transition away from animal proteins. Same in the in scope definitions.
+- Addition of an out of scope topic on general equipment where AP is only a potential application
+- Addition of an in scope boundary to include enabling technologies
