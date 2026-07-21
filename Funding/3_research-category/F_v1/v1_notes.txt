@@ -1,0 +1,13 @@
+Taken from v7 pubs
+Initial changes:
+- Updated instructions and examples to all categories get TRUE/FALSE
+- Removed prefer x over y in Feedstocks
+- *** Removed 'does not include' clauses in bioprocess design (not convinced there will be enough overlap for this to be an issue, considering multiple labels can/should be applied where they are all true.
+- Removed in vitro digestibility from end product and ingredient cats, plus simplified their endings to remove distinction lines.
+- Edits to shared categories to match PB_V1
+
+Performance:
+- Ingredient optimisation overassigned. Consider specifying ingredient optimisation must be for a single ingredient at a time, not a mixture? Is every mixture then end product?
+
+v1 -> v2:
+- Adjust ingredient optimisation definition to line up more closely with PB. But I'm not sure if that's right...

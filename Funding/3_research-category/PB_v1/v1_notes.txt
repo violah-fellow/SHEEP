@@ -1,0 +1,29 @@
+Taken from v7 pubs
+Initial changes:
+- Updated instructions and examples to all categories get TRUE/FALSE
+- Removed in vitro digestibility notes in the ingredient and end product definitions - I don't think I will have crossover in the same way, but tbc, can always add them back in.
+- Removed an 'prefer x over y' as multiple labels can be given. May need to add back in if the LLM gets excited about handing out labels.
+- Reduce counterexamples for food safety & quality
+
+Notes on v1 performance:
+Overall, performed surprisingly well! A few points where it's missing the mark but the majority of failures I actually just agreed with the LLM so all good here.
+
+Ingredient optimisation is being over-assigned — the LLM is assigning it whenever ingredients are mentioned, even when the grant is purely about finished product development. Ocean Bite, Tackling barriers (fat/oleogels), STARS burger, and the plant-based extrusion grant all have this problem. The distinction needed is that Ingredient optimisation requires the ingredient itself to be the object of study, not just an input to a product.
+Consumer & market research is being over-assigned — sensory evaluation during product development is being categorised as consumer research. The fat/oleogels grant and SUSWEED both have this issue. Your note about human taste testing is the right fix.
+Food safety is being over-assigned for starter culture selection — VegVit's safety screening of starter cultures is operational safety testing within a fermentation process, not food safety research. This should be Strain development.
+Strain development is being under-assigned — VegVit and FAVORIT both involve selecting and screening bacterial cultures, which should trigger Strain development, but the LLM isn't picking it up.
+Texturization vs Ingredient optimisation vs End product formulation boundaries are blurry — the extrusion grant should be Texturization only, but the LLM is splitting across all three because extrusion sits at the intersection of all of them.
+Plant waste side streams = ingredient optimisation
+Recombinant protein production in crops – is that crop development? Strain development?
+Cross-cutting is unnecessary and was largely there to cut time when doing manually to avoid writing like 4+ categories.
+Human taste testing as part of product development is just end product formulation and not consumer & market research.
+
+
+v1 -> v2:
+- Added two new examples - bacterial screening is strain development and sensory evaluation (inc. taste testing) is end product formulation not consumer research
+- Crop development: added recombinant crop production sentence
+- Strain development: added starter culture selection and clarified food safety boundary
+- Ingredient optimisation: added waste side streams as input, clarified ingredient must be a research focus
+- End product formulation: clarified that human taste testing as part of product dev is still just end product formulation and not consumer & market research
+- Food safety & quality: exclusion of screening bacterial starter cultures for fermentation
+- Consumer & market research: clarified that human taste testing as part of product dev is still just end product formulation and not consumer & market research

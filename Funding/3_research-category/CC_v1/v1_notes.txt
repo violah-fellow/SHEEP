@@ -1,0 +1,3 @@
+Taken from v4 pubs
+Updated using all the other cats.
+Originally kept just the categories from pubs but ended up adding all cats after the first review - grants have a much wider scope than a publication, so it is necessary to include even AP-specific categories like target molecule selection (F/PF only), as they can be included in a grant alongside other research activities.

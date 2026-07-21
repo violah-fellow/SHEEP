@@ -1,0 +1,10 @@
+Taken from v5 pubs
+Updated to align with F_v2
+Examples updated
+
+
+v1 notes:
+Really good. Only two issues.
+
+v1 -> v2:
+- Bioprinting getting picked up as bioprocess design. Adjusted definition to specify that bioprinting, including it's scale-up, is just scaffolding.
