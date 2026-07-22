@@ -72,7 +72,7 @@ def main(
                             research_orgs+research_org_names+research_org_countries+research_org_cities+
                             researchers+investigators+keywords+linkout+dimensions_url+
                             category_for_2020+category_sdg]
-                            limit 100"""))
+                            limit 10"""))
 
         # query.append(dsl.query_iterative(f"""search grants in title_abstract_only for "{dsl_escape(query_string)}"
         #                     where start_year={YEAR}
