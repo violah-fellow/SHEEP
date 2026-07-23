@@ -1,0 +1,14 @@
+match_key,gt_row_id,lrd_row_id,GT index,LRD index,Title,GT Dimensions ID,LRD Identification code,GT Funder,LRD Funder,GT Total (USD),LRD Total (USD),GT Project start date,LRD Project start date,is_true_match
+1262__1120,1262,1120,7,1120,SusKelpFood – Sustainable ingredients from cultivated kelp to the food industry,grant.9965162,,The Research Council of Norway,Research Council of Norway,2723733,,,,True
+1731__697,1731,697,237,697,Impact analysis of the novel food knowledge unit,,,SA Tallinna Teaduspark Tehnopol,Tallinn Technology Park (Tehnopol),26532,26532,2024-01-23,2024-01-23,True
+1732__698,1732,698,238,698,Microbial proteins as food product?,,,Federal Ministry of Food and Agriculture,Federal Ministry of Food and Agriculture (BMEL),,,2024-06-03,2024-06-03,True
+1733__699,1733,699,239,699,Food4Cells Sustainable cell culture media for cultivated meat,,,Research Council of Norway and participating companies,Research Council of Norway,338498,338498,2025-01-01,2025-01-01,True
+1743__708,1743,708,249,708,Sustainable Proteins from Seaweed,,,,Research Foundation – Flanders (FWO),,,,,True
+1743__976,1743,976,249,976,Sustainable Proteins from Seaweed,,,,Research Foundation – Flanders (FWO),,,,2024-01-10,True
+1755__717,1755,717,259,717,Meat replacement and systems of edibility in Asia and beyond,,grant.14751793,Research Council of Norway,Research Council of Norway,1127788,1127788,2025-01-01,2025-01-01,True
+1755__1122,1755,1122,259,1122,Meat replacement and systems of edibility in Asia and beyond,,,Research Council of Norway,Research Council of Norway,1127788,,2025-01-01,,True
+1855__127,1855,127,313,127,EAGLE: Enhanced Analytical and Genetics Tools for Improving UK Food Legumes,grant.14049012,grant.12930078,Federal Department of Economic Affairs Education and Research (EAER),UK Research and Innovation (UKRI),283485,1048464,2025-01-22,2023-01-01,False
+1855__288,1855,288,313,288,EAGLE: Enhanced Analytical and Genetics Tools for Improving UK Food Legumes,grant.14049012,,Federal Department of Economic Affairs Education and Research (EAER),UK Research and Innovation (UKRI),283485,274575,2025-01-22,2022-01-01,False
+1861__553,1861,553,318,553,Combinatorial solidification approaches for the production of high-quality plant protein-based foods,,,,Federal Ministry for Economic Affairs and Climate Action (BMWK),,,,2023-01-03,True
+1863__1001,1863,1001,320,1001,Occurrence and behavior of spore-forming bacteria in meat substitute products,,,,Federal Ministry for Economic Affairs and Climate Action (BMWK),,,,,True
+1922__1104,1922,1104,355,1104,Continuous fermentation of milk protein (ContiMilk),GUDP.2025.002,,GUDP,Danish Government,969452,,2025-03-01,,True

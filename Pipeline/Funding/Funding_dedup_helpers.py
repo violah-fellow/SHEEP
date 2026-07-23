@@ -127,12 +127,28 @@ def export_highlighted_diff(before_df, after_df, changed_indices, out_path):
     return view
 
 
+def _build_match_key(df, id_cols):
+    """Concatenate id_cols into a single '__'-joined string key, column-by-column rather than
+    via a row-wise .astype(str).agg(join, axis=1) - that pattern silently leaves NaN as an
+    actual float (not the string 'nan') in newer pandas versions when the row also contains
+    string columns, which then crashes str.join. fillna('NA') first sidesteps that entirely."""
+    key = df[id_cols[0]].fillna('NA').astype(str)
+    for col in id_cols[1:]:
+        key = key + '__' + df[col].fillna('NA').astype(str)
+    return key
+
+
 def export_for_review(matches_df, id_cols, out_path, decision_col='is_true_match', default=True):
     """Export candidate matches for human review. Builds a composite match_key from id_cols
     (so the decision can be re-applied by key rather than by fragile row position), pre-fills
-    decision_col with `default`, and writes a CSV. Returns the exported dataframe."""
+    decision_col with `default`, and writes a CSV. Returns the exported dataframe.
+    No-ops (no file written) when matches_df is empty - nothing to review."""
+    if len(matches_df) == 0:
+        print("No candidate matches to review - skipping export.")
+        return matches_df.copy()
+
     df = matches_df.copy()
-    df['match_key'] = df[id_cols].astype(str).agg('__'.join, axis=1)
+    df['match_key'] = _build_match_key(df, id_cols)
     df[decision_col] = default
     df = df[['match_key'] + [c for c in df.columns if c != 'match_key']]
 
@@ -155,7 +171,13 @@ def apply_reviewed_decisions(matches_df, reviewed_csv_path, id_cols, decision_co
     """Read a human-edited copy of an export_for_review CSV back in, rejoin by match_key
     (not row position), and split matches_df into (confirmed, rejected) based on decision_col.
     Raises if any match_key present in matches_df is missing from the reviewed file, to guard
-    against a stale or mismatched reviewed file being applied against a different run."""
+    against a stale or mismatched reviewed file being applied against a different run.
+    No-ops (no file read) when matches_df is empty - export_for_review skipped writing one."""
+    if len(matches_df) == 0:
+        print("No candidate matches were exported for review - skipping reviewed-file read.")
+        empty = matches_df.copy()
+        return empty, empty
+
     reviewed = pd.read_csv(reviewed_csv_path)
     if 'match_key' not in reviewed.columns:
         raise ValueError(
@@ -163,7 +185,7 @@ def apply_reviewed_decisions(matches_df, reviewed_csv_path, id_cols, decision_co
         )
 
     working = matches_df.copy()
-    working['match_key'] = working[id_cols].astype(str).agg('__'.join, axis=1)
+    working['match_key'] = _build_match_key(working, id_cols)
 
     missing = set(working['match_key']) - set(reviewed['match_key'])
     if missing:

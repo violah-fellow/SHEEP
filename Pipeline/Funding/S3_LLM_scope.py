@@ -13,12 +13,12 @@ import os
 KEY_PATH = '../../.env'
 
 # Database
-# path to DuckDB database (kept in place in SHEEP/Funding/ - not duplicated here)
-DB_PATH = '../../Funding/funding.db'
+# path to DuckDB database (self-contained in Pipeline/Funding, mirrors Publications)
+DB_PATH = 'funding.db'
 # table containing the raw run data (only used for batch metadata file naming)
-RUN_TABLE = 'test_llm_scope'
+RUN_TABLE = 'dim_query_test'
 # table containing the deduplicated new grants to classify - produced by S2_grant_deduplication.ipynb
-DEDUP_TABLE = 'test_llm_scope_dedup'
+DEDUP_TABLE = 'dim_query_test_dedup'
 # table for final classifications
 CLASSIFICATION_TABLE = 'funding_classified'
 
@@ -26,7 +26,7 @@ CLASSIFICATION_TABLE = 'funding_classified'
 # path to the system prompt used for scoping
 PROMPT_PATH = 'llm_prompts/scope_prompt_funding.md'
 # model to use for scoping; set from the main pipeline script
-LLM_MODEL_SCOPE = 'claude-haiku-4-5'  # or 'claude-sonnet-4-6' for more accurate results
+LLM_MODEL_SCOPE = 'claude-sonnet-4-6'  # or 'claude-sonnet-4-6' for more accurate results
 MAX_TOKENS = 512
 TEMPERATURE = 0.0
 
@@ -34,7 +34,7 @@ TEMPERATURE = 0.0
 # directory for batch submission metadata, keyed by RUN_TABLE (allows resuming without resubmitting)
 BATCH_DIR = 'batch_jobs'
 # how often to check whether the batch has finished
-POLL_INTERVAL_SECONDS = 1800
+POLL_INTERVAL_SECONDS = 600
 
 # START OF SCRIPT
 
@@ -116,7 +116,7 @@ def main(
     db.sql(f"""
         INSERT INTO {CLASSIFICATION_TABLE}
         SELECT * FROM {DEDUP_TABLE}
-        WHERE id NOT IN (SELECT id FROM {CLASSIFICATION_TABLE})
+        WHERE "Grant ID" NOT IN (SELECT "Grant ID" FROM {CLASSIFICATION_TABLE})
     """)
     n_after = db.sql(f"SELECT COUNT(*) AS n FROM {CLASSIFICATION_TABLE}").df()['n'][0]
     print(f"Inserted {n_after - n_before} new rows from '{DEDUP_TABLE}' into '{CLASSIFICATION_TABLE}'.")
@@ -141,9 +141,9 @@ def main(
             system_prompt = f.read().strip()
 
         def build_batch_request(row):
-            user_message = f"Title: {row['title']}\n\nAbstract: {row['abstract']}"
+            user_message = f"Title: {row['Title translated']}\n\nAbstract: {row['Abstract translated']}"
             return {
-                "custom_id": row["id"].replace(".", "_"),
+                "custom_id": row["Grant ID"].replace(".", "_"),
                 "params": {
                     "model": LLM_MODEL_SCOPE,
                     "max_tokens": MAX_TOKENS,
@@ -175,7 +175,7 @@ def main(
             "dedup_table": DEDUP_TABLE,
             "model": LLM_MODEL_SCOPE,
             "n_records": len(data),
-            "dataset_ids": data["id"].tolist(),
+            "dataset_ids": data["Grant ID"].tolist(),
             "created_at": datetime.now().isoformat(),
         }
         metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
@@ -203,17 +203,17 @@ def main(
             tool_block = next((b for b in content if b.type == "tool_use"), None)
             if tool_block:
                 record = dict(tool_block.input)
-                record["id"] = grant_id
+                record["Grant ID"] = grant_id
                 record["status_LLM"] = "ok"
                 record["stop_reason_LLM"] = stop_reason
             else:
-                record = {"id": grant_id, "status_LLM": "parse_error", "stop_reason_LLM": stop_reason}
+                record = {"Grant ID": grant_id, "status_LLM": "parse_error", "stop_reason_LLM": stop_reason}
         else:
-            record = {"id": grant_id, "status_LLM": result.result.type, "stop_reason_LLM": None}
+            record = {"Grant ID": grant_id, "status_LLM": result.result.type, "stop_reason_LLM": None}
         raw_results.append(record)
 
     results_df = pd.DataFrame(raw_results)
-    non_llm_cols = {"id", "status_LLM", "stop_reason_LLM"}
+    non_llm_cols = {"Grant ID", "status_LLM", "stop_reason_LLM"}
     results_df = results_df.rename(columns={c: f"{c}_LLM" for c in results_df.columns if c not in non_llm_cols})
 
     n_ok = (results_df["status_LLM"] == "ok").sum()
@@ -263,7 +263,7 @@ def main(
         'stop_reason_LLM':   'VARCHAR',
         'date_LLM':          'VARCHAR',
     }
-    results_df = results_df.reindex(columns=['id'] + list(llm_columns.keys()))
+    results_df = results_df.reindex(columns=['Grant ID'] + list(llm_columns.keys()))
 
     for table in (DEDUP_TABLE, CLASSIFICATION_TABLE):
         existing_tables = db.sql("SHOW TABLES").df()['name'].tolist()
@@ -280,7 +280,7 @@ def main(
             UPDATE {table}
             SET {set_clause}
             FROM llm_results
-            WHERE {table}.id = llm_results.id
+            WHERE {table}."Grant ID" = llm_results."Grant ID"
         """)
         print(f"'{table}' updated with LLM columns for {len(results_df)} rows.")
 

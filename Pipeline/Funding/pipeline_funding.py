@@ -20,7 +20,7 @@ from S3_LLM_scope import main as scope_llm
 RESUME = True
 
 # Shared paths
-DB_PATH  = '../../Funding/funding.db'  # kept in place in SHEEP/Funding/, not duplicated here
+DB_PATH  = 'funding.db'  # self-contained in Pipeline/Funding, mirrors Publications
 KEY_PATH = '../../.env'
 
 # Query

@@ -1,0 +1,2 @@
+match_key,Grant ID,lrd_row_id,Dim index,LRD index,Title,LRD Identification code,Dim Funder,LRD Funder,Dim Total (USD),LRD Total (USD),Dim Start date,LRD Project start date,is_true_match
+grant.14970420__507.0,grant.14970420,507,38,507,BiochAIn - BiochAIn is a software project for optimizing an entire biotechnological process chain using AI,grant.13728161,Austrian Research Promotion Agency,Austrian Research Promotion Agency (FFG),0,0,2025-01-04,2023-01-03,False
