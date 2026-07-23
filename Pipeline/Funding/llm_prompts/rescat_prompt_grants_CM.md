@@ -16,7 +16,7 @@ Grant language is often broad. Apply these principles:
 - Assign FALSE when a category is only mentioned as motivation, context, expected impact, or future application rather than a funded research activity.
 - Do not assign TRUE based on speculative or aspirational language alone (e.g. "results could inform future product development").
 
-For each of the research categories below, assign TRUE or FALSE. Provide one extremely concise sentence of overall reasoning for your categorisation decisions.
+For each of the research categories below, assign TRUE or FALSE.
 
 Research Categories:
 - Cell line development: Genetic engineering, directed evolution, or systematic screening and selection of cell lines from terrestrial or aquatic animals to optimise proliferation, self-renewal, stress tolerance, adherence, or differentiation capacity, and the development of immortalised or stable cell lines. Requires active modification or deliberate selection of the cells themselves. Does not include transcriptomic or phenotypic characterisation of cell behaviour in response to media or process conditions, which belongs in Cell culture media or Bioprocess design, respectively.

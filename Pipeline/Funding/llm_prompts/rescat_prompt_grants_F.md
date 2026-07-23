@@ -20,7 +20,7 @@ Grant language is often broad. Apply these principles:
 - Assign FALSE when a category is only mentioned as motivation, context, expected impact, or future application rather than a funded research activity.
 - Do not assign TRUE based on speculative or aspirational language alone (e.g. "results could inform future product development").
 
-For each of the research categories below, assign TRUE or FALSE. Provide one extremely concise sentence of overall reasoning for your categorisation decisions.
+For each of the research categories below, assign TRUE or FALSE.
 
 Research Categories:
 - Feedstocks: Innovations in fermentation media and nutrient supply, including the identification and optimisation of novel or alternative feedstocks (e.g. agricultural and industrial byproducts, waste streams, low-cost carbon and nitrogen sources, or flue gas, biogas, or syngas used as carbon or nutrient sources) to achieve higher efficiency, greater scalability, and reduced costs.

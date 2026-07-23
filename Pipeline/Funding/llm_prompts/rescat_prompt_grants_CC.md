@@ -13,7 +13,7 @@ Grant language is often broad. Apply these principles:
 - Assign FALSE when a category is only mentioned as motivation, context, expected impact, or future application rather than a funded research activity.
 - Do not assign TRUE based on speculative or aspirational language alone (e.g. "results could inform future product development").
 
-For each of the research categories below, assign TRUE or FALSE. Provide one extremely concise sentence of overall reasoning for your categorisation decisions.
+For each of the research categories below, assign TRUE or FALSE.
 
 Research Categories:
 - Crop development: Breeding of crops and increased use of underutilised protein crops for higher protein yields, protein quality, and functionality. Also includes recombinant production of proteins or functional compounds in genetically engineered crops or plants.
