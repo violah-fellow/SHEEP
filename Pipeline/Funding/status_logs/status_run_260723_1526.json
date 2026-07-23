@@ -1,0 +1,21 @@
+{
+  "config": {
+    "DB_PATH": "funding.db",
+    "KEY_PATH": "../../.env",
+    "RUN_TABLE": "run_260723_1526",
+    "DEDUP_TABLE": "run_260723_1526_dedup",
+    "STRINGS_FILE": "dimensions_search_funding.txt",
+    "YEAR": 2025,
+    "LLM_MODEL_SCOPE": "claude-sonnet-4-6",
+    "PROMPT_PATH": "llm_prompts/scope_prompt_funding.md",
+    "LLM_MODEL_LABEL": "claude-sonnet-4-6",
+    "CLASSIFICATION_TABLE": "funding_classified"
+  },
+  "steps": {
+    "query": "done",
+    "dedup": "done",
+    "llm_scope": "done",
+    "review": "done",
+    "llm_labelling": "done"
+  }
+}

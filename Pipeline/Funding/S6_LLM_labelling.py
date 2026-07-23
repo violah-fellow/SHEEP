@@ -49,6 +49,10 @@ POLL_INTERVAL_SECONDS = 600
 # None = auto-resume the newest incomplete labelling run, or mint a fresh timestamped one
 RUN_LABEL = None
 
+# Output
+# directory for the Excel copy of the final, updated funding_curated dataset
+OUTPUT_DIR = 'data_output'
+
 # START OF SCRIPT
 
 # Category lists per pillar - verbatim from llm_prompts/rescat_prompt_grants_{PILLAR}.md
@@ -154,6 +158,7 @@ def main(
     BATCH_DIR=BATCH_DIR,
     POLL_INTERVAL_SECONDS=POLL_INTERVAL_SECONDS,
     RUN_LABEL=RUN_LABEL,
+    OUTPUT_DIR=OUTPUT_DIR,
 ):
     import time
     import json
@@ -431,6 +436,14 @@ def main(
     curated_df = curated_df.drop(columns=['_ap_pillar_code'], errors='ignore')
     db.sql(f"CREATE OR REPLACE TABLE {CURATED_TABLE} AS SELECT * FROM curated_df")
     print(f"'{CURATED_TABLE}' rewritten with {len(curated_df)} total rows.")
+
+    # 11. Excel copy of the final, updated funding_curated dataset (timestamp leading the
+    # filename, so reruns don't overwrite an earlier export)
+    output_dir = Path(OUTPUT_DIR)
+    output_dir.mkdir(exist_ok=True)
+    export_path = output_dir / f"{datetime.today().strftime('%y%m%d_%H%M')}_{CURATED_TABLE}.xlsx"
+    curated_df.to_excel(export_path, index=False)
+    print(f"Excel copy of '{CURATED_TABLE}' saved to {export_path}")
 
     mark_batch_complete()
     db.close()

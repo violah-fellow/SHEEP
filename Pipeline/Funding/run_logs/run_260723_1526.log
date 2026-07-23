@@ -1,0 +1,113 @@
+Starting new run 'run_260723_1526'
+
+Starting Step 1: Query Dimensions for grants.
+
+Connecting to the Dimensions API
+Using default endpoint: 'https://app.dimensions.ai'
+Dimcli - Dimensions API Client (v1.7)
+Connected to: <https://app.dimensions.ai/api/dsl> - DSL v2.15
+Method: manual login
+====
+Heads up! The latest Dimcli version is  1.8
+You have installed:  1.7
+====
+Please upgrade: `pip install dimcli -U`
+
+Start query
+Returned Grants: 10 (total = 24)
+Time: 6.15s
+Returned Grants: 10 (total = 216)
+Time: 6.02s
+Returned Grants: 10 (total = 40)
+Time: 1.51s
+Returned Grants: 10 (total = 290)
+Time: 5.86s
+
+40 grants retrieved from dimensions.
+
+36 grants remain after deduplication.
+
+Storing grants in database as run_260723_1526
+36 rows appended to run_260723_1526.
+Done!
+
+Step 2 (dedup) requires a manual step:
+  1. Run S2_grant_deduplication.ipynb with RUN_TABLE='run_260723_1526' as input.
+  2. Confirm its output is saved as table 'run_260723_1526_dedup' in funding.db.
+  3. Re-run this script to continue (it will pick up from here).
+Resuming run 'run_260723_1526'
+completed steps: ['query']
+
+Step 1 (query) already done, skipping.
+
+Found 'run_260723_1526_dedup' - dedup step complete, continuing.
+
+Starting Step 3: LLM scope classification.
+
+Connecting to the Anthropic API
+Created empty 'funding_classified' with run_260723_1526_dedup's schema.
+Inserted 32 new rows from 'run_260723_1526_dedup' into 'funding_classified'.
+32 rows loaded from 'run_260723_1526_dedup'
+
+Submitting batch
+Batch ID: msgbatch_01VnWW76sMk6o3fuYZpx7b7P
+Status:   in_progress
+Batch metadata saved to batch_jobs\run_260723_1526_llm_scope.json
+
+Waiting for batch to complete
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=32, succeeded=0)
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=32)
+
+Retrieving results
+Results: 32 total, 32 succeeded, 0 missing a scope decision.
+LLM predicted in scope: 13
+
+Updating 'run_260723_1526_dedup' and 'funding_classified' with LLM columns.
+'run_260723_1526_dedup' updated with LLM columns for 32 rows.
+'funding_classified' updated with LLM columns for 32 rows.
+
+Done!
+
+Step 4 (review) requires a manual step:
+  1. Run S5_Review_classifications.ipynb - it auto-curates confident grants and exports
+     the ambiguous ones (from this run and any other pending grants) for review.
+  2. Review the exported CSV, then complete the notebook's second section to apply your
+     decisions back onto funding_classified.
+  3. Re-run this script to continue (it will pick up from here).
+Resuming run 'run_260723_1526'
+completed steps: ['query', 'dedup', 'llm_scope']
+
+Step 1 (query) already done, skipping.
+
+Step 2 (dedup) already done, skipping.
+
+Step 3 (llm_scope) already done, skipping.
+
+All grants from this run have a scope_curated decision - review step complete, continuing.
+
+Starting Step 5: Research category labelling.
+
+Connecting to the Anthropic API
+Pool A (funding_classified, scope_curated='in', not yet attempted): 13 rows
+Pool B (funding_curated, Database='airtable', Research category missing): 314 rows
+
+Submitting batch of 327 requests
+Batch ID: msgbatch_01P1yEmvSTXMYYhMJG18oNzd
+Status:   in_progress
+Batch metadata saved to batch_jobs\labelling_260723_1555_llm_labelling.json
+
+Waiting for batch to complete
+Processing status: in_progress   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=327, succeeded=0)
+Processing status: ended   Counts: MessageBatchRequestCounts(canceled=0, errored=0, expired=0, processing=0, succeeded=327)
+
+Retrieving results
+Pool A results: 13 total, 13 succeeded
+Pool B results: 314 rows updated with a Research category
+'funding_classified' updated with labelling diagnostic columns for 13 rows.
+Promoted 13 newly-labelled Dimensions grants into 'funding_curated'.
+'funding_curated' rewritten with 1517 total rows.
+Excel copy of 'funding_curated' saved to data_audit\260723_1605_funding_curated.xlsx
+
+Done!
+
+Pipeline complete for run 'run_260723_1526'.
