@@ -26,7 +26,9 @@ KEY_PATH = '../../.env'
 
 # Query
 STRINGS_FILE = 'dimensions_search_funding.txt'
-YEAR         = 2025
+# range of start years to search across (inclusive on both ends) - set equal for a single year
+START_YEAR   = 2020
+END_YEAR     = 2025
 
 # GenAI
 LLM_MODEL_SCOPE = 'claude-sonnet-4-6'   # or 'claude-haiku-4-5' for cheap test runs
@@ -81,7 +83,8 @@ else:
         'RUN_TABLE':             RUN_TABLE,
         'DEDUP_TABLE':           DEDUP_TABLE,
         'STRINGS_FILE':          STRINGS_FILE,
-        'YEAR':                  YEAR,
+        'START_YEAR':            START_YEAR,
+        'END_YEAR':              END_YEAR,
         'LLM_MODEL_SCOPE':       LLM_MODEL_SCOPE,
         'PROMPT_PATH':           PROMPT_PATH,
         'LLM_MODEL_LABEL':       LLM_MODEL_LABEL,
@@ -113,7 +116,8 @@ if status['steps']['query'] != 'done':
         RUN_TABLE=cfg['RUN_TABLE'],
         CLASSIFICATION_TABLE=cfg['CLASSIFICATION_TABLE'],
         STRINGS_FILE=cfg['STRINGS_FILE'],
-        YEAR=cfg['YEAR'],
+        START_YEAR=cfg['START_YEAR'],
+        END_YEAR=cfg['END_YEAR'],
     )
     mark_done(status, 'query', STATUS_DIR)
 else:

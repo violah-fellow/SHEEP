@@ -22,7 +22,9 @@ CLASSIFICATION_TABLE = 'funding_classified'
 # path to txt file with search strings
 STRINGS_FILE = 'dimensions_search_funding.txt'
 # Other parameters for search
-YEAR = 2025
+# range of start years to search across (inclusive on both ends) - set equal for a single year
+START_YEAR = 2020
+END_YEAR = 2025
 # ...
 
 # START OF SCRIPT
@@ -33,7 +35,8 @@ def main(
     RUN_TABLE=RUN_TABLE,
     CLASSIFICATION_TABLE=CLASSIFICATION_TABLE,
     STRINGS_FILE=STRINGS_FILE,
-    YEAR=YEAR,
+    START_YEAR=START_YEAR,
+    END_YEAR=END_YEAR,
 ):
     # import packages
     from dotenv import load_dotenv
@@ -63,7 +66,8 @@ def main(
         query_string = i.replace('\\"', '\"')
 
         # only pull 100 grants per search term for testing
-        # note: grants are filtered on start_year (not year, as for publications/patents)
+        # note: grants are filtered on start_year (not year, as for publications/patents) - using
+        # the DSL's "field in [X:Y]" range syntax so a single-year search is just START_YEAR==END_YEAR
         # Funding fields: funding_currency is the grant's ORIGINAL currency code (metadata only -
         # the DSL has no generic native-amount field; it was deprecated/removed from the grants
         # source back in 2018). The 8 funding_XXX fields below are Dimensions' own currency
@@ -72,7 +76,7 @@ def main(
         # them, falling back to just USD/EUR when it doesn't. funding_schemes is dropped - it
         # isn't a documented grants field.
         query.append(dsl.query(f"""search grants in title_abstract_only for "{dsl_escape(query_string)}"
-                            where start_year={YEAR}
+                            where start_year in [{START_YEAR}:{END_YEAR}]
                             return grants[id+title+original_title+abstract+start_date+start_year+end_date+
                             funder_orgs+funder_org_name+funder_org_countries+funder_org_cities+
                             funding_currency+funding_usd+funding_eur+funding_gbp+funding_aud+
@@ -83,7 +87,7 @@ def main(
                             limit 10"""))
 
         # query.append(dsl.query_iterative(f"""search grants in title_abstract_only for "{dsl_escape(query_string)}"
-        #                     where start_year={YEAR}
+        #                     where start_year in [{START_YEAR}:{END_YEAR}]
         #                     return grants[id+title+original_title+abstract+start_date+start_year+end_date+
         #                     funder_orgs+funder_org_name+funder_org_countries+funder_org_cities+
         #                     funding_currency+funding_usd+funding_eur+funding_gbp+funding_aud+
