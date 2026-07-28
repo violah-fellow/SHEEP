@@ -1,0 +1,7 @@
+Issues:
+- Only issue was cocoa butter going into agnostic. I'll add it to chocolate.
+
+v2 -> v3:
+- Added chocolate ingredients into chocolate. 
+HAVE NOT added an example at the top but I'm concerned it could pull another grant that focusses primarily on palm oil but does also mention being similar to cocoa butter into this category - that would be incorrect so it's the main check 
+(Using Fermentation of Sugar Side-Streams to Produce a Palm Oil Alternative)

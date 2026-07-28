@@ -1,0 +1,32 @@
+v2 changes from v1 (v1 prompt taken from patents v3):
+
+- Reframed output from a single top-2-ranked pick to independent TRUE/FALSE per category,
+  matching the rescat pipeline's multi-label schema — grants can have more than one end
+  product type, unlike the patents pipeline this prompt was originally written for.
+- Removed Cross-cutting entirely. Its two former uses are now handled differently:
+    - "grant spans multiple named product types" -> flag every applicable category True
+      (multi-label already expresses this; no separate label needed).
+    - "food-ingredient COMPOSITION with no specific product framing" (textured proteins,
+      enzyme preparations, encapsulated ingredients) -> merged into Agnostic. This is a
+      real behaviour change worth reviewing: these grants previously got a distinct label
+      from equipment/strain/process grants (which were Agnostic); now both fall under
+      Agnostic since there's no other bucket for "food-related but no specific product"
+      once Cross-cutting is gone.
+- Added a proper definition for Infant formula. In v1 it was only named inside the Dairy
+  key-decision-rule bullet but had no entry in the "End Product Categories" list at the
+  bottom — a real gap (v1 said "12 categories" but only defined 11). v2 now defines all 12.
+- Simplified the Dairy rules: v1 routed "spans multiple dairy subtypes" and "dairy alongside
+  another AP product type" to Cross-cutting. Since multi-label is now possible, v2 instead
+  says to flag each specific dairy subcategory that clearly applies, and to flag Dairy
+  alongside Meat/Fish and seafood/Eggs/etc. when a grant genuinely spans both. The general
+  Dairy fallback is now reserved strictly for genuine ambiguity about which single dairy
+  subtype applies, not for multi-subtype or multi-product grants.
+- Kept the comprehensive specificity guardrails as-is (don't infer from physical form, don't
+  infer end product from external/common-use knowledge, paste/purée is not automatically a
+  spread) since these are still needed regardless of single- vs multi-label output.
+
+Downstream (in prompt_endproduct_testing.ipynb): the 5 dairy booleans (Milk and milk
+proteins, Yoghurt and fermented dairy, Cheese, Cream and ice cream, Infant formula) plus the
+general Dairy boolean are collapsed into the ground truth's two-column format — any of them
+True sets "End product type" to include "Dairy", and the specific true subcategory(ies)
+(excluding the general Dairy flag) are written to "sub-end product".
