@@ -1,0 +1,75 @@
+v2 changes from v1, based on manual review of F_v1_claude-sonnet-4-6_results.xlsx (18 of 52 rows
+exact_match=False).
+
+Of the 18 mismatches: 16 were the LLM being correct (ground truth wrong) per the user's own review
+notes — no prompt change needed for those. 2 were "out of scope" grants (a PHA-bioplastic
+biomanufacturing grant, a lignin-to-chemicals valorization grant) that aren't really alternative-
+protein food grants at all but got forced into a BF/PF answer anyway by the "every Fermentation
+grant must resolve to something" rule — a data-scoping observation, not a prompt fix, left as-is
+for now (flagging here in case it's worth revisiting whether these should be excluded from the
+Fermentation-pillar sample entirely, upstream of this prompt).
+
+The one real, recurring mistake (2 rows: "MYCOFACT" id 12, "Synthetically engineered microalgae for
+improved gut function" id 39): the LLM classified strain-engineering-for-overexpression grants as
+PF whenever a specific compound (an enzyme/metabolite in MYCOFACT; Vitamin B12/Lutein/
+exopolysaccharides in the microalgae grant) was named as the target of the engineering — even
+though in both cases the compound stays within the organism's biomass, which remains the whole
+food ingredient. v1's decision rule said "strain development... whose stated purpose is producing
+or overexpressing a specific target molecule... → PF", with no requirement that the molecule
+actually be separated from the cells — that was the bug.
+
+Fix: the rule now explicitly requires extraction/purification/isolation away from the cells before
+something counts as PF. Overexpressing or enriching a named compound WITHIN the biomass, where the
+biomass itself (containing that compound) is still the food product, stays BF regardless of how
+targeted the engineering is or how much the grant frames that one compound as its central
+innovation. PF is reserved for when the specific molecule is isolated out and used as a standalone
+ingredient separate from the biomass. Both the decision rule and the BF category definition were
+updated to state this explicitly (the BF definition now says as much: "Includes biomass that has
+been strain-engineered to enrich a specific nutrient or compound within it, as long as that
+compound is not subsequently isolated away from the biomass").
+
+Also, per the user's request: category names changed from the full "Biomass fermentation"/
+"Precision fermentation" to the short codes "BF"/"PF" throughout (matching the ground truth's own
+vocabulary directly, and matching the original patents prompt's "BF (Biomass fermentation):" /
+"PF (Precision fermentation):" definition style). The notebook's PILLAR_CATS["F"] and
+collapse_fermentation function were updated to match — collapse_fermentation no longer needs to
+translate full category names, since the schema fields are now literally "BF"/"PF" already.
+
+Added a third boolean category, "Unclear" (also decided during the same review pass, before any
+run of v2): row id 5 ("GoCreate") had no organism/product named in the abstract at all — just a
+vague reference to a "Fermtech" company — so v1's ambiguous-fallback rule ("default to flagging
+both BF and PF true") kicked in, predicting Mixed. Ground truth was actually BF (the user happens
+to know the company does biomass fermentation, information not present in the text). The user
+flagged this as a case that should probably route to manual review rather than get a guessed
+label at all.
+
+Checked how often this specific fallback (as opposed to a real multi-modal-institute Mixed case)
+actually fired in the v1 run: only 1 of 52 rows (the GoCreate row itself) — the other two Mixed
+predictions (Porphyridium purpureum id 16, the bioprocess-monitoring platform id 27) were genuine
+dual-route/institute-scale grants the user agreed with. So conflating "genuinely can't tell" with
+"explicitly does both" under one Mixed label was hiding two very different situations behind one
+value, and Mixed guesses for the former case will score as wrong against a single-label BF/PF
+ground truth anyway — there's no accuracy cost to admitting uncertainty instead. This mirrors the
+original patents prompt's own NA category and its v1 notes' own conclusion for the equivalent case
+("not fixable by prompt wording... flagging in case family-level context becomes available").
+
+**"Unclear" was tried and then reverted after the first real run.** Added as a third boolean
+(flagged true, with BF and PF both left false, only when the text genuinely doesn't specify a
+route — distinguished from the broad-institute/platform rule, which still flags both BF and PF
+true when a grant explicitly describes both modalities), with rows routed to manual review
+(excluded from scoring) instead of guessed. Based on the v1 review this was expected to fire on
+roughly 1/52 rows.
+
+Actual v2 run: 13 of 52 rows came back Unclear — the model was applying it far more liberally than
+"no organism/product/activity named at all" (the intended bar), closer to "any hesitation about
+which route." That's an unacceptable amount of manual-review overhead for what it bought. Per the
+user's decision, Unclear was removed entirely and the original v1 ambiguous-fallback rule restored
+("every grant must resolve to at least one of BF or PF; default to flagging both true when
+genuinely unclear") — accepting that Mixed will occasionally be wrong in the rare case where the
+text truly gives no signal (as with the GoCreate row that prompted this whole detour), rather than
+carrying a 25%-of-the-sample manual-review burden to avoid it. The notebook's needs_review-column/
+excluded-from-metrics machinery added to support Unclear was reverted along with it.
+
+Everything else (the whey/casein/egg/collagen/heme canonical-PF-molecule rule, the "don't decide
+from organism alone" rule, the broad-institute/platform Mixed rule, the BF/PF extraction-boundary
+fix) is unchanged and stays in v2.

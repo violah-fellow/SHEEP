@@ -1,0 +1,40 @@
+v1 adapted from Patents/GenAI/subpillar/v2/prompt_subpillar_patents_v2.md, which is a well-tested
+BF/PF/NA prompt for patents (v1 of that prompt scored 93% on n=60, per its own notes file). Kept
+close to verbatim: the canonical PF-target-molecule rule (whey/casein/egg/collagen/heme -> PF by
+default even without "fermentation"/"recombinant" wording), "don't decide BF vs PF from the
+organism alone", the strain-development split (own growth/yield/composition -> BF; overexpressing
+a named target -> PF), and both category definitions.
+
+Two structural changes made for grants, both required rather than optional:
+
+1. Switched from single-label (BF/PF/NA, mutually exclusive) to the TRUE/FALSE boolean-per-category
+   schema used everywhere else in this pipeline (rescat, end product, award purpose). The
+   downstream notebook collapses the two booleans into a single ground-truth-matching string:
+   both True -> "Mixed", only Biomass fermentation True -> "BF", only Precision fermentation True
+   -> "PF". This is necessary because the grants ground truth has a real "Mixed" label (18 of 313
+   Fermentation rows) that patents' BF/PF/NA scheme has no equivalent for.
+
+2. Removed the patents prompt's "prefer PF" tie-break rule entirely. That rule existed because
+   patents has no way to express "both routes apply" — when a patent described both a biomass use
+   and a specific-molecule use, v2 was told to pick PF since a specific-molecule claim is usually
+   the more novel one. For grants, "both routes genuinely apply" is no longer a tie to break — it's
+   literally the definition of Mixed. So the rule was replaced with an explicit "flag both true"
+   instruction for that case, and a second, distinct instruction for the true fallback case: when
+   a grant is genuinely indeterminate (no organism/product/activity stated at all), also default to
+   flagging both true rather than guessing. Confirmed with the user (recommended and accepted):
+   Mixed is the honest hedge for genuine ambiguity, not an arbitrary pick.
+
+Important data insight that shaped rule #1's wording: pulled 8 real "Mixed" ground-truth examples
+before writing this prompt, and the pattern is NOT "one grant doing both biomass and precision
+fermentation on the same product" (only 1-2 of 18 Mixed rows look like that, e.g. an Ogataea
+polymorpha grant with both whole-cell extract uses and transgenic myoglobin production). It's
+overwhelmingly broad institutes/centres/consortia/technology-platforms (BRIGHT, SFI Industrial
+Biotechnology, Mic2Food, FutureFerm) whose stated scope explicitly spans multiple fermentation
+modalities, sectors, or outputs at once — not reducible to a single BF or PF read. The "broad
+multi-modal institute/platform" decision rule reflects this directly, and matches naturally with
+the ambiguous-fallback rule, since both cases genuinely warrant flagging both booleans true.
+
+Also normalized on the notebook side (not the prompt): 1 of 313 ground-truth Fermentation rows has
+"Bf" (lowercase f) instead of "BF" -- a data-entry typo, normalized before scoring. 2 rows have a
+genuinely null Sub-production pillar despite every other Fermentation row having one -- set aside
+for manual review rather than force-sampled, since the ground truth itself doesn't resolve them.

@@ -1,0 +1,28 @@
+v1 written from scratch (no existing patents/pubs prompt covers Plant-based subpillar — the ported
+patents prompt only ever covered Fermentation-pillar BF/PF/NA).
+
+Basis: pulled 14 real ground-truth examples of "TF" (Traditional fermentation) grants before
+writing this. Overwhelmingly classic/artisanal microbial fermentation techniques (lactic acid
+fermentation of legumes/pulses/cereals, solid-state fungal fermentation, kefir/yoghurt-style
+cultures) applied as a processing step to plant protein raw materials — either to remove
+anti-nutritional factors and improve digestibility/texture/flavour, or to create plant-based
+analogues of fermented dairy/meat products (fermented vegan cheese, plant-based yoghurt,
+tempeh-like hybrids). Very few titles literally say "tempeh"/"miso"/"koji" by name, but the
+technique matches; a notable number of examples had missing/NaN abstracts, so the title alone
+often has to carry the signal.
+
+Only 75 of 1027 Plant-based rows (7%) have TF in ground truth — the other 93% are blank, which is
+the normal/expected outcome, not a failure to classify. The prompt is written to make this explicit
+("flagging True is the exception, not the default") so the model doesn't over-trigger on any
+mention of fermentation-adjacent vocabulary in an otherwise unrelated Plant-based grant.
+
+A small number of Plant-based rows (5 total) have anomalous non-TF Sub-production pillar values
+(CellAg, BF, PF, Algae x2) — these read as algae-related mislabeling noise from elsewhere in the
+taxonomy, not a real second Plant-based subpillar scheme, and are excluded from the notebook's
+sampling/scoring for this pillar rather than folded into the prompt.
+
+Key distinction worth remembering on review: this prompt is about fermentation as a *processing
+technique* used within a Plant-based grant, not about the grant's underlying production platform.
+A grant where microbial/fungal fermentation IS the production platform (i.e. genuinely belongs to
+the Fermentation pillar, not Plant-based) is out of scope here entirely — that split happens
+upstream of this prompt, at the Production platform level.

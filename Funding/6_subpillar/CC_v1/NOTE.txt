@@ -1,0 +1,33 @@
+v1 written from scratch. Basis: pulled real ground-truth examples for every distinct Cross-cutting
+Sub-production pillar value before designing categories.
+
+The real data has 7 distinct non-null values under Cross-cutting: CellAg (13 rows), All (12),
+Agnostic (2), CM for PB (2), PF (2), Consumer (1) -- and no "Other" value anywhere, contradicting
+the initial assumption that one existed.
+
+Per user decision, trimmed to just 3 categories: CellAg, All, Agnostic.
+- Dropped "CM for PB" and "Consumer" entirely: user's reasoning was that Consumer-focused grants
+  likely also exist within other specific pillars, so a cross-cutting-only Consumer label isn't
+  useful; CM for PB (2 rows, cultivated-technology components used within plant-based products) was
+  dropped for the same "too narrow / not clearly a real cross-cutting pattern" reasoning.
+- Dropped the "PF" value (2 rows) as a data artifact, not a category: both example grants read as
+  straightforward Fermentation-pillar precision-fermentation grants (e.g. "unconventional yeasts...
+  using precision fermentation") that appear to have been mistagged Cross-cutting for Production
+  platform upstream of this pipeline, rather than representing any real "PF-as-cross-cutting-
+  subpillar" pattern. Not something a subpillar prompt should learn to reproduce.
+- Dropped "Other" since it has zero real examples to ground a definition — no basis to write one.
+
+CellAg vs All is the one place these two categories can blur (both describe broad, non-product-
+specific initiatives) — the decision rule tells the model to prefer whichever framing (cellular-
+agriculture-specific vs. whole-sector) is the grant's own stated scope, since the real examples
+were fairly clearly separable this way: CellAg examples explicitly use "cellular agriculture"/
+"cell ag" as their own framing (CARMA, ARRIVAL, CellFood); All examples are framed around the
+broader food system/bioeconomy without cell-ag-specific language (SYNAGRI, GIANT LEAPS, AgriLoop,
+CiPA).
+
+85 of 117 Cross-cutting rows (73%) have no subpillar value at all — blank is the overwhelmingly
+common outcome, which the prompt states explicitly so the model doesn't over-trigger.
+
+Downstream (notebook): 5 rows are excluded entirely from this pillar's sampling/scoring, since they
+carry a dropped label (2 CM for PB, 1 Consumer, 2 PF-artifact) that this v1 prompt no longer
+attempts to reproduce.
