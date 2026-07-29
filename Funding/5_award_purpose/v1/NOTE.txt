@@ -1,0 +1,58 @@
+v1 prompt written from scratch (unlike end product/rescat, there was no existing patents/pubs
+prompt to adapt for award purpose).
+
+Basis: reviewed sample titles/abstracts for each of the 5 atomic "Award purpose" values found in
+Funding2026_inscope.xlsx (Research and development, Education and training, Networking, Equipment
+and infrastructure, Research infrastructure), then wrote category definitions and decision rules
+directly from those patterns. Multi-label TRUE/FALSE framing throughout, matching the rescat and
+end-product prompts, since the ground truth itself has real multi-label combos (e.g. 81 rows are
+"Research and development, Education and training").
+
+Judgment call worth reviewing on your first pass: Research infrastructure (only 4 ground-truth
+rows, the rarest label) and Equipment and infrastructure (28 rows) are the two most confusable
+categories — both fund physical capacity. The line drawn here: Research infrastructure = shared,
+institutional, or multi-partner research facility/hub/instrumentation network supporting future
+research broadly (e.g. NAPIC, a national alt-protein centre); Equipment and infrastructure = a
+single organisation's own physical production/manufacturing equipment or facility, aimed at
+making/scaling product rather than general research capacity. Confirmed with the user before
+writing the prompt this way, but it's based on only 4 real examples of the rarer label, so worth
+extra scrutiny during review.
+
+Research and development is treated as the default category (present in 1603 of 1675 labelled
+rows) — the prompt tells the model to flag it True for the large majority of grants and only
+withhold it when a grant exclusively funds one of the other four purposes with no R&D activity of
+its own described.
+
+Trimmed shortly after first draft: the initial version had a "Key decision rules" bullet per
+category that mostly just restated its own category definition in different words, plus a
+multi-label rules bullet duplicating the intro paragraph. Unlike end product, these 5 categories
+are mostly non-overlapping domains with only one genuine cross-category ambiguity (Equipment vs
+Research infrastructure), so "Key decision rules" was cut down to just that one bullet, and the
+category definitions list is now the single source of truth for scope/examples/exceptions.
+
+Known limitation, investigated and NOT fixed (v1 results review): the LLM sometimes omits
+"Education and training" for grants that also have "Research and development" true. Reviewing
+awardpurpose_v1_claude-sonnet-4-6_results.xlsx, 9 of 10 rows where ground truth has "Education and
+training" but the LLM didn't flag it were university-affiliated PIs (Reading, Oxford, King's
+College London, Copenhagen, York, Wageningen, Nottingham) — a strong-looking signal that suggested
+a PI-organisation-based override (force "Education and training" true whenever the PI is a
+university/college/institute/association).
+
+That override was checked against the FULL 1678-row ground truth before building it, and rejected:
+the two conditional probabilities point in different directions. Within the missed rows, 90% were
+university-affiliated — but among ALL university-affiliated grants in the dataset, only 15.2% have
+"Education and training" in ground truth (vs a 6.9% dataset-wide baseline), so forcing the label
+for every University PI would be wrong 84.8% of the time. The other name patterns tested are worse:
+"college" wrong 64.3% of the time, "institute" 96.9%, "association" 100% (n=15 — includes dedicated
+applied-research bodies like RISE and IRTA that do pure R&D with no training component, and the
+Danish Vegetarian Association, an advocacy body, not a research/training institution). University
+PIs ARE enriched for Education and training (~2.2x baseline) but nowhere near deterministically
+enough to automate.
+
+Conclusion: this is an accepted limitation, not a prompt or pipeline bug. It likely reflects the
+original ground-truth curators using information not present in the title/abstract at all (e.g. an
+attached PhD studentship) — the same category of gap as the Cocoa/Fats/Snacks/Sugar vocabulary
+mismatch already documented for end product (4_endproduct/v2/NOTE.txt). No text-based approach —
+LLM prompt wording or a PI-organisation-name heuristic — can close a gap caused by evidence that
+isn't in the classified text. Don't re-propose a PI-organisation override without re-deriving these
+numbers first.

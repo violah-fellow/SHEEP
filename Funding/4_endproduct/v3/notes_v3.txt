@@ -1,0 +1,8 @@
+Notes on the errors (what I feed to Claude):
+- Oat beverages / plant-based beverages I think should go in Dairy. I'd love your thoughts on this though. I suppose, for a grant to be in scope it has to be developing a product to replace an animal product (that's what makes it an alternative protein) and all these plant-based beverages are there as milk replacements mostly, right? So Dairy as a general fallback if no specific dairy product is specified I think makes sense.
+- If making seafood (like octopus), then seafood only. The LLM actually got this correct previously so I'm not sure why it changed its mind. This happened twice.
+- It decided to label Agnostic when the title literally says dairy-alternatives.
+- I am leaning suggesting than an alternative to tofu/tempeh/ similar existing plant-based proteins that are typically used as a meat substitute - what are your thoughts
+
+v3 -> v4:
+- 
