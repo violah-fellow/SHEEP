@@ -1,0 +1,105 @@
+v2 is a full redesign, not an iteration on v1 (CellAg/All/Agnostic). v1 was built from the legacy
+"Sub-production pillar" values, which only existed on 32 of 117 Cross-cutting rows — the user ran
+v1, found the categories "a bit useless," and realised they'd never actually looked at how sparse
+and seemingly arbitrary those legacy labels were until seeing the results. v2 was built by reading
+the title/abstract (plus Award purpose/Research category for cross-referencing) of ALL 117
+Cross-cutting rows from scratch, not just the 32 with an old label.
+
+Natural clusters found in the full 117: broad multi-pillar R&D (45 rows), hub/network/training/
+consortium-building (20), generic narrow technical studies (15), consumer/market/socioeconomic
+research (14), novel/other-platform or mistagged rows (10), cross-platform hybrid technique (6),
+sustainability/environmental-impact assessment (5), policy/macro catch-all (2).
+
+Design decisions, all confirmed with the user:
+
+1. **CellAg + All merge into "Broad R&D."** Read at face value, CellAg and All were never two
+   different grant types — they were two different framings (cell-ag-specific language vs.
+   whole-sector language) of the same thing: broad, multi-pillar technical research. Once the 92
+   previously-unlabelled rows are read too, the same content pattern holds at ~4x the scale (45
+   Broad R&D rows vs. the old 25-row combined CellAg+All bucket).
+
+2. **"Technical research" kept as a separate category from "Broad R&D," not merged.** Both are
+   technical/scientific research in nature — the difference is scope (spans multiple platforms vs.
+   a narrow single-lab study). Considered merging since "type of research" was the user's stated
+   organising principle, but the user chose to keep breadth as its own distinction.
+
+3. **"Socioeconomic" merges consumer/market/policy research with sustainability/environmental-
+   impact-assessment (LCA/footprint-tool/systems-modelling) research.** These read in a noticeably
+   different register (survey/attitude/qualitative work vs. quantitative modelling), but both are
+   clearly non-technical and society/systems-facing, and the user chose the simpler merged version
+   over keeping the LCA-style cluster as its own third-of-four category.
+
+4. **"Agnostic" dropped entirely.** Only 2 of 117 rows genuinely fit "not tied to any specific
+   project/technology/method" even after reading everything — and one of the two legacy-tagged
+   "Agnostic" rows ("Center for Sustainable Protein Launches at Imperial") doesn't hold up on close
+   reading anyway; it's a research-centre launch, i.e. Broad R&D/hub content, not a pure macro item.
+
+5. **"Hub/Network/Training/Consortium-building" is NOT a category, despite being a real 20-row
+   cluster.** Per the user's explicit framing: subpillar should track the type of research being
+   funded, not the funding mechanism — that's already Award Purpose's job (Research and
+   development vs. Education and training vs. Networking vs. Equipment and infrastructure vs.
+   Research infrastructure). Confirmed via cross-tab that Award Purpose already captures this
+   cluster almost completely (every row whose Award purpose includes Networking, Equipment and
+   infrastructure, or Research infrastructure falls into this cluster or the 2-row Policy cluster).
+   So hub-shaped grants (NAPIC, CARMA, ICAN, etc.) are classified here by what they actually
+   research instead — e.g. NAPIC funds broad cross-platform R&D, so its subpillar is Broad R&D,
+   regardless of it also being a "centre."
+
+6. **Single-label, not multi-label, with Broad R&D as an explicit fallback.** The first real run
+   (before this change) used the same TRUE/FALSE-per-category boolean schema as every other
+   pillar in this pipeline, and several rows came back multi-true (e.g. "Broad R&D;
+   Socioeconomic") — not what was wanted once the taxonomy was designed as one-label-per-grant.
+   Rather than keep independent booleans and add a "pick only one"/tie-break instruction (which
+   the model could still violate), the schema itself was changed to a single `Literal` field
+   constrained to exactly one of the three category names — this enforces "exactly one" at the
+   API's structured-output level (Claude is given a tool whose input schema has an `enum`
+   constraint, so it cannot return more than one value), not just via a prompt instruction. The
+   prompt's decision rules were reordered into a priority list (Socioeconomic, then Technical
+   research, then Broad R&D as the catch-all default) instead of three independent true/false
+   tests. This required a genuine notebook change alongside the prompt change: a new
+   `make_single_label_schema` builder (`Literal[tuple(cats)]` instead of one boolean per
+   category), a `SCHEMA_MODE` dict (`"multi_label"` for F/PB, `"single_label"` for CC) selecting
+   which builder runs, and `collapse_crosscutting`/`build_predictions` reading the single
+   `category` field directly instead of iterating booleans. F and PB are unaffected — they're
+   genuinely multi-label (a grant can be BF+PF at once) and keep the original boolean schema.
+
+7. **"Technical work + minor socioeconomic component" stays Broad R&D, not Socioeconomic.** Raised
+   as a concern before this ran for real: a broad multi-platform R&D grant that also evaluates
+   consumer acceptance as one work package could get pulled toward Socioeconomic just because the
+   model spots "consumer acceptance" language, even though the Socioeconomic definition already
+   said "no wet-lab or process-engineering content." A qualifier at the end of a bullet is easy to
+   skim past, especially once Socioeconomic is checked first in a priority list. Fixed by adding
+   an explicit rule ahead of the category-specific ones: any grant with genuine wet-lab/process-
+   engineering/product-development content anywhere in its scope stays Broad R&D or Technical
+   research, regardless of an accompanying consumer/socioeconomic evaluation component — and
+   narrowed the Socioeconomic definition to require that non-technical research be the entire
+   activity, not a secondary component alongside real technical work.
+
+8. **Motivational/benefit framing is not itself a socioeconomic research component.** Caught during
+   manual review of the first real run: "An innovative whey protein powder that includes
+   lactoferrin and NAD+..." (GoFitt/MilaK) — a single, narrow fermented-whey-protein-powder
+   product-development project — came back Broad R&D instead of Technical research. The abstract's
+   framing (lactose-intolerance health equity, affordability for low-income communities, carbon
+   emissions, workforce productivity) is standard grant-writing motivation for why the product
+   matters, not a described socioeconomic research task — but rule #7's fix ("technical + a
+   socioeconomic component stays Broad R&D/Technical research") didn't distinguish "genuinely
+   performs socioeconomic research" from "mentions societal benefits," so the model apparently
+   read the benefit-framing language as if it were a real component and bumped scope up to Broad
+   R&D. Fixed by adding an explicit distinction: a socioeconomic component only counts when the
+   grant explicitly describes DOING that research (e.g. "we will conduct consumer surveys,"
+   "assessing market acceptance through interviews") — narrative motivation using health/
+   environmental/societal benefit language does not, on its own, elevate a narrow single-product
+   development project to Broad R&D. Both the Technical research and Broad R&D definitions were
+   updated to state this explicitly.
+
+## Critical: this run has no ground truth to score against
+
+Unlike Fermentation (BF/PF/Mixed) and Plant-Based (TF), these 3 categories don't exist anywhere in
+the raw "Sub-production pillar" column — they're invented fresh from reading content, not derived
+from an existing label. Comparing predictions against the old CellAg/All/Agnostic/CM-for-PB/
+Consumer/blank values would be meaningless (different vocabulary entirely), so the notebook does
+NOT compute exact-match/precision/recall/Jaccard for this pillar, and does not balance-sample by
+category (there's nothing to balance against) — it runs the LLM across all 117 Cross-cutting rows
+and saves title/abstract/predicted categories/reasoning for manual review. This first v2 run *is*
+the ground-truth-generation step: once reviewed and corrected, that becomes the basis for scoring
+any future v3.
