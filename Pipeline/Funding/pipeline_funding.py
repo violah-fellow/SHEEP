@@ -12,7 +12,7 @@ from datetime import datetime
 from Helper_pipeline_functions import save_status, mark_done, find_incomplete_run
 from S1_query_dimensions import main as query_dimensions
 from S3_LLM_scope import main as scope_llm
-from S6_LLM_labelling import main as label_research_category
+from S6_LLM_labelling import main as run_llm_labelling
 
 # CONFIG
 # edit parameters for this run here
@@ -34,8 +34,9 @@ END_YEAR     = 2025
 LLM_MODEL_SCOPE = 'claude-sonnet-4-6'   # or 'claude-haiku-4-5' for cheap test runs
 # path to the system prompt used for scoping
 PROMPT_PATH = 'llm_prompts/scope_prompt_funding.md'
-# model used for research-category labelling (S6) - PROMPT_PATHS/PILLAR_CATS/etc. are static,
-# not per-run, so they're left to S6's own defaults rather than parameterized here
+# model used for LLM labelling (S6: Research category, End product, Award purpose, Subpillar) -
+# PROMPT_PATHS/PILLAR_CATS/RUN_*/LABEL_SCOPE/etc. are static, not per-run, so they're left to S6's
+# own defaults rather than parameterized here
 LLM_MODEL_LABEL = 'claude-sonnet-4-6'   # or 'claude-haiku-4-5' for cheap test runs
 
 # Classification table (pipeline-owned, accumulates across runs)
@@ -183,10 +184,11 @@ if status['steps']['review'] != 'done':
 else:
     print("\nStep 4 (review) already done, skipping.")
 
-# Step 5: Research category labelling + promotion into funding_curated
+# Step 5: LLM labelling (Research category, End product, Award purpose, Subpillar) + promotion
+# of newly-labelled Dimensions grants into funding_curated
 if status['steps']['llm_labelling'] != 'done':
-    print("\nStarting Step 5: Research category labelling.")
-    label_research_category(
+    print("\nStarting Step 5: LLM labelling (Research category, End product, Award purpose, Subpillar).")
+    run_llm_labelling(
         KEY_PATH=cfg['KEY_PATH'],
         DB_PATH=cfg['DB_PATH'],
         CLASSIFICATION_TABLE=cfg['CLASSIFICATION_TABLE'],
