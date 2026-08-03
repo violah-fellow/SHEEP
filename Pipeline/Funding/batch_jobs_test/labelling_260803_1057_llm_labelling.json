@@ -1,0 +1,53 @@
+{
+  "run_label": "labelling_260803_1057",
+  "created_at": "2026-08-03T10:57:01.763382",
+  "stages": {
+    "rescat": {
+      "batch_id": "msgbatch_01MHYSE5UHuQk9QPvRdVtFfT",
+      "pillar_by_custom_id": {
+        "fc_grant_15280337": "PB",
+        "fc_grant_15149823": "CC",
+        "curated_2": "PB"
+      },
+      "n_records": 3
+    },
+    "end_product": {
+      "batch_id": "msgbatch_016zmeQL6v7SVgPAcj3eR49A",
+      "pillar_by_custom_id": {
+        "fc_grant_15280337": "_",
+        "fc_grant_15149823": "_",
+        "curated_0": "_",
+        "curated_1": "_",
+        "curated_2": "_"
+      },
+      "n_records": 5
+    },
+    "award_purpose": {
+      "batch_id": "msgbatch_01Bqw3Gg1CD5mNkHcGw6RQ4R",
+      "pillar_by_custom_id": {
+        "fc_grant_15280337": "_",
+        "fc_grant_15149823": "_",
+        "curated_0": "_",
+        "curated_1": "_",
+        "curated_2": "_",
+        "curated_3": "_"
+      },
+      "n_records": 6
+    },
+    "subpillar": {
+      "batch_id": "msgbatch_011tg8Aepkp6s1oputpjzKMS",
+      "pillar_by_custom_id": {
+        "fc_grant_15280337": "PB",
+        "fc_grant_15149823": "CC",
+        "curated_0": "PB",
+        "curated_1": "F",
+        "curated_2": "PB",
+        "curated_3": "F",
+        "curated_4": "PB",
+        "curated_5": "F"
+      },
+      "n_records": 8
+    }
+  },
+  "completed_at": "2026-08-03T11:23:31.843274"
+}

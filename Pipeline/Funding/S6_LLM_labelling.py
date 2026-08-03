@@ -133,6 +133,10 @@ AP_PILLAR_TO_CODE = {
     'cultivated': 'CM',
     'cross-cutting': 'CC',
 }
+# Reverse of the above - used at promotion time so a newly-promoted Dimensions grant gets 'AP
+# pillar' set too. Without this, a promoted row's pillar is unrecoverable from funding_curated
+# alone, so no later run's Pool B could ever pillar-match it for rescat or Subpillar backfilling.
+CODE_TO_AP_PILLAR = {'PB': 'Plant-based', 'F': 'Fermentation', 'CM': 'Cultivated', 'CC': 'Cross-cutting'}
 
 # Column mapping from funding_classified's Dimensions-derived schema into funding_curated's
 # tracker schema - copied verbatim from S2_grant_deduplication.ipynb's col_map, so promoted
@@ -571,6 +575,12 @@ def main(
         pillar_by_custom_id = metadata['stages'][stage_name]['pillar_by_custom_id']
         assets = stage_assets[stage_name]
 
+        # force object dtype before writing string labels into curated_df - if a target column is
+        # entirely null (e.g. never populated, or - as in a small test slice - coincidentally all
+        # blank), DuckDB/pandas can infer a numeric dtype for it, which then rejects a string write
+        for col in stage['curated_value_cols']:
+            curated_df[col] = curated_df[col].astype(object)
+
         fc_results = []
         n_curated_updates = 0
 
@@ -667,6 +677,7 @@ def main(
 
                 new_row['Database'] = 'Dimensions'
                 new_row['Identification code'] = row['Grant ID']
+                new_row['AP pillar'] = CODE_TO_AP_PILLAR.get(row.get(PILLAR_COL))
                 new_row['Research category'] = row.get('research_category_LLM')
 
                 # carry over any other enabled stage's already-computed labels for this grant, so a
